@@ -22,13 +22,10 @@ namespace Zenit {
 		while (!glfwWindowShouldClose(window->GetNativeWindow()))
 		{
 			Update();
-
-
 			Draw();
 		}
 
 		CleanUp();
-
 	}
 
 	void Application::Start()
@@ -51,5 +48,4 @@ namespace Zenit {
 	void Application::CleanUp()
 	{
 	}
-
 }

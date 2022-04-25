@@ -5,7 +5,7 @@
 
 namespace Zenit {
 
-	Window::Window() : window(nullptr)
+	Window::Window()
 	{
 	}
 
@@ -15,8 +15,6 @@ namespace Zenit {
 
 	void Window::Init()
 	{
-		GLFWwindow* window;
-
 		/* Initialize the library */
 		if (!glfwInit())
 			std::cout << "GLFW Init failed" << std::endl;
@@ -27,7 +25,6 @@ namespace Zenit {
 		{
 			glfwTerminate();
 			std::cout << "GLFW Window creation failed" << std::endl;
-
 		}
 
 		/* Make the window's context current */
