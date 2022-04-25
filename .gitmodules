@@ -1,0 +1,3 @@
+[submodule "Zenit/Dependencies/spdlog"]
+	path = Zenit/Dependencies/spdlog
+	url = https://github.com/gabime/spdlog

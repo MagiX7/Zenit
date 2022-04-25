@@ -11,7 +11,11 @@ project "Zenit"
         "Source/**.h",
         "Source/**.cpp",
         "%{prj.location}/Dependencies/stb_image/**.h",
-        "%{prj.location}/Dependencies/stb_image/**.cpp"
+        "%{prj.location}/Dependencies/stb_image/**.cpp",
+        "%{prj.location}/Dependencies/spdlog/src/**.h",
+        "%{prj.location}/Dependencies/spdlog/src/**.cpp",
+        "%{prj.location}/Dependencies/spdlog/include/**.h",
+        "%{prj.location}/Dependencies/spdlog/include/**.cpp",
     }
 
     defines
@@ -28,13 +32,14 @@ project "Zenit"
         "%{IncludeDir.ImGui}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
+        "%{IncludeDir.spdlog}",
     }
 
     links
     {
         "GLFW",
         "Glad",
-        "ImGui"
+        "ImGui",
     }
 
     filter "system:windows"
@@ -46,13 +51,13 @@ project "Zenit"
         }
 
     filter "configurations:Debug"
-        -- defines here
+        defines {"SPDLOG_COMPILED_LIB"}
         runtime "Debug"
         buildoptions "/MDd"
         symbols "On"
 
     filter "configurations:Release"
-        -- defines here
+        defines {"SPDLOG_COMPILED_LIB"}
         runtime "Release"
         buildoptions "/MD"
         optimize "On"

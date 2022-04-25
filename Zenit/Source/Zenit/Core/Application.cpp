@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Window.h"
+#include "Log.h"
 
 #include <glad/glad.h>
 
@@ -12,6 +13,10 @@ namespace Zenit {
 		instance = this;
 		window = new Window();
 		window->Init();
+
+		Log::Init();
+		ZN_CORE_INFO("Logging system initialized");
+		ZN_WARN("Client warn");
 	}
 
 	Application::~Application()
