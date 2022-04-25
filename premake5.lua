@@ -1,8 +1,8 @@
 include "Dependencies.lua"
 
-workspace "Little Engine"
-	architecture "x64"
-	startproject "Little Editor"
+workspace "Zenit"
+	architecture "x86"
+	startproject "Zenit"
 
 	configurations
 	{
@@ -13,11 +13,9 @@ workspace "Little Engine"
 outputdir = "Build/%{cfg.buildcfg}"
 
 group "Dependencies"
-	include "Little Engine/Dependencies/GLFW"
-	include "Little Engine/Dependencies/GLAD"
-	include "Little Engine/Dependencies/ImGui"
+	include "Zenit/Dependencies/GLFW"
+	include "Zenit/Dependencies/GLAD"
+	include "Zenit/Dependencies/ImGui"
 group ""
 
-include "Little Engine"
-include "Sandbox"
-include "Little Editor"
+include "Zenit"

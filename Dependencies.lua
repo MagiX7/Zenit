@@ -1,7 +1,7 @@
 IncludeDir = {}
 
-IncludeDir["GLFW"] = "%{wks.location}/Little Engine/Dependencies/GLFW/include"
-IncludeDir["Glad"] = "%{wks.location}/Little Engine/Dependencies/Glad/include"
-IncludeDir["ImGui"] = "%{wks.location}/Little Engine/Dependencies/ImGui"
-IncludeDir["glm"] = "%{wks.location}/Little Engine/Dependencies/glm"
-IncludeDir["stb_image"] = "%{wks.location}/Little Engine/Dependencies/stb_image"
+IncludeDir["GLFW"] = "%{wks.location}/Zenit/Dependencies/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/Zenit/Dependencies/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/Zenit/Dependencies/ImGui"
+IncludeDir["glm"] = "%{wks.location}/Zenit/Dependencies/glm"
+IncludeDir["stb_image"] = "%{wks.location}/Zenit/Dependencies/stb_image"
