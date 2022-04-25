@@ -1,5 +1,5 @@
-project "Zenit"
-    kind "StaticLib"
+project "Zenit Editor"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
 
@@ -9,9 +9,7 @@ project "Zenit"
     files
     {
         "Source/**.h",
-        "Source/**.cpp",
-        "%{prj.location}/Dependencies/stb_image/**.h",
-        "%{prj.location}/Dependencies/stb_image/**.cpp"
+        "Source/**.cpp",        
     }
 
     defines
@@ -23,19 +21,19 @@ project "Zenit"
     includedirs
     {
         "Source",
+        "%{wks.location}/Zenit/Source",
+        "%{wks.location}/Zenit/Dependencies",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.ImGui}",
-        "%{IncludeDir.glm}",
-        "%{IncludeDir.stb_image}",
+        "%{IncludeDir.glm}"
     }
 
     links
     {
-        "GLFW",
-        "Glad",
-        "ImGui"
+        "Zenit"
     }
+
+    
 
     filter "system:windows"
         systemversion "latest"

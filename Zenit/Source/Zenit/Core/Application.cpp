@@ -5,8 +5,11 @@
 
 namespace Zenit {
 
+	Application* Application::instance = nullptr;
+
 	Application::Application()
 	{
+		instance = this;
 		window = new Window();
 		window->Init();
 	}

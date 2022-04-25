@@ -10,7 +10,7 @@ namespace Zenit {
 	{
 	public:
 		Application();
-		~Application();
+		virtual ~Application();	
 
 		void Run();
 
@@ -21,8 +21,12 @@ namespace Zenit {
 		void CleanUp();
 
 	private:
+		static Application* instance;
+		
 		Window* window;
+
 	};
 
+	Application* CreateApplication();
 
 }

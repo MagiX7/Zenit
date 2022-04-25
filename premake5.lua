@@ -2,7 +2,7 @@ include "Dependencies.lua"
 
 workspace "Zenit"
 	architecture "x86"
-	startproject "Zenit"
+	startproject "Zenit Editor"
 
 	configurations
 	{
@@ -19,3 +19,4 @@ group "Dependencies"
 group ""
 
 include "Zenit"
+include "Zenit Editor"
