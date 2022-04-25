@@ -1,5 +1,5 @@
 project "Zenit"
-    kind "StaticLib"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
 
@@ -8,8 +8,8 @@ project "Zenit"
 
     files
     {
-        "src/**.h",
-        "src/**.cpp",
+        "Source/**.h",
+        "Source/**.cpp",
         "%{prj.location}/Dependencies/stb_image/**.h",
         "%{prj.location}/Dependencies/stb_image/**.cpp"
     }
@@ -22,7 +22,7 @@ project "Zenit"
 
     includedirs
     {
-        "src",
+        "Source",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.ImGui}",
