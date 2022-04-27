@@ -3,8 +3,6 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/logger.h>
 
-#include <memory>
-
 namespace Zenit {
 
 	class Log

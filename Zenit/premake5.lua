@@ -6,6 +6,9 @@ project "Zenit"
     targetdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/")
     objdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/Int")
 
+    --pchheader "znpch.h"
+    --pchsource "Zenit/Source/znpch.cpp"
+
     files
     {
         "Source/**.h",
@@ -14,8 +17,7 @@ project "Zenit"
         "%{prj.location}/Dependencies/stb_image/**.cpp",
         "%{prj.location}/Dependencies/spdlog/src/**.h",
         "%{prj.location}/Dependencies/spdlog/src/**.cpp",
-        "%{prj.location}/Dependencies/spdlog/include/**.h",
-        "%{prj.location}/Dependencies/spdlog/include/**.cpp",
+        "%{prj.location}/Dependencies/spdlog/include/",
     }
 
     defines
