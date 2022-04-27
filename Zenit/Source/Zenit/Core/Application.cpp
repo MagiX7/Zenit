@@ -1,10 +1,12 @@
 #include "znpch.h"
 #include "Application.h"
 #include "Window.h"
+#include "Input.h"
+
 #include "Log.h"
 
-#include "../Events/Event.h"
-#include "../Events/ApplicationEvent.h"
+#include "Zenit/Events/Event.h"
+#include "Zenit/Events/ApplicationEvent.h"
 
 #include <glad/glad.h>
 

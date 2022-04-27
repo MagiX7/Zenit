@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Zenit/Events/ApplicationEvent.h"
-#include "Zenit/Debug/ImGuiLayer.h"
+#include "Zenit/ImGui/ImGuiLayer.h"
 #include "LayerStack.h"
 
 #include <memory>
