@@ -32,7 +32,7 @@ namespace Zenit {
 
 	Window::~Window()
 	{
-		
+		Shutdown();		
 	}
 
 	bool Window::Init()

@@ -33,6 +33,7 @@ namespace Zenit {
 
 	Application::~Application()
 	{
+		//window.release();
 		delete instance;
 	}
 
