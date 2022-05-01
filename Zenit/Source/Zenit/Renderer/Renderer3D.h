@@ -10,7 +10,7 @@ namespace Zenit {
 	class IndexBuffer;
 	class Shader;
 
-	struct QuadVertex
+	struct Vertex
 	{
 		glm::vec3 position;
 		glm::vec2 texCoords;
@@ -30,8 +30,8 @@ namespace Zenit {
 
 		uint32_t indexCount = 0;
 
-		QuadVertex* vertexBufferBase = nullptr;
-		QuadVertex* vertexBufferPtr = nullptr;
+		Vertex* vertexBufferBase = nullptr;
+		Vertex* vertexBufferPtr = nullptr;
 	};
 	
 
@@ -43,7 +43,6 @@ namespace Zenit {
 		static void ShutDown();
 
 		static void Clear(const glm::vec4& color);
-
 
 	private:
 		static Renderer3DData data;

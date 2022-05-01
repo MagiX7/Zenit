@@ -22,7 +22,9 @@ namespace Zenit {
 
 	void EditorLayer::OnImGuiRender()
 	{
-		ImGui::Begin("Im in the editor");
+		ImGui::Begin("Viewport");
 		ImGui::End();
+
+		panelInspector.OnImGuiRender();
 	}
 }

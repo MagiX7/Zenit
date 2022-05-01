@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Zenit.h"
+#include "Panels/PanelInspector.h"
 
 namespace Zenit {
 
@@ -14,6 +15,8 @@ namespace Zenit {
 		virtual void OnDetach() override;
 		virtual void OnImGuiRender() override;
 
+	private:
+		PanelInspector panelInspector;
 	};
 
 

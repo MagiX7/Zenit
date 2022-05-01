@@ -18,7 +18,7 @@ namespace Zenit {
 		Window(int width, int height, const std::string& title = "Zenit");
 		virtual ~Window();
 
-		void Update();
+		void SwapBuffers();
 
 		inline void SetEventCallback(const EventCallbackFn& callback) { props.eventCallback = callback; }
 
