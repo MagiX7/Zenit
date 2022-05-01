@@ -24,6 +24,9 @@ namespace Zenit {
 		virtual void OnImGuiRender() override;
 
 	private:
+		void SetStyle();
+
+	private:
 		float time = 0;
 	};
 

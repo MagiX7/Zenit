@@ -177,7 +177,7 @@ namespace Zenit {
 		//glfwTerminate();
 	}
 
-	void Window::Update()
+	void Window::SwapBuffers()
 	{
 		glfwPollEvents();
 		glfwSwapBuffers(window);

@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "Window.h"
 #include "Input.h"
+#include "Zenit/Renderer/Renderer3D.h"
 
 #include "Log.h"
 
@@ -33,17 +34,13 @@ namespace Zenit {
 
 	Application::~Application()
 	{
-		//window.release();
-		delete instance;
 	}
 
 	void Application::Run()
 	{
 		while (isRunning)
 		{
-			// Ideal would be having Renderer::Clear();
-			glClear(GL_COLOR_BUFFER_BIT);
-			glClearColor(0.1, 0.1, 0.1, 1.0);
+			Renderer3D::Clear({ 0.2f,0.2f,0.2f,1.0f });
 
 			float t = glfwGetTime();
 			TimeStep dt = t - lastFrameDt;
@@ -58,7 +55,7 @@ namespace Zenit {
 				l->OnImGuiRender();
 			imguiLayer->End();
 			
-			window->Update();
+			window->SwapBuffers();
 		}
 	}
 

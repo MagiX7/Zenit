@@ -1,20 +1,26 @@
 #include "Zenit.h"
+#include "Zenit/Core/EntryPoint.h"
 
-class ZenitEditorApp : public Zenit::Application
-{
-public:
-	ZenitEditorApp()
+#include "EditorLayer.h"
+
+namespace Zenit {
+
+	class ZenitEditorApp : public Application
 	{
+	public:
+		ZenitEditorApp()
+		{
+			PushLayer(new EditorLayer());
+		}
 
-	}
+		~ZenitEditorApp()
+		{
 
-	~ZenitEditorApp()
+		}
+	};
+
+	Application* CreateApplication()
 	{
-
+		return new ZenitEditorApp();
 	}
-};
-
-Zenit::Application* Zenit::CreateApplication()
-{
-	return new ZenitEditorApp();
 }
