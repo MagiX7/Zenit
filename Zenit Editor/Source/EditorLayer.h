@@ -3,6 +3,8 @@
 #include "Zenit.h"
 #include "Panels/PanelInspector.h"
 
+#include <memory>
+
 namespace Zenit {
 
 	class EditorLayer : public Layer
@@ -17,7 +19,7 @@ namespace Zenit {
 
 	private:
 		PanelInspector panelInspector;
+		std::unique_ptr<FrameBuffer> fbo;
+
 	};
-
-
 }

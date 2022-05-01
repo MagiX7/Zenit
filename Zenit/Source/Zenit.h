@@ -7,3 +7,13 @@
 #include "Zenit/Core/KeyCodes.h"
 
 #include "Zenit/ImGui/ImGuiLayer.h"
+
+#include "Zenit/Renderer/Renderer3D.h"
+
+// Buffers
+#include "Zenit/Renderer/FrameBuffer.h"
+#include "Zenit/Renderer/VertexArray.h"
+#include "Zenit/Renderer/VertexBuffer.h"
+#include "Zenit/Renderer/IndexBuffer.h"
+#include "Zenit/Renderer/Shader.h"
+#include "Zenit/Renderer/Texture2D.h"

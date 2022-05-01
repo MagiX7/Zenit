@@ -54,22 +54,11 @@ namespace Zenit {
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-		//io.ConfigViewportsNoAutoMerge = true;
-		//io.ConfigViewportsNoTaskBarIcon = true;
+		
 		io.IniFilename = "Settings/imgui.ini";
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("Assets/Fonts/Lato/Lato-Regular.ttf", 16.5f);
 
-
 		SetStyle();
-		// Setup Dear ImGui style
-
-		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-		ImGuiStyle& style = ImGui::GetStyle();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
 
 		ImGui_ImplGlfw_InitForOpenGL(Application::GetInstance().GetWindow().GetNativeWindow(), true);
 		ImGui_ImplOpenGL3_Init("#version 430");
@@ -128,6 +117,5 @@ namespace Zenit {
 		colors[ImGuiCol_TabHovered] = { 0.3,0.3,0.3,1 };
 		colors[ImGuiCol_TabUnfocused] = { 0.15,0.15,0.15,1 };
 		colors[ImGuiCol_TabUnfocusedActive] = { 0.2,0.2,0.2,1 };
-
 	}
 }
