@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vertex.h"
 #include "BufferLayout.h"
 
 #include "glad/glad.h"
@@ -12,7 +13,7 @@ namespace Zenit {
 	{
 	public:
 		VertexBuffer();
-		VertexBuffer(const float* vertices, uint32_t size);
+		VertexBuffer(const Vertex* vertices, uint32_t size);
 		VertexBuffer(uint32_t size);
 		virtual ~VertexBuffer();
 

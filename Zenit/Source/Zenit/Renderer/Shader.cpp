@@ -254,11 +254,11 @@ namespace Zenit {
 		{
 			char infoLog[512];
 			glGetProgramInfoLog(rendererID, 512, NULL, infoLog);
-			ZN_CORE_ERROR("{0} program linking failed {1}", name, infoLog);
+			ZN_CORE_ERROR("{0} shader linking failed {1}", name, infoLog);
 		}
 		else
 		{
-			ZN_CORE_INFO("{0} program linking successfully!", name);
+			ZN_CORE_INFO("{0} shader linked successfully!", name);
 		}
 
 		glDetachShader(rendererID, vs);

@@ -7,7 +7,7 @@ namespace Zenit {
 		glGenBuffers(1, &vbo);
 	}
 
-	VertexBuffer::VertexBuffer(const float* vertices, uint32_t size)
+	VertexBuffer::VertexBuffer(const Vertex* vertices, uint32_t size)
 	{
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);

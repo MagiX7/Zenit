@@ -25,6 +25,8 @@ namespace Zenit {
 		window = std::make_unique<Window>(1280, 720);
 		window->SetEventCallback(ZN_BIND_EVENT_FN(Application::OnEvent));
 
+		Renderer3D::Init();
+
 		imguiLayer = new ImGuiLayer();
 		PushOverlay(imguiLayer);
 
