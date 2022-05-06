@@ -11,6 +11,9 @@ namespace Zenit {
 		ZenitEditorApp()
 		{
 			PushLayer(new EditorLayer());
+
+			//ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+
 		}
 
 		~ZenitEditorApp()

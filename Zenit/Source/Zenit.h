@@ -17,3 +17,6 @@
 #include "Zenit/Renderer/IndexBuffer.h"
 #include "Zenit/Renderer/Shader.h"
 #include "Zenit/Renderer/Texture2D.h"
+
+// Models
+#include "Zenit/Core/Importers/ModelImporter.h"

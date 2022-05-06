@@ -15,14 +15,14 @@ namespace Zenit {
 	class Mesh
 	{
 	public:
-		Mesh(std::vector<Vertex*> verts, std::vector<uint32_t> inds);
+		Mesh(std::vector<Vertex> verts, std::vector<uint32_t> inds);
 		~Mesh();
 
 	private:
 		void SetBuffers();
 
 	private:
-		std::vector<Vertex*> vertices;
+		std::vector<Vertex> vertices;
 		std::vector<uint32_t> indices;
 
 		std::shared_ptr<VertexArray> vao;

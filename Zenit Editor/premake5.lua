@@ -2,6 +2,7 @@ project "Zenit Editor"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
+    staticruntime "on"
 
     targetdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/")
     objdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/Int")
@@ -25,12 +26,14 @@ project "Zenit Editor"
         "%{wks.location}/Zenit/Dependencies",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.assimp}",
     }
 
     links
     {
-        "Zenit"
+        "Zenit",
+        "assimp",
     }
 
     
@@ -46,11 +49,11 @@ project "Zenit Editor"
     filter "configurations:Debug"
         -- defines here
         runtime "Debug"
-        buildoptions "/MDd"
+        buildoptions "/MTd"
         symbols "On"
 
     filter "configurations:Release"
         -- defines here
         runtime "Release"
-        buildoptions "/MD"
+        buildoptions "/MT"
         optimize "On"

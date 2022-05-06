@@ -1,16 +1,15 @@
-project "Assimp"
-    kind "StaticLib"
-    language "C++"
-    cppdialect "C++17"
-    staticruntime "on"
+project "assimp"
+  kind "StaticLib"
+  language "C++"
+  cppdialect "C++17"
+  staticruntime "on"
 
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+  targetdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/")
+  objdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/Int")
 
-    defines 
-    {
+  defines {
       -- "SWIG",
-      -- "ASSIMP_BUILD_NO_OWN_ZLIB",
+      "ASSIMP_BUILD_NO_OWN_ZLIB",
 
       "ASSIMP_BUILD_NO_X_IMPORTER",
       "ASSIMP_BUILD_NO_3DS_IMPORTER",
@@ -51,7 +50,7 @@ project "Assimp"
       "ASSIMP_BUILD_NO_NDO_IMPORTER",
       "ASSIMP_BUILD_NO_IFC_IMPORTER",
       "ASSIMP_BUILD_NO_XGL_IMPORTER",
-      -- "ASSIMP_BUILD_NO_FBX_IMPORTER",
+      "ASSIMP_BUILD_NO_FBX_IMPORTER",
       "ASSIMP_BUILD_NO_ASSBIN_IMPORTER",
       -- "ASSIMP_BUILD_NO_GLTF_IMPORTER",
       "ASSIMP_BUILD_NO_C4D_IMPORTER",
@@ -62,19 +61,19 @@ project "Assimp"
       "ASSIMP_BUILD_NO_STEP_EXPORTER",
       "ASSIMP_BUILD_NO_SIB_IMPORTER",
 
-      "ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS",
-      "ASSIMP_BUILD_NO_FLIPUVS_PROCESS",
-      "ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS",
-      "ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS",
+      -- "ASSIMP_BUILD_NO_MAKELEFTHANDED_PROCESS",
+      -- "ASSIMP_BUILD_NO_FLIPUVS_PROCESS",
+      -- "ASSIMP_BUILD_NO_FLIPWINDINGORDER_PROCESS",
+      -- "ASSIMP_BUILD_NO_CALCTANGENTS_PROCESS",
       "ASSIMP_BUILD_NO_JOINVERTICES_PROCESS",
-      "ASSIMP_BUILD_NO_TRIANGULATE_PROCESS",
+      -- "ASSIMP_BUILD_NO_TRIANGULATE_PROCESS",
       "ASSIMP_BUILD_NO_GENFACENORMALS_PROCESS",
-      "ASSIMP_BUILD_NO_GENVERTEXNORMALS_PROCESS",
+      -- "ASSIMP_BUILD_NO_GENVERTEXNORMALS_PROCESS",
       "ASSIMP_BUILD_NO_REMOVEVC_PROCESS",
       "ASSIMP_BUILD_NO_SPLITLARGEMESHES_PROCESS",
       "ASSIMP_BUILD_NO_PRETRANSFORMVERTICES_PROCESS",
       "ASSIMP_BUILD_NO_LIMITBONEWEIGHTS_PROCESS",
-      "ASSIMP_BUILD_NO_VALIDATEDS_PROCESS",
+      -- "ASSIMP_BUILD_NO_VALIDATEDS_PROCESS",
       "ASSIMP_BUILD_NO_IMPROVECACHELOCALITY_PROCESS",
       "ASSIMP_BUILD_NO_FIXINFACINGNORMALS_PROCESS",
       "ASSIMP_BUILD_NO_REMOVE_REDUNDANTMATERIALS_PROCESS",
@@ -90,10 +89,9 @@ project "Assimp"
       "ASSIMP_BUILD_NO_DEBONE_PROCESS",
       "ASSIMP_BUILD_NO_EMBEDTEXTURES_PROCESS",
       "ASSIMP_BUILD_NO_GLOBALSCALE_PROCESS",
-    }
+  }
 
-    files 
-    {
+  files {
       "include/**",
       "code/Assimp.cpp",
       "code/BaseImporter.cpp",
@@ -109,24 +107,6 @@ project "Assimp"
       "code/DefaultIOSystem.cpp",
       "code/DefaultLogger.cpp",
       "code/GenVertexNormalsProcess.cpp",
-      "code/FBXAnimation.cpp",
-      "code/FBXBinaryTokenizer.cpp",
-      "code/FBXConverter.cpp",
-      "code/FBXDeformer.cpp",
-      "code/FBXDocument.cpp",
-      "code/FBXDocumentUtil.cpp",
-      "code/FBXExporter.cpp",
-      "code/FBXExportNode.cpp",
-      "code/FBXExportProperty.cpp",
-      "code/FBXImporter.cpp",
-      "code/FBXMaterial.cpp",
-      "code/FBXMeshGeometry.cpp",
-      "code/FBXModel.cpp",
-      "code/FBXNodeAttribute.cpp",
-      "code/FBXParser.cpp",
-      "code/FBXProperties.cpp",
-      "code/FBXTokenizer.cpp",
-      "code/FBXUtil.cpp",
       "code/Importer.cpp",
       "code/ImporterRegistry.cpp",
       "code/MaterialSystem.cpp",
@@ -152,28 +132,25 @@ project "Assimp"
       "code/ScaleProcess.cpp",
       "code/EmbedTexturesProcess.cpp",
       "contrib/irrXML/*",
-    }
+  }
 
-    includedirs 
-    {
+  includedirs {
       "include",
       "contrib/irrXML",
       "contrib/zlib",
       "contrib/rapidjson/include",
-    }
+  }
 
-    links
-    {
-      "contrib/zlib/lib/zlib.lib"
-    }
 
-    filter "system:windows"
+   filter "system:windows"
       systemversion "latest"
 
-    filter  "configurations:Debug"
+   filter  "configurations:Debug"
        runtime "Debug"
+       buildoptions "/MTd"
        symbols "on"
 
-    filter  "configurations:Release"
+   filter  "configurations:Release"
        runtime "Release"
+       buildoptions "/MT"
        optimize "on"

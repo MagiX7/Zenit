@@ -23,7 +23,7 @@ project "GLAD"
 		staticruntime "On"
 
 	filter "configurations:Debug"
-		runtime "Debug"	
+		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"

@@ -2,6 +2,7 @@ project "Zenit"
     kind "StaticLib"
     language "C++"
     cppdialect "C++17"
+    staticruntime "on"
 
     targetdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/")
     objdir ("%{wks.location}/" .. outputdir .. "/%{prj.name}/Int")
@@ -18,6 +19,7 @@ project "Zenit"
         "%{prj.location}/Dependencies/spdlog/src/**.h",
         "%{prj.location}/Dependencies/spdlog/src/**.cpp",
         "%{prj.location}/Dependencies/spdlog/include/",
+        "%{prj.location}/Dependencies/assimp/include/",
     }
 
     defines
@@ -35,6 +37,7 @@ project "Zenit"
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.spdlog}",
+        "%{IncludeDir.assimp}",
     }
 
     links
@@ -42,6 +45,7 @@ project "Zenit"
         "GLFW",
         "Glad",
         "ImGui",
+        "assimp",
     }
 
     filter "system:windows"
@@ -55,11 +59,11 @@ project "Zenit"
     filter "configurations:Debug"
         defines {"SPDLOG_COMPILED_LIB"}
         runtime "Debug"
-        buildoptions "/MDd"
+        buildoptions "/MTd"
         symbols "On"
 
     filter "configurations:Release"
         defines {"SPDLOG_COMPILED_LIB"}
         runtime "Release"
-        buildoptions "/MD"
+        buildoptions "/MT"
         optimize "On"
