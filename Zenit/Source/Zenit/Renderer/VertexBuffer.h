@@ -17,7 +17,7 @@ namespace Zenit {
 		VertexBuffer(uint32_t size);
 		virtual ~VertexBuffer();
 
-		void SetData(const void* vertices, uint32_t size);
+		void SetData(void* vertices, uint32_t size);
 		//void SetData(const std::vector<Vertex>&);
 		void Bind() const;
 		void Unbind() const;

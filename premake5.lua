@@ -16,7 +16,7 @@ group "Dependencies"
 	include "Zenit/Dependencies/GLFW"
 	include "Zenit/Dependencies/GLAD"
 	include "Zenit/Dependencies/ImGui"
-	--include "Zenit/Dependencies/spdlog"
+	include "Zenit/Dependencies/Assimp"
 	group ""
 
 include "Zenit"

@@ -31,7 +31,7 @@ namespace Zenit {
 		glDeleteBuffers(1, &vbo);
 	}
 
-	void VertexBuffer::SetData(const void* vertices, uint32_t size)
+	void VertexBuffer::SetData(void* vertices, uint32_t size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, size, vertices);
