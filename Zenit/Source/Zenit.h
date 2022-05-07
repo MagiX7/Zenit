@@ -20,3 +20,7 @@
 
 // Models
 #include "Zenit/Core/Importers/ModelImporter.h"
+
+// Camera
+#include "Zenit/Core/PerspectiveCamera.h"
+

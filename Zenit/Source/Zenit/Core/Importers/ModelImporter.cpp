@@ -41,8 +41,8 @@ namespace Zenit {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 
-        vertices.resize(mesh->mNumVertices);
-        indices.resize(mesh->mNumFaces);
+        //vertices.resize(mesh->mNumVertices);
+        //indices.resize(mesh->mNumFaces);
         
         for (int i = 0; i < mesh->mNumVertices; ++i)
         {
@@ -70,7 +70,8 @@ namespace Zenit {
             }
 
             vertices.push_back(vertex);
-           // Load textures
+
+            // Load textures
 
         }
         

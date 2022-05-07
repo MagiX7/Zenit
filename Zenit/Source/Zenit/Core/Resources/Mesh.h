@@ -18,6 +18,8 @@ namespace Zenit {
 		Mesh(std::vector<Vertex> verts, std::vector<uint32_t> inds);
 		~Mesh();
 
+		void Draw();
+
 	private:
 		void SetBuffers();
 

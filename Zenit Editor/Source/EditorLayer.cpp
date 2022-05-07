@@ -4,7 +4,7 @@
 
 namespace Zenit {
 
-	EditorLayer::EditorLayer()
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ -5,5,-5 }, { 0,0,0 }, 45.0f))
 	{
 	}
 
@@ -15,10 +15,22 @@ namespace Zenit {
 	void EditorLayer::OnAttach()
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
+
+		gun = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
 	}
 
 	void EditorLayer::OnDetach()
 	{
+	}
+
+	void EditorLayer::OnUpdate(TimeStep ts)
+	{
+		camera.Update(ts);
+
+		Renderer3D::Clear({ 0.2,0.2,0.2,1 });
+		fbo->Bind();
+		gun->Draw(camera);
+		fbo->Unbind();
 	}
 
 	void EditorLayer::OnImGuiRender()

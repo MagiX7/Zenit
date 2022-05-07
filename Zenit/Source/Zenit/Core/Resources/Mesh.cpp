@@ -15,6 +15,15 @@ namespace Zenit {
 	{
 	}
 
+	void Mesh::Draw()
+	{
+		vao->Bind();
+		ibo->Bind();
+		glDrawElements(GL_TRIANGLES, ibo->GetCount(), GL_UNSIGNED_INT, 0);
+		ibo->Unbind();
+		vao->Unbind();
+	}
+
 	void Mesh::SetBuffers()
 	{
 		vao = std::make_shared<VertexArray>();

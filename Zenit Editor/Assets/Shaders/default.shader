@@ -2,13 +2,16 @@
 #version 430 core
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec2 texCoords;
+layout(location = 1) in vec3 normals;
+layout(location = 2) in vec2 texCoords;
 
-uniform mat4 viewProjection;
+uniform mat4 view;
+uniform mat4 projection;
+
 
 void main()
 {
-	gl_Position = viewProjection * vec4(position, 1);
+	gl_Position = projection * view * vec4(position, 1);
 }
 
 #type fragment

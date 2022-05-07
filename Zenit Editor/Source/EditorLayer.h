@@ -15,11 +15,15 @@ namespace Zenit {
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
+		virtual void OnUpdate(TimeStep ts) override;
 		virtual void OnImGuiRender() override;
 
 	private:
 		PanelInspector panelInspector;
 		std::unique_ptr<FrameBuffer> fbo;
+		
+		PerspectiveCamera camera;
+		Model* gun;
 
 	};
 }
