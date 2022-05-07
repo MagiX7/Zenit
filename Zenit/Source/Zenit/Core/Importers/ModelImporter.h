@@ -2,9 +2,15 @@
 
 #include "Zenit/Core/Resources/Model.h"
 
-class aiNode;
-class aiScene;
-class aiMesh;
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+//
+//class aiNode;
+//class aiScene;
+//class aiMesh;
 
 namespace Zenit {
 

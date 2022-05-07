@@ -1,10 +1,6 @@
 #include "ModelImporter.h"
 #include "Zenit/Core/Log.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 namespace Zenit {
  
     Model* ModelImporter::ImportModel(std::string path)
@@ -20,6 +16,8 @@ namespace Zenit {
 
         Model* model = new Model(path);
         ProcessNode(scene->mRootNode, scene, *model);
+
+        ZN_CORE_TRACE("Model {0} loaded", path.c_str());
 
         return model;
     }
@@ -43,6 +41,9 @@ namespace Zenit {
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
 
+        vertices.resize(mesh->mNumVertices);
+        indices.resize(mesh->mNumFaces);
+        
         for (int i = 0; i < mesh->mNumVertices; ++i)
         {
             Vertex vertex;
@@ -68,9 +69,18 @@ namespace Zenit {
                 vertex.texCoords = { 0,0 };
             }
 
+            vertices.push_back(vertex);
            // Load textures
 
         }
+        
+        for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+        {
+            aiFace face = mesh->mFaces[i];
+            for (unsigned int j = 0; j < face.mNumIndices; j++)
+                indices.push_back(face.mIndices[j]);
+        }
+
         return new Mesh(vertices, indices);
     }
 }

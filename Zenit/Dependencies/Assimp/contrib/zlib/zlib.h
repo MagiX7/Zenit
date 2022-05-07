@@ -77,9 +77,6 @@ extern "C" {
   the consistency of the compressed data, so the library should never crash
   even in the case of corrupted input.
 */
-#ifdef __ANDROID__     
-using zcrc_t = unsigned_long; 
-#endif
 
 #ifdef __ANDROID__
 typedef unsigned long zcrc_t;

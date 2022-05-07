@@ -3,6 +3,8 @@
 
 #include "EditorLayer.h"
 
+using namespace Assimp;
+
 namespace Zenit {
 
 	class ZenitEditorApp : public Application
@@ -12,7 +14,7 @@ namespace Zenit {
 		{
 			PushLayer(new EditorLayer());
 
-			//ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+			ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
 
 		}
 

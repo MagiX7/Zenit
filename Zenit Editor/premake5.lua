@@ -33,7 +33,6 @@ project "Zenit Editor"
     links
     {
         "Zenit",
-        "assimp",
     }
 
     
