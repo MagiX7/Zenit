@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 namespace Zenit {
 
@@ -21,6 +21,7 @@ namespace Zenit {
 		inline const glm::vec3& GetDirection() { return direction; }
 		inline const glm::vec3& GetUp() { return up; }
 		inline const glm::vec3& GetRight() { return right; }
+		inline const glm::vec3& GetForward() { return glm::cross(up, right); }
 
 	private:
 		bool HandleMovement(TimeStep ts);
@@ -33,8 +34,10 @@ namespace Zenit {
 		glm::vec3 right;
 		glm::vec3 up;
 
-		glm::mat4x4 view;
-		glm::mat4x4 projection;
+		glm::quat rotation;
+
+		glm::mat4 view;
+		glm::mat4 projection;
 
 		float fovY;
 	};

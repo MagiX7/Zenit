@@ -4,7 +4,7 @@
 
 namespace Zenit {
 
-	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ -5,5,-5 }, { 0,0,0 }, 45.0f))
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,50 }, { 0,0,0 }, 45.0f))
 	{
 	}
 
@@ -16,7 +16,8 @@ namespace Zenit {
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
-		gun = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+		gun = ModelImporter::ImportModel("Assets/Models/Cerberus/Cerberus.fbx");
+		//gun = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
 	}
 
 	void EditorLayer::OnDetach()
@@ -27,8 +28,8 @@ namespace Zenit {
 	{
 		camera.Update(ts);
 
-		Renderer3D::Clear({ 0.2,0.2,0.2,1 });
 		fbo->Bind();
+		Renderer3D::Clear({ 0.2,0.2,0.2,1 });
 		gun->Draw(camera);
 		fbo->Unbind();
 	}
