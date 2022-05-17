@@ -29,6 +29,7 @@ namespace Zenit {
 
 		inline Window& GetWindow() { return *window; }
 
+
 	private:
 		Application(const Application&);
 		Application& operator=(Application&) {}

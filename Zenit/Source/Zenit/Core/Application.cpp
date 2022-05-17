@@ -1,4 +1,3 @@
-#include "znpch.h"
 #include "Application.h"
 #include "Window.h"
 #include "Input.h"
@@ -57,6 +56,8 @@ namespace Zenit {
 				l->OnImGuiRender();
 			imguiLayer->End();
 			
+			Input::GetInstance()->ResetScrollStats();
+
 			window->SwapBuffers();
 		}
 	}
@@ -84,8 +85,9 @@ namespace Zenit {
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<WindowCloseEvent>(std::bind(&Application::OnWindowClose, this, std::placeholders::_1));
-		dispatcher.Dispatch<WindowResizeEvent>(std::bind(&Application::OnWindowResize, this, std::placeholders::_1));
+		dispatcher.Dispatch<WindowCloseEvent>(ZN_BIND_EVENT_FN(Application::OnWindowClose));
+		dispatcher.Dispatch<WindowResizeEvent>(ZN_BIND_EVENT_FN(Application::OnWindowResize));
+		Input::GetInstance()->OnEvent(e);
 		
 		for (auto it = layerStack.end(); it != layerStack.begin();)
 		{

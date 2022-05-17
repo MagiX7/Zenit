@@ -12,6 +12,7 @@ namespace Zenit {
 	public:
 		// FOV Y in degrees.
 		PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov);
+		~PerspectiveCamera();
 		void Update(TimeStep ts);
 
 		inline const glm::mat4x4& GetView() { return view; }
@@ -21,11 +22,12 @@ namespace Zenit {
 		inline const glm::vec3& GetDirection() { return direction; }
 		inline const glm::vec3& GetUp() { return up; }
 		inline const glm::vec3& GetRight() { return right; }
-		inline const glm::vec3& GetForward() { return glm::cross(up, right); }
+		inline const glm::vec3& GetForward() { return forward; }
 
 	private:
+		bool HandleInput(TimeStep ts);
 		bool HandleMovement(TimeStep ts);
-		void ReCalculateMatrices();
+		void RecalculateMatrices();
 
 	private:
 		glm::vec3 position;
@@ -33,13 +35,15 @@ namespace Zenit {
 		glm::vec3 target;
 		glm::vec3 right;
 		glm::vec3 up;
+		glm::vec3 forward;
 
-		glm::quat rotation;
+		glm::vec3 rotation;
 
 		glm::mat4 view;
 		glm::mat4 projection;
 
 		float fovY;
+		float yaw, pitch, roll;
 	};
 
 }

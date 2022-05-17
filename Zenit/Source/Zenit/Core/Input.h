@@ -1,6 +1,8 @@
 #pragma once
 
 #include "KeyCodes.h"
+#include "Zenit/Events/Event.h"
+#include "Zenit/Events/MouseEvent.h"
 
 #include <utility>
 
@@ -9,15 +11,35 @@ namespace Zenit {
 	class Input
 	{
 	public:
-		static bool IsKeyPressed(int keycode);
-		static bool IsMouseButtonPressed(int button);
+		static Input* GetInstance();
 
-		static float GetMouseX();
-		static float GetMouseY();
-		static std::pair<float, float> GetMousePosition();
+		bool IsKeyPressed(int keycode);
+		bool IsMouseButtonPressed(int button);
+
+		float GetMouseX();
+		float GetMouseY();
+		float GetMouseMotionX();
+		float GetMouseMotionY();
+		std::pair<float, float> GetMousePosition();
+		inline float GetMouseScrolDx() { return deltaXScroll; }
+		inline float GetMouseScrolDy() { return deltaYScroll; }
+
+		void OnEvent(Event& e);
+
+		void ResetScrollStats();
 
 	private:
-		//static Input* instance;
-	};
+		bool OnMouseScrolled(MouseScrolledEvent& e);
+
+	private:
+		static Input* instance;
+
+		float deltaXScroll;
+		float deltaYScroll;
+
+		float lastMousePosX = 0;
+		float lastMousePosY = 0;
+		double x, y;
+	};	
 
 }

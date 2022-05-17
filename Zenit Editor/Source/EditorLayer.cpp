@@ -4,7 +4,7 @@
 
 namespace Zenit {
 
-	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,50 }, { 0,0,0 }, 45.0f))
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,50 }, { 0,0,0 }, 60.0f))
 	{
 	}
 
@@ -27,6 +27,7 @@ namespace Zenit {
 	void EditorLayer::OnUpdate(TimeStep ts)
 	{
 		camera.Update(ts);
+		gun->Update(ts);
 
 		fbo->Bind();
 		Renderer3D::Clear({ 0.2,0.2,0.2,1 });
@@ -59,6 +60,5 @@ namespace Zenit {
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
-
 	}
 }

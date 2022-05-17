@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Mesh.h"
+#include "Zenit/Core/TimeStep.h"
 
+#include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <vector>
 
@@ -9,6 +11,7 @@ namespace Zenit {
 
 	class Shader;
 	class PerspectiveCamera;
+	class Texture2D;
 
 	class Model
 	{
@@ -16,11 +19,16 @@ namespace Zenit {
 		Model(std::string path);
 		~Model();
 
+		void Update(TimeStep ts);
 		void Draw(PerspectiveCamera& camera);
 
 	private:
 		std::string path;
 		std::vector<Mesh*> meshes;
+		Texture2D* diffuse;
+
+		glm::mat4 transform;
+		glm::quat rotation;
 
 		Shader* shader;
 
