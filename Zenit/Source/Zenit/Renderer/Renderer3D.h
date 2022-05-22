@@ -10,7 +10,6 @@ namespace Zenit {
 		static void Init();
 		static void ShutDown();
 		static void Clear(const glm::vec4& color);
-
+		static void OnResize(int width, int height);
 	};
-
 }

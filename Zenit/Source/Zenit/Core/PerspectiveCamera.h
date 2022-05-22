@@ -24,6 +24,8 @@ namespace Zenit {
 		inline const glm::vec3& GetRight() { return right; }
 		inline const glm::vec3& GetForward() { return forward; }
 
+		void UpdateFov(int width, int height);
+
 	private:
 		bool HandleInput(TimeStep ts);
 		bool HandleMovement(TimeStep ts);
@@ -43,6 +45,7 @@ namespace Zenit {
 		glm::mat4 projection;
 
 		float fovY;
+		float fovX;
 		float yaw, pitch, roll;
 	};
 

@@ -21,7 +21,9 @@ namespace Zenit {
 	Model::Model(std::string path) : path(path)
 	{
 		shader = new Shader("Assets/Shaders/default.shader");
-		diffuse = new Texture2D("Assets/Models/Cerberus/Textures/Cerberus_A.tga.png");
+		//diffuse = new Texture2D("Assets/Models/Cerberus/Textures/Cerberus_A.tga.png");
+		uint32_t data = 0xffffffff;
+		diffuse = new Texture2D(&data, 1, 1);
 
 		rotation = glm::quat(0, 0, 0, 1);
 		transform = glm::translate(glm::mat4(1.0), { 0,0,0 }) * glm::toMat4(rotation);
@@ -61,7 +63,7 @@ namespace Zenit {
 			if (dy)
 			{
 				glm::vec3 right = glm::vec3(transform[0][0], transform[1][0], transform[2][0]);
-				transform = glm::rotate(transform, dy * ts, right);
+				transform = glm::rotate(transform, -dy * ts, right);
 			}
 			if (dx)
 			{
@@ -93,4 +95,8 @@ namespace Zenit {
 		shader->Unbind();
 	}
 
+	void Model::ResetRotation()
+	{
+		transform = glm::toMat4(glm::quat(0, 0, 0, 1));
+	}
 }

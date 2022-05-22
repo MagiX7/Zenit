@@ -21,6 +21,9 @@ namespace Zenit {
 
 		void Update(TimeStep ts);
 		void Draw(PerspectiveCamera& camera);
+		void ResetRotation();
+
+		inline const glm::mat4& GetTransform() { return transform; }
 
 	private:
 		std::string path;

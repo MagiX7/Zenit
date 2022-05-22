@@ -7,6 +7,7 @@ namespace Zenit {
 	class Texture2D
 	{
 	public:
+		Texture2D(uint32_t* data, int w, int h);
 		Texture2D(const std::string& path);
 		~Texture2D();
 

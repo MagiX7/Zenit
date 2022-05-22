@@ -14,7 +14,7 @@ namespace Zenit {
 		void Unbind();
 
 		void SetFramebuffer();
-		void ResizeFramebuffer(int w, int h);
+		void Resize(int w, int h);
 
 		inline const GLuint GetId() const { return framebuffer; }
 		inline const GLuint GetColorId() const { return colorTexture; }

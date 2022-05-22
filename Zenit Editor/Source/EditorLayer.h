@@ -2,6 +2,7 @@
 
 #include "Zenit.h"
 #include "Panels/PanelInspector.h"
+#include "Panels/PanelViewport.h"
 
 #include <memory>
 
@@ -20,10 +21,11 @@ namespace Zenit {
 
 	private:
 		PanelInspector panelInspector;
+		PanelViewport panelViewport;
 		std::unique_ptr<FrameBuffer> fbo;
 		
 		PerspectiveCamera camera;
-		Model* gun;
+		Model* model;
 
 	};
 }

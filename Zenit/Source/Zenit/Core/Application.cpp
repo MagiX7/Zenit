@@ -111,7 +111,9 @@ namespace Zenit {
 			minimized = true;
 			return false;
 		}
-
+		
+		Renderer3D::OnResize(e.GetWidth(), e.GetHeight());
+		
 		minimized = false;
 	}
 }

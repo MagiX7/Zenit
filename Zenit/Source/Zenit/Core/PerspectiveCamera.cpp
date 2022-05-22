@@ -25,6 +25,8 @@ namespace Zenit {
 		forward = glm::normalize(glm::cross(up, right));
 		rotation = glm::vec3(0, 0, 0);
 
+		fovX = glm::atan(glm::tan(fovY * 0.5) * 1280 / 720);
+
 		RecalculateMatrices();
 	}
 
@@ -41,6 +43,14 @@ namespace Zenit {
 		}
 	}
 
+	void PerspectiveCamera::UpdateFov(int width, int height)
+	{
+		fovY = 2 * glm::atan((glm::tan(fovX / 2)) * (height / width));
+		fovX = 2 * glm::atan(glm::tan(fovY * 0.5) * (float)width / height);
+		
+		projection = glm::perspective(glm::radians(fovY), (float)width / height, 0.01f, 10000.0f);
+	}
+
 	bool PerspectiveCamera::HandleInput(TimeStep ts)
 	{
 		bool needToRecalculate = false;
@@ -51,11 +61,11 @@ namespace Zenit {
 		}
 		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
 		{
-			position -= Input::GetInstance()->GetMouseMotionX() * 15.0f * ts * right;
-			position -= Input::GetInstance()->GetMouseMotionY() * 15.0f * ts * up;
+			position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
+			position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
 			needToRecalculate = true;
 		}
-		
+
 		return needToRecalculate;
 	}
 
@@ -104,7 +114,7 @@ namespace Zenit {
 		// Maybe not a good idea using rotation as vec3.
 		// Should switch to quat
 		// Try with glm::rotate or glm::rotation;
-		
+
 		glm::mat4 transform = glm::translate(glm::mat4(1.0), position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 		view = glm::inverse(transform);
 
@@ -112,4 +122,5 @@ namespace Zenit {
 		float w = Application::GetInstance().GetWindow().GetWidth();
 		projection = glm::perspective(glm::radians(fovY), w / h, 0.01f, 10000.0f);
 	}
+
 }

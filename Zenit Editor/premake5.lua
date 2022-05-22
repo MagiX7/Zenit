@@ -28,6 +28,7 @@ project "Zenit Editor"
         "%{IncludeDir.Glad}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.spdlog}",
     }
 
     links
@@ -47,12 +48,14 @@ project "Zenit Editor"
 
     filter "configurations:Debug"
         -- defines here
+        defines {"SPDLOG_COMPILED_LIB"}
         runtime "Debug"
         buildoptions "/MTd"
         symbols "On"
 
     filter "configurations:Release"
         -- defines here
+        defines {"SPDLOG_COMPILED_LIB"}
         runtime "Release"
         buildoptions "/MT"
         optimize "On"

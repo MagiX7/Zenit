@@ -4,7 +4,7 @@
 
 namespace Zenit {
 
-	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,50 }, { 0,0,0 }, 60.0f))
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f))
 	{
 	}
 
@@ -16,8 +16,9 @@ namespace Zenit {
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
-		gun = ModelImporter::ImportModel("Assets/Models/Cerberus/Cerberus.fbx");
-		//gun = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+		//model = ModelImporter::ImportModel("Assets/Models/Cerberus/Cerberus.fbx");
+		//model = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
 	}
 
 	void EditorLayer::OnDetach()
@@ -27,11 +28,11 @@ namespace Zenit {
 	void EditorLayer::OnUpdate(TimeStep ts)
 	{
 		camera.Update(ts);
-		gun->Update(ts);
+		model->Update(ts);
 
 		fbo->Bind();
-		Renderer3D::Clear({ 0.2,0.2,0.2,1 });
-		gun->Draw(camera);
+		Renderer3D::Clear({ 0.05,0.05,0.05,1 });
+		model->Draw(camera);
 		fbo->Unbind();
 	}
 
@@ -52,11 +53,9 @@ namespace Zenit {
 		}
 		ImGui::EndMainMenuBar();
 
-		ImGui::Begin("Viewport");
-		ImGui::Image((void*)fbo->GetColorId(), { (float)fbo->GetWidth(), (float)fbo->GetHeight() }, { 0,1 }, { 1,0 });
-		ImGui::End();
 
-		panelInspector.OnImGuiRender();
+		panelViewport.OnImGuiRender(fbo.get(), camera, model);
+		panelInspector.OnImGuiRender(model);
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);

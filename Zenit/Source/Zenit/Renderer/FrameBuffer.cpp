@@ -98,7 +98,7 @@ namespace Zenit {
 			ZN_CORE_INFO("Framebuffer is Complete");
 	}
 
-	void FrameBuffer::ResizeFramebuffer(int w, int h)
+	void FrameBuffer::Resize(int w, int h)
 	{
 		if (w != width || height != h)
 		{
