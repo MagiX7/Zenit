@@ -3,6 +3,7 @@
 #include "Zenit.h"
 #include "Panels/PanelInspector.h"
 #include "Panels/PanelViewport.h"
+#include "Panels/PanelSkybox.h"
 
 #include <memory>
 
@@ -22,8 +23,10 @@ namespace Zenit {
 	private:
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
+		PanelSkybox panelSkybox;
 		std::unique_ptr<FrameBuffer> fbo;
-		
+		std::unique_ptr<Skybox> skybox;
+
 		PerspectiveCamera camera;
 		Model* model;
 

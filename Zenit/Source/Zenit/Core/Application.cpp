@@ -9,6 +9,7 @@
 #include "Zenit/Events/ApplicationEvent.h"
 
 #include <glad/glad.h>
+#include <iostream>
 
 namespace Zenit {
 
@@ -19,7 +20,7 @@ namespace Zenit {
 		instance = this;
 		
 		Log::Init();
-		ZN_CORE_INFO("[INFO]: Logging system initialized");
+		ZN_CORE_INFO("Logging system initialized");
 		
 		window = std::make_unique<Window>(1280, 720);
 		window->SetEventCallback(ZN_BIND_EVENT_FN(Application::OnEvent));
@@ -41,6 +42,11 @@ namespace Zenit {
 	{
 		while (isRunning)
 		{
+			//GLenum er;
+			//er = glGetError();
+			//if (er)
+			//	ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+			//	//std::cout << "OpenGL error " << std::endl;
 			Renderer3D::Clear({ 0.2f,0.2f,0.2f,1.0f });
 
 			float t = glfwGetTime();

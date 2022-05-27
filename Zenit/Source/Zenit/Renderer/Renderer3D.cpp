@@ -1,4 +1,5 @@
 #include "Renderer3D.h"
+#include "Zenit/Core/Log.h"
 
 #include <glad/glad.h>
 

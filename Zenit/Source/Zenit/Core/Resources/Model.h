@@ -12,6 +12,7 @@ namespace Zenit {
 	class Shader;
 	class PerspectiveCamera;
 	class Texture2D;
+	class Skybox;
 
 	class Model
 	{
@@ -20,7 +21,7 @@ namespace Zenit {
 		~Model();
 
 		void Update(TimeStep ts);
-		void Draw(PerspectiveCamera& camera);
+		void Draw(PerspectiveCamera& camera, const std::unique_ptr<Skybox>& skybox);
 		void ResetRotation();
 
 		inline const glm::mat4& GetTransform() { return transform; }

@@ -32,6 +32,11 @@ namespace Zenit {
 
 	void FrameBuffer::SetFramebuffer()
 	{
+		GLenum er;
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+
 		if (framebuffer > 0)
 		{
 			glDeleteFramebuffers(1, &framebuffer);
@@ -41,24 +46,48 @@ namespace Zenit {
 			glDeleteRenderbuffers(1, &rboDepthStencil);
 		}
 
+
+		
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+
 		glGenFramebuffers(1, &framebuffer);
 		glGenRenderbuffers(1, &renderedBufferRenderer);
 		glGenRenderbuffers(1, &depthRenderbuffer);
+
+
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glBindRenderbuffer(GL_RENDERBUFFER, renderedBufferRenderer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderedBufferRenderer);
 
+		//GLenum er;
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+
 		glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderbuffer);
+
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		glGenTextures(1, &colorTexture);
 		glBindTexture(GL_TEXTURE_2D, colorTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		// Attach it to currently bound framebuffer object
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
@@ -69,6 +98,10 @@ namespace Zenit {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+
 		// Attach it to currently bound framebuffer object
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTexture, 0);
 
@@ -78,24 +111,35 @@ namespace Zenit {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+
 		// Attach it to currently bound framebuffer object
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
 
-		GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_DEPTH_ATTACHMENT };
+		//GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_DEPTH_ATTACHMENT };
 		
-		glDrawBuffers(3, buffers);
+		//glDrawBuffers(3, buffers);
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		er = glGetError();
+		if (er)
+			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (err != GL_FRAMEBUFFER_COMPLETE)
 			ZN_CORE_ERROR("Framebuffer is Incomplete. Error {0}", glGetString(err));
 		else
 			ZN_CORE_INFO("Framebuffer is Complete");
+
 	}
 
 	void FrameBuffer::Resize(int w, int h)

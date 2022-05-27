@@ -12,6 +12,7 @@ namespace Zenit {
 		~Texture2D();
 
 		void Bind(uint32_t slot = 0);
+		void Unbind();
 
 		inline unsigned int GetWidth() { return width; }
 		inline unsigned int GetHeight() { return height; }

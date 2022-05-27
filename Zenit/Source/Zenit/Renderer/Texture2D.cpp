@@ -84,8 +84,14 @@ namespace Zenit {
 
 	void Texture2D::Bind(uint32_t slot)
 	{
-		//glBindTexture(GL_TEXTURE_2D, rendererId);
-		glBindTextureUnit(slot, rendererId);
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, rendererId);
+		//glBindTextureUnit(slot, rendererId);
+	}
+
+	void Texture2D::Unbind()
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 }

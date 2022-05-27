@@ -11,6 +11,8 @@
 #include "Zenit/Core/TimeStep.h"
 #include "Zenit/Core/Log.h"
 
+#include "Zenit/Renderer/Skybox.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtx/orthonormalize.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -20,8 +22,7 @@ namespace Zenit {
 
 	Model::Model(std::string path) : path(path)
 	{
-		shader = new Shader("Assets/Shaders/default.shader");
-		//diffuse = new Texture2D("Assets/Models/Cerberus/Textures/Cerberus_A.tga.png");
+		shader = new Shader("Assets/Shaders/PBR.shader");
 		uint32_t data = 0xffffffff;
 		diffuse = new Texture2D(&data, 1, 1);
 
@@ -31,6 +32,7 @@ namespace Zenit {
 
 	Model::~Model()
 	{
+		delete diffuse;
 	}
 
 	void Model::Update(TimeStep ts)
@@ -76,22 +78,31 @@ namespace Zenit {
 		lastY = y;
 	}
 
-	void Model::Draw(PerspectiveCamera& camera)
+	void Model::Draw(PerspectiveCamera& camera, const std::unique_ptr<Skybox>& skybox)
 	{
 		shader->Bind();
 		shader->SetUniformMatrix4f("view", camera.GetView());
 		shader->SetUniformMatrix4f("projection", camera.GetProjection());
 
 		shader->SetUniformMatrix4f("model", transform);
+		shader->SetUniformVec3f("camPos", camera.GetPosition());
 
 		diffuse->Bind();
 		shader->SetUniform1i("colorTexture", 0);
+
+		skybox->Bind(1);
+		shader->SetUniform1i("skybox", 1);
+
+		shader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
+		shader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
 
 		for (auto& m : meshes)
 		{
 			m->Draw();
 		}
 
+		skybox->Unbind();
+		diffuse->Unbind();
 		shader->Unbind();
 	}
 

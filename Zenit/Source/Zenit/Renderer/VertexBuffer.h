@@ -13,8 +13,8 @@ namespace Zenit {
 	{
 	public:
 		VertexBuffer();
+		VertexBuffer(float* vertices, int count);
 		VertexBuffer(const Vertex* vertices, uint32_t size);
-		VertexBuffer(uint32_t size);
 		virtual ~VertexBuffer();
 
 		void SetData(void* vertices, uint32_t size);

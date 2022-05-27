@@ -7,6 +7,16 @@ namespace Zenit {
 		glGenBuffers(1, &vbo);
 	}
 
+	VertexBuffer::VertexBuffer(float* vertices, int count)
+	{
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), vertices, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		
+		this->count = count;
+	}
+
 	VertexBuffer::VertexBuffer(const Vertex* vertices, uint32_t size)
 	{
 		glGenBuffers(1, &vbo);
@@ -15,15 +25,6 @@ namespace Zenit {
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		count = size / sizeof(uint32_t);
-	}
-
-	// Batch rendering purposes
-	VertexBuffer::VertexBuffer(uint32_t size)
-	{
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	VertexBuffer::~VertexBuffer()

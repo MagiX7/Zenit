@@ -8,19 +8,20 @@
 
 #include "Zenit/ImGui/ImGuiLayer.h"
 
+// Rendering
 #include "Zenit/Renderer/Renderer3D.h"
-
-// Buffers
 #include "Zenit/Renderer/FrameBuffer.h"
 #include "Zenit/Renderer/VertexArray.h"
 #include "Zenit/Renderer/VertexBuffer.h"
 #include "Zenit/Renderer/IndexBuffer.h"
 #include "Zenit/Renderer/Shader.h"
 #include "Zenit/Renderer/Texture2D.h"
+#include "Zenit/Renderer/Skybox.h"
 
 // Models
 #include "Zenit/Core/Importers/ModelImporter.h"
 
 // Camera
 #include "Zenit/Core/PerspectiveCamera.h"
+
 

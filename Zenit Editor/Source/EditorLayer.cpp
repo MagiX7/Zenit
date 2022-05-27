@@ -1,4 +1,5 @@
 #include "EditorLayer.h"
+#include "Zenit/Core/Log.h"
 
 #include <ImGui/imgui.h>
 
@@ -16,8 +17,17 @@ namespace Zenit {
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
-		//model = ModelImporter::ImportModel("Assets/Models/Cerberus/Cerberus.fbx");
-		//model = ModelImporter::ImportModel("Assets/Models/Gun/Gun.dae");
+		std::vector<std::string> faces;
+		
+		faces.push_back("Assets/Skyboxes/Sea/right.jpg");
+		faces.push_back("Assets/Skyboxes/Sea/left.jpg");
+		faces.push_back("Assets/Skyboxes/Sea/top.jpg");
+		faces.push_back("Assets/Skyboxes/Sea/bottom.jpg");
+		faces.push_back("Assets/Skyboxes/Sea/front.jpg");
+		faces.push_back("Assets/Skyboxes/Sea/back.jpg");
+		
+		skybox = std::make_unique<Skybox>(faces);
+
 		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
 	}
 
@@ -31,8 +41,13 @@ namespace Zenit {
 		model->Update(ts);
 
 		fbo->Bind();
+		
 		Renderer3D::Clear({ 0.05,0.05,0.05,1 });
-		model->Draw(camera);
+		glDisable(GL_CULL_FACE);
+		skybox->Draw(camera);
+		glEnable(GL_CULL_FACE);
+		model->Draw(camera, skybox);
+
 		fbo->Unbind();
 	}
 
@@ -56,6 +71,7 @@ namespace Zenit {
 
 		panelViewport.OnImGuiRender(fbo.get(), camera, model);
 		panelInspector.OnImGuiRender(model);
+		panelSkybox.OnImGuiRender(skybox);
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
