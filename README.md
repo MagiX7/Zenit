@@ -7,9 +7,11 @@ This tool is centered in the PBR metallic workflow, allowing to create each diff
 
 custom FBX model loading is also supported.
 
-## How to generate files
+## Files generation
 
-All what is needed to get the files is running the file named GenProject.bat.
+All what is needed to get the files is:
+  - Cloning the repository recursively: ```git clone --recursive https://github.com/MagiX7/Zenit```
+  - Running the file named GenProjects.bat
 
 ## Goals
 
