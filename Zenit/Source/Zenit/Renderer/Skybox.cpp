@@ -118,16 +118,16 @@ namespace Zenit {
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
-    void Skybox::Draw(PerspectiveCamera& camera)
+    void Skybox::Draw()
     {
-        glDepthFunc(GL_LEQUAL);
-        shader->Bind();
-        shader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
-        shader->SetUniformMatrix4f("projection", camera.GetProjection());
-        
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-        shader->SetUniform1i("skybox", 0);
+        //glDepthFunc(GL_LEQUAL);
+        //shader->Bind();
+        //shader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
+        //shader->SetUniformMatrix4f("projection", camera.GetProjection());
+        //
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+        //shader->SetUniform1i("skybox", 0);
         
         
         vao->Bind();

@@ -32,10 +32,12 @@ namespace Zenit {
 		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/PBR.shader");
+		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
+
 		uint32_t data = 0xffffffff;
 		diffuse = std::make_unique<Texture2D>(&data, 1, 1);
 
-		drawSkybox = true;
+		skyboxProps = SkyboxProperties();
 	}
 
 	void EditorLayer::OnDetach()
@@ -51,13 +53,8 @@ namespace Zenit {
 		{
 			Renderer3D::Clear({ 0.15,0.15,0.15,1 });
 
-			if (drawSkybox)
-			{
-				glDisable(GL_CULL_FACE);
-				skybox->Draw(camera);
-				glEnable(GL_CULL_FACE);
-			}
-
+			DrawSkybox();
+			
 			pbrShader->Bind();
 			SetShaderData();
 
@@ -89,10 +86,36 @@ namespace Zenit {
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelInspector.OnImGuiRender(model);
-		panelSkybox.OnImGuiRender(skybox, drawSkybox);
+		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
+	}
+
+	void EditorLayer::DrawSkybox()
+	{
+		if (skyboxProps.draw)
+		{
+			glDisable(GL_CULL_FACE);
+			glDepthFunc(GL_LEQUAL);
+
+			skyboxShader->Bind();
+			skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
+			skyboxShader->SetUniformMatrix4f("projection", camera.GetProjection());
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->GetId());
+			skyboxShader->SetUniform1i("skybox", 0);
+
+			skybox->Draw();
+
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			skyboxShader->Unbind();
+
+			glDepthFunc(GL_LESS);
+			glEnable(GL_CULL_FACE);
+		}
+
 	}
 
 	void EditorLayer::SetShaderData()
@@ -106,14 +129,15 @@ namespace Zenit {
 		diffuse->Bind();
 		pbrShader->SetUniform1i("colorTexture", 0);
 
-		pbrShader->SetUniform1i("drawSkybox", drawSkybox);
-		if (drawSkybox)
+		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
+		if (skyboxProps.draw)
 		{
 			skybox->Bind(1);
 			pbrShader->SetUniform1i("skybox", 1);
 
 			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
 			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
+
 		}
 	}
 }

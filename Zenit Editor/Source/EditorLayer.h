@@ -5,10 +5,12 @@
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelSkybox.h"
 
+#include "Helpers/SkyboxProperties.h"
+
 #include <memory>
 
 namespace Zenit {
-
+	
 	class EditorLayer : public Layer
 	{
 	public:
@@ -21,6 +23,7 @@ namespace Zenit {
 		virtual void OnImGuiRender() override;
 
 	private:
+		void DrawSkybox();
 		void SetShaderData();
 
 	private:
@@ -34,8 +37,9 @@ namespace Zenit {
 		Model* model;
 
 		std::unique_ptr<Shader> pbrShader;
+		std::unique_ptr<Shader> skyboxShader;
 		std::unique_ptr<Texture2D> diffuse;
-
-		bool drawSkybox;
+		
+		SkyboxProperties skyboxProps;
 	};
 }

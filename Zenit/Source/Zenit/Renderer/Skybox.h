@@ -21,7 +21,7 @@ namespace Zenit {
 		void Bind(int slot = 0);
 		void Unbind();
 
-		void Draw(PerspectiveCamera& camera);
+		void Draw();
 
 		inline unsigned int GetId() { return id; }
 
