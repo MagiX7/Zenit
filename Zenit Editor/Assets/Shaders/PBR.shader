@@ -31,6 +31,7 @@ layout(location = 1) uniform samplerCube skybox;
 uniform vec3 camPos;
 uniform float skyboxIntensity;
 uniform int skyboxReflectionEnabled;
+uniform int drawSkybox;
 
 out vec4 fragColor;
 
@@ -44,7 +45,7 @@ void main()
 	vec3 I = normalize(vPosition - camPos);
 	vec3 R = reflect(I, normalize(vNormals));
 
-	if (bool(skyboxReflectionEnabled))
+	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
 		fragColor = texture2D(colorTexture, vTexCoords) * vec4(texture(skybox, R).rgb * skyboxIntensity, 1);
 	else
 		fragColor = texture2D(colorTexture, vTexCoords);

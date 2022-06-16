@@ -12,7 +12,7 @@ namespace Zenit {
 		PanelViewport();
 		~PanelViewport();
 
-		void OnImGuiRender(FrameBuffer* fbo, PerspectiveCamera camera, Model* model);
+		void OnImGuiRender(FrameBuffer* fbo, const PerspectiveCamera& camera);
 
 	private:
 		glm::vec2 viewportSize;

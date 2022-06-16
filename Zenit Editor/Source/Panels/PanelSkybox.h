@@ -12,7 +12,7 @@ namespace Zenit {
 		//PanelSkybox();
 		//~PanelSkybox();
 
-		void OnImGuiRender(const std::unique_ptr<Skybox>& skybox);
+		void OnImGuiRender(const std::unique_ptr<Skybox>& skybox, bool& drawSkybox);
 	};
 
 }

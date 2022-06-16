@@ -21,6 +21,9 @@ namespace Zenit {
 		virtual void OnImGuiRender() override;
 
 	private:
+		void SetShaderData();
+
+	private:
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelSkybox panelSkybox;
@@ -30,5 +33,9 @@ namespace Zenit {
 		PerspectiveCamera camera;
 		Model* model;
 
+		std::unique_ptr<Shader> pbrShader;
+		std::unique_ptr<Texture2D> diffuse;
+
+		bool drawSkybox;
 	};
 }

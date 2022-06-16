@@ -22,17 +22,12 @@ namespace Zenit {
 
 	Model::Model(std::string path) : path(path)
 	{
-		shader = new Shader("Assets/Shaders/PBR.shader");
-		uint32_t data = 0xffffffff;
-		diffuse = new Texture2D(&data, 1, 1);
-
 		rotation = glm::quat(0, 0, 0, 1);
 		transform = glm::translate(glm::mat4(1.0), { 0,0,0 }) * glm::toMat4(rotation);
 	}
 
 	Model::~Model()
 	{
-		delete diffuse;
 	}
 
 	void Model::Update(TimeStep ts)
@@ -78,32 +73,32 @@ namespace Zenit {
 		lastY = y;
 	}
 
-	void Model::Draw(PerspectiveCamera& camera, const std::unique_ptr<Skybox>& skybox)
+	void Model::Draw() const
 	{
-		shader->Bind();
-		shader->SetUniformMatrix4f("view", camera.GetView());
-		shader->SetUniformMatrix4f("projection", camera.GetProjection());
+		//shader->Bind();
+		//shader->SetUniformMatrix4f("view", camera.GetView());
+		//shader->SetUniformMatrix4f("projection", camera.GetProjection());
 
-		shader->SetUniformMatrix4f("model", transform);
-		shader->SetUniformVec3f("camPos", camera.GetPosition());
+		//shader->SetUniformMatrix4f("model", transform);
+		//shader->SetUniformVec3f("camPos", camera.GetPosition());
 
-		diffuse->Bind();
-		shader->SetUniform1i("colorTexture", 0);
+		//diffuse->Bind();
+		//shader->SetUniform1i("colorTexture", 0);
 
-		skybox->Bind(1);
-		shader->SetUniform1i("skybox", 1);
+		//skybox->Bind(1);
+		//shader->SetUniform1i("skybox", 1);
 
-		shader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
-		shader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
+		//shader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
+		//shader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
 
 		for (auto& m : meshes)
 		{
 			m->Draw();
 		}
 
-		skybox->Unbind();
+		/*skybox->Unbind();
 		diffuse->Unbind();
-		shader->Unbind();
+		shader->Unbind();*/
 	}
 
 	void Model::ResetRotation()

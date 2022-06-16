@@ -18,7 +18,7 @@ namespace Zenit {
 
 		inline const GLuint GetId() const { return framebuffer; }
 		inline const GLuint GetColorId() const { return colorTexture; }
-		inline const GLuint GetNormalId() const { return normalTexture; }
+		inline const GLuint GetNormalsId() const { return normalTexture; }
 		inline const GLuint GetDepthId() const { return depthTexture; }
 		inline const int GetWidth() const { return width; }
 		inline const int GetHeight() const { return height; }

@@ -21,7 +21,7 @@ namespace Zenit {
 		~Model();
 
 		void Update(TimeStep ts);
-		void Draw(PerspectiveCamera& camera, const std::unique_ptr<Skybox>& skybox);
+		void Draw() const;
 		void ResetRotation();
 
 		inline const glm::mat4& GetTransform() { return transform; }
@@ -29,13 +29,10 @@ namespace Zenit {
 	private:
 		std::string path;
 		std::vector<Mesh*> meshes;
-		Texture2D* diffuse;
-
+		
 		glm::mat4 transform;
 		glm::quat rotation;
-
-		Shader* shader;
-
+		
 		friend class ModelImporter;
 	};
 

@@ -16,9 +16,8 @@ namespace Zenit {
 	{
 	}
 
-	void PanelViewport::OnImGuiRender(FrameBuffer* fbo, PerspectiveCamera camera, Model* model)
+	void PanelViewport::OnImGuiRender(FrameBuffer* fbo, const PerspectiveCamera& camera)
 	{
-		//ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0);
 		ImGui::Begin("Viewport");
 		ImVec2 dimensions = ImGui::GetContentRegionAvail();
 		if (viewportSize.x != dimensions.x || viewportSize.y != dimensions.y)
@@ -31,9 +30,8 @@ namespace Zenit {
 			viewportSize = { dimensions.x, dimensions.y };
 		}
 		
-		ImGui::Image((void*)fbo->GetColorId(), { viewportSize.x, viewportSize.y }, { 0,1 }, { 1,0 });
+		ImGui::Image((ImTextureID*)fbo->GetColorId(), { viewportSize.x, viewportSize.y }, { 0,1 }, { 1,0 });
 		ImGui::End();
-		//ImGui::PopStyleVar();
 	}
 
 }
