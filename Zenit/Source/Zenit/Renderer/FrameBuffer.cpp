@@ -32,10 +32,8 @@ namespace Zenit {
 
 	void FrameBuffer::SetFramebuffer()
 	{
-		GLenum er;
-		er = glGetError();
-		if (er)
-			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+		GLenum er = glGetError();
+		if (er) ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		if (framebuffer > 0)
 		{
@@ -48,9 +46,7 @@ namespace Zenit {
 
 
 		
-		er = glGetError();
-		if (er)
-			ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
+		if (er = glGetError()) ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
 
 		glGenFramebuffers(1, &framebuffer);
 		glGenRenderbuffers(1, &renderedBufferRenderer);
@@ -150,5 +146,21 @@ namespace Zenit {
 			height = h;
 			SetFramebuffer();
 		}
+	}
+
+	void FrameBuffer::GetColorData(unsigned int* buffer, int channels)
+	{
+		buffer = new unsigned int[width * height * channels];
+		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	}
+
+	void FrameBuffer::GetNormalsData(void* buffer)
+	{
+		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &buffer);
+	}
+
+	void FrameBuffer::GetDepthData(void* buffer)
+	{
+		glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, &buffer);
 	}
 }

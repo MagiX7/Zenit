@@ -16,12 +16,16 @@ namespace Zenit {
 		void SetFramebuffer();
 		void Resize(int w, int h);
 
-		inline const GLuint GetId() const { return framebuffer; }
-		inline const GLuint GetColorId() const { return colorTexture; }
-		inline const GLuint GetNormalsId() const { return normalTexture; }
-		inline const GLuint GetDepthId() const { return depthTexture; }
-		inline const int GetWidth() const { return width; }
-		inline const int GetHeight() const { return height; }
+		void GetColorData(unsigned int* buffer, int channels);
+		void GetNormalsData(void* buffer);
+		void GetDepthData(void* buffer);
+
+		inline GLuint GetId() const { return framebuffer; }
+		inline GLuint GetColorId() const { return colorTexture; }
+		inline GLuint GetNormalsId() const { return normalTexture; }
+		inline GLuint GetDepthId() const { return depthTexture; }
+		inline int GetWidth() const { return width; }
+		inline int GetHeight() const { return height; }
 
 	private:
 		int width;

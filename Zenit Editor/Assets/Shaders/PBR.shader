@@ -25,8 +25,12 @@ void main()
 #type fragment
 #version 430 core
 
-layout(location = 0) uniform sampler2D colorTexture;
-layout(location = 1) uniform samplerCube skybox;
+layout(location = 0) uniform sampler2D diffuseTexture;
+layout(location = 1) uniform sampler2D normalsTexture;
+layout(location = 2) uniform sampler2D metallicTexture;
+layout(location = 3) uniform sampler2D roughnessTexture;
+layout(location = 4) uniform sampler2D ambientOcclussionTexture;
+layout(location = 5) uniform samplerCube skybox;
 
 uniform vec3 camPos;
 uniform float skyboxIntensity;
@@ -39,14 +43,47 @@ in vec3 vPosition;
 in vec2 vTexCoords;
 in vec3 vNormals;
 
+
+struct Light
+{
+	vec3 direction;
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+uniform Light dirLight;
+
+vec3 GetSkyboxReflection(float ratio)
+{
+	// TODO: Change vNormals to normal map
+	vec3 I = normalize(vPosition - camPos);
+	return reflect(I, normalize(vNormals));
+}
+
+vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir)
+{
+	vec3 lightDir = normalize(-light.direction);
+	float diff = max(dot(normal, lightDir), 0);
+
+	vec3 reflectDir = reflect(-lightDir, normal);
+	float spec = max(dot(viewDir, reflectDir), 0.0);
+
+	vec3 ambient = light.ambient * vec3(texture(diffuseTexture, vTexCoords));
+	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseTexture, vTexCoords));
+	//vec3 specular = light.specular * spec * vec3(texture(diffuseTexture, TexCoords));
+	return ambient + diffuse;
+}
+
 void main()
 {
 	float ratio = 1.00 / 1.52;
-	vec3 I = normalize(vPosition - camPos);
-	vec3 R = reflect(I, normalize(vNormals));
+	vec3 R = GetSkyboxReflection(ratio);
+
+	vec3 color = CalculateDirLight(dirLight, vNormals, (camPos - vPosition));
+
 
 	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
-		fragColor = texture2D(colorTexture, vTexCoords) * vec4(texture(skybox, R).rgb * skyboxIntensity, 1);
+		fragColor = texture2D(diffuseTexture, vTexCoords) * vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
 	else
-		fragColor = texture2D(colorTexture, vTexCoords);
+	fragColor = texture2D(diffuseTexture, vTexCoords) * vec4(color, 1);
 }

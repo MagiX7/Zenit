@@ -10,7 +10,14 @@
 #include <memory>
 
 namespace Zenit {
-	
+
+	struct DirectionalLight
+	{
+		glm::vec3 dir = { 0,0,0 };
+		glm::vec3 ambient = { 1,0,0 };
+		glm::vec3 diffuse = { 0,0,1 };
+	};
+
 	class EditorLayer : public Layer
 	{
 	public:
@@ -19,18 +26,22 @@ namespace Zenit {
 
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
-		virtual void OnUpdate(TimeStep ts) override;
+		virtual void OnUpdate(const TimeStep ts) override;
 		virtual void OnImGuiRender() override;
 
 	private:
 		void DrawSkybox();
-		void SetShaderData();
+		void SetModelShaderData();
+		void ExportTextures();
 
 	private:
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelSkybox panelSkybox;
+
 		std::unique_ptr<FrameBuffer> fbo;
+		std::unique_ptr<FrameBuffer> diffuseFbo;
+
 		std::unique_ptr<Skybox> skybox;
 
 		PerspectiveCamera camera;
@@ -39,7 +50,12 @@ namespace Zenit {
 		std::unique_ptr<Shader> pbrShader;
 		std::unique_ptr<Shader> skyboxShader;
 		std::unique_ptr<Texture2D> diffuse;
-		
+		std::unique_ptr<Texture2D> normal;
+		std::unique_ptr<Texture2D> metallic;
+		std::unique_ptr<Texture2D> roughness;
+		std::unique_ptr<Texture2D> ambientOcclusion;
+
+		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
 	};
 }
