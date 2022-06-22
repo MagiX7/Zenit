@@ -29,6 +29,7 @@ project "Zenit Editor"
         "%{IncludeDir.glm}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.spdlog}",
+        "%{IncludeDir.node_editor}",
     }
 
     links

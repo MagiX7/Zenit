@@ -7,7 +7,11 @@
 
 #include "Helpers/SkyboxProperties.h"
 
+#include <imgui_node_editor.h>
+
 #include <memory>
+
+namespace ed = ax::NodeEditor;
 
 namespace Zenit {
 
@@ -33,6 +37,7 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
+		void HandleNodes() const;
 
 	private:
 		PanelInspector panelInspector;
@@ -57,5 +62,8 @@ namespace Zenit {
 
 		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
+
+		// Nodes-related
+		ed::EditorContext* context;
 	};
 }

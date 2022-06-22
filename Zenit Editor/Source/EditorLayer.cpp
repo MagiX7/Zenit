@@ -46,10 +46,13 @@ namespace Zenit {
 
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
+
+		context = ed::CreateEditor();
 	}
 
 	void EditorLayer::OnDetach()
 	{
+		ed::DestroyEditor(context);
 	}
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
@@ -100,6 +103,8 @@ namespace Zenit {
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelInspector.OnImGuiRender(model, dirLight);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
+
+		HandleNodes();
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
@@ -186,5 +191,27 @@ namespace Zenit {
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png("mytex.png", w, h, channels, data, w * channels);
 		delete[] data;
+	}
+
+	void EditorLayer::HandleNodes() const
+	{
+		ed::SetCurrentEditor(context);
+
+		ImGui::Begin("Node editor");
+		ed::Begin("");
+		int uniqueId = 1;
+
+		ed::BeginNode(uniqueId++);
+		ImGui::Text("Node A");
+		ed::BeginPin(uniqueId++, ed::PinKind::Input);
+		ImGui::Text("-> In");
+		ed::EndPin();
+		ImGui::SameLine();
+		ed::BeginPin(uniqueId++, ed::PinKind::Output);
+		ImGui::Text("Out ->");
+		ed::EndPin();
+		ed::EndNode();
+		ed::End();
+		ImGui::End();
 	}
 }

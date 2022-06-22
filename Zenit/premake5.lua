@@ -18,8 +18,8 @@ project "Zenit"
         "%{prj.location}/Dependencies/stb_image/**.cpp",
         "%{prj.location}/Dependencies/spdlog/src/**.h",
         "%{prj.location}/Dependencies/spdlog/src/**.cpp",
-        "%{prj.location}/Dependencies/spdlog/include/",
-        "%{prj.location}/Dependencies/assimp/include/",
+        "%{prj.location}/Dependencies/imgui-node-editor/NodeEditor/Source/**.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/NodeEditor/Source/**.cpp",
     }
 
     defines
@@ -38,6 +38,7 @@ project "Zenit"
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.node_editor}",
     }
 
     links
