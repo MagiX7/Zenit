@@ -8,7 +8,7 @@
 #include "Helpers/SkyboxProperties.h"
 
 #include <imgui_node_editor.h>
-#include "Helpers/Node.h"
+#include "Helpers/Nodes/Node.h"
 
 #include <memory>
 
@@ -38,7 +38,7 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
-		Node* CreateFlatColorNode(const char* name, glm::vec4 color);
+		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		void HandleNodes();
 		void DrawNodes();
 

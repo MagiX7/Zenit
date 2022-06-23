@@ -31,7 +31,8 @@ namespace Zenit {
 		Blueprint,
 		Simple,
 		Tree,
-		Comment
+		Comment,
+		FLAT_COLOR,
 	};
 
 	struct Node;
@@ -57,15 +58,16 @@ namespace Zenit {
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
 
-		ImColor color;
+		ImColor nodeColor;
 		NodeType type;
 		ImVec2 pos;
 		ImVec2 size;
 
-		Node(int id, const char* name, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), color(color), type(NodeType::Blueprint), size(5, 5)
+		Node(int id, const char* name, NodeType type, ImColor color = ImColor(255, 255, 255))
+			: id(id), name(name), nodeColor(color), type(NodeType::Blueprint), size(5, 5)
 		{
 		}
+
 	};
 
 }

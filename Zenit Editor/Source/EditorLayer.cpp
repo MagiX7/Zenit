@@ -1,6 +1,8 @@
 #include "EditorLayer.h"
 #include "Zenit/Core/Log.h"
 
+#include "Helpers/Nodes/ColorNode.h"
+
 #include <ImGui/imgui.h>
 #include <stb_image/stb_image_write.h>
 
@@ -143,7 +145,7 @@ namespace Zenit {
 					{
 						//if (ed::BeginCreate())
 						{
-							CreateFlatColorNode("My Created node", { 0,1,1,1 });
+							CreateFlatColorNode("Flat Color", { 1,0,0 });
 						}
 						showCreationPopup = false;
 					}
@@ -190,6 +192,8 @@ namespace Zenit {
 		{
 			ed::BeginNode(n->id);
 			ImGui::Text(n->name.c_str());
+			ImGui::NewLine();
+
 			for (auto& input : n->inputs)
 			{
 				ed::BeginPin(input.id, input.kind);
@@ -198,7 +202,23 @@ namespace Zenit {
 			}
 			
 			ImGui::SameLine();
-			
+
+			switch(n->type)
+			{
+				case NodeType::FLAT_COLOR:
+				{
+					const auto node = (ColorNode*)n;
+					ImGui::SetNextItemWidth(150);
+					constexpr ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel;
+					ImGui::ColorPicker3("Color", glm::value_ptr(node->color), flags);
+					n = node;
+					break;
+				}
+
+				default:
+					break;
+			}
+
 			for (auto& output : n->outputs)
 			{
 				ed::BeginPin(output.id, output.kind);
@@ -272,7 +292,6 @@ namespace Zenit {
 
 			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
 			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
-
 		}
 	}
 
@@ -293,14 +312,14 @@ namespace Zenit {
 		delete[] data;
 	}
 
-	Node* EditorLayer::CreateFlatColorNode(const char* name, glm::vec4 color)
+	Node* EditorLayer::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
 		static int creationId = 1;
-		Node* node = new Node(creationId++, name, { color.r,color.g,color.b,color.a });
+		ColorNode* node = new ColorNode(creationId++, name, NodeType::FLAT_COLOR, color);
 		node->pos = { 10,10 };
 
 		node->size = { 5,5 };
-		node->type = NodeType::Simple;
+		node->type = NodeType::FLAT_COLOR;
 		nodes.emplace_back(node);
 
 		Pin pin = Pin(creationId++, "Red", PinType::Float, ed::PinKind::Output);
