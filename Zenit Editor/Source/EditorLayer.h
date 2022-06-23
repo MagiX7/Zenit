@@ -8,6 +8,7 @@
 #include "Helpers/SkyboxProperties.h"
 
 #include <imgui_node_editor.h>
+#include "Helpers/Node.h"
 
 #include <memory>
 
@@ -37,7 +38,9 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
-		void HandleNodes() const;
+		Node* CreateFlatColorNode(const char* name, glm::vec4 color);
+		void HandleNodes();
+		void DrawNodes();
 
 	private:
 		PanelInspector panelInspector;
@@ -65,5 +68,8 @@ namespace Zenit {
 
 		// Nodes-related
 		ed::EditorContext* context;
+		std::vector<Node*> nodes;
+		bool showCreationPopup = false;
+		
 	};
 }

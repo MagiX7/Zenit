@@ -12,11 +12,12 @@ namespace Zenit {
 		PanelViewport();
 		~PanelViewport();
 
+		void OnUpdate(TimeStep ts, Model* model);
 		void OnImGuiRender(FrameBuffer* fbo, const PerspectiveCamera& camera);
 
 	private:
 		glm::vec2 viewportSize;
-
+		bool allowModelRotation;
 	};
 
 }

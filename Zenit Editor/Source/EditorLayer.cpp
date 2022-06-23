@@ -53,12 +53,20 @@ namespace Zenit {
 	void EditorLayer::OnDetach()
 	{
 		ed::DestroyEditor(context);
+
+		/*for (int i = 0; i < nodes.size(); ++i)
+		{
+			delete nodes[i];
+			nodes[i] = nullptr;
+		}*/
+		//nodes.clear();
 	}
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
 		camera.Update(ts);
-		model->Update(ts);
+
+		panelViewport.OnUpdate(ts, model);
 
 		fbo->Bind();
 		{
@@ -108,6 +116,98 @@ namespace Zenit {
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
+	}
+
+	void EditorLayer::HandleNodes()
+	{
+		ed::SetCurrentEditor(context);
+
+		ImGui::Begin("Node editor");
+
+		if (ImGui::IsWindowHovered())
+		{
+			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
+				showCreationPopup = true;
+			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
+				showCreationPopup = false;
+		}
+
+		if (showCreationPopup)
+		{
+			ImGui::OpenPopup("CreationPopup");
+			if (ImGui::BeginPopup("CreationPopup"))
+			{
+				if (ImGui::BeginMenu("Create"))
+				{
+					if (ImGui::MenuItem("Flat Color"))
+					{
+						//if (ed::BeginCreate())
+						{
+							CreateFlatColorNode("My Created node", { 0,1,1,1 });
+						}
+						showCreationPopup = false;
+					}
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndPopup();
+			}
+			ImGui::CloseCurrentPopup();
+		}
+
+
+		// NODES WORKSPACE =======================================================
+
+
+		ed::Begin("", { 0,0 });
+		DrawNodes();
+		
+
+		//int uniqueId = 1;
+		//ed::BeginNode(uniqueId++);
+		//{
+		//	ImGui::Text("Node A");
+		//	ed::BeginPin(uniqueId++, ed::PinKind::Input);
+		//		ImGui::Text("-> In");
+		//	ed::EndPin();
+		//	ImGui::SameLine();
+		//	ed::BeginPin(uniqueId++, ed::PinKind::Output);
+		//		ImGui::Text("Out ->");
+		//	ed::EndPin();
+		//}
+		//ed::EndNode();
+
+		ed::End();
+		ImGui::End();
+
+		// NODES WORKSPACE =======================================================
+	}
+
+	void EditorLayer::DrawNodes()
+	{
+		for (auto n : nodes)
+		{
+			ed::BeginNode(n->id);
+			ImGui::Text(n->name.c_str());
+			for (auto& input : n->inputs)
+			{
+				ed::BeginPin(input.id, input.kind);
+					ImGui::Text(input.name.c_str());
+				ed::EndPin();
+			}
+			
+			ImGui::SameLine();
+			
+			for (auto& output : n->outputs)
+			{
+				ed::BeginPin(output.id, output.kind);
+					ImGui::Text(output.name.c_str());
+				ed::EndPin();
+			}
+
+			ed::EndNode();
+		}
 	}
 
 	void EditorLayer::DrawSkybox()
@@ -193,25 +293,28 @@ namespace Zenit {
 		delete[] data;
 	}
 
-	void EditorLayer::HandleNodes() const
+	Node* EditorLayer::CreateFlatColorNode(const char* name, glm::vec4 color)
 	{
-		ed::SetCurrentEditor(context);
+		static int creationId = 1;
+		Node* node = new Node(creationId++, name, { color.r,color.g,color.b,color.a });
+		node->pos = { 10,10 };
 
-		ImGui::Begin("Node editor");
-		ed::Begin("");
-		int uniqueId = 1;
+		node->size = { 5,5 };
+		node->type = NodeType::Simple;
+		nodes.emplace_back(node);
 
-		ed::BeginNode(uniqueId++);
-		ImGui::Text("Node A");
-		ed::BeginPin(uniqueId++, ed::PinKind::Input);
-		ImGui::Text("-> In");
-		ed::EndPin();
-		ImGui::SameLine();
-		ed::BeginPin(uniqueId++, ed::PinKind::Output);
-		ImGui::Text("Out ->");
-		ed::EndPin();
-		ed::EndNode();
-		ed::End();
-		ImGui::End();
+		Pin pin = Pin(creationId++, "Red", PinType::Float, ed::PinKind::Output);
+		pin.node = node;
+		node->outputs.emplace_back(pin);
+
+		Pin pin2 = Pin(creationId++, "Green", PinType::Float, ed::PinKind::Output);
+		pin2.node = node;
+		node->outputs.emplace_back(pin2);
+
+		Pin pin3 = Pin(creationId++, "Blue", PinType::Float, ed::PinKind::Output);
+		pin3.node = node;
+		node->outputs.emplace_back(pin3);
+
+		return nodes.back();
 	}
 }

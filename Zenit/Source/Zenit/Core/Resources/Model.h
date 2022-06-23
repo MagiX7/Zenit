@@ -20,7 +20,7 @@ namespace Zenit {
 		Model(std::string path);
 		~Model();
 
-		void Update(TimeStep ts);
+		void Update(TimeStep ts, float dx, float dy);
 		void Draw() const;
 		void ResetRotation();
 

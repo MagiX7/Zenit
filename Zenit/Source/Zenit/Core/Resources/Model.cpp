@@ -30,20 +30,20 @@ namespace Zenit {
 	{
 	}
 
-	void Model::Update(TimeStep ts)
+	void Model::Update(TimeStep ts, float dx, float dy)
 	{
 		static bool firstInput = true;
 
-		float x = Input::GetInstance()->GetMouseX();
-		float y = Input::GetInstance()->GetMouseY();
-
-		static float lastX = x;
-		static float lastY = y;
-
-		//float dx = (x - lastX) / Application::GetInstance().GetWindow().GetWidth();
-		//float dy = (lastY - y) / Application::GetInstance().GetWindow().GetHeight();
-		float dx = Input::GetInstance()->GetMouseMotionX();
-		float dy = Input::GetInstance()->GetMouseMotionY();
+		//float x = Input::GetInstance()->GetMouseX();
+		//float y = Input::GetInstance()->GetMouseY();
+		//
+		//static float lastX = x;
+		//static float lastY = y;
+		//
+		////float dx = (x - lastX) / Application::GetInstance().GetWindow().GetWidth();
+		////float dy = (lastY - y) / Application::GetInstance().GetWindow().GetHeight();
+		//float dx = Input::GetInstance()->GetMouseMotionX();
+		//float dy = Input::GetInstance()->GetMouseMotionY();
 
 		if (!Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
 		{
@@ -69,8 +69,8 @@ namespace Zenit {
 			}
 		}
 
-		lastX = x;
-		lastY = y;
+		//lastX = x;
+		//lastY = y;
 	}
 
 	void Model::Draw() const
