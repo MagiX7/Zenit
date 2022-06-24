@@ -64,17 +64,6 @@ namespace Zenit {
 		else
 		{
 			ZN_CORE_INFO("{0} Compute Shader linked successfully!", name);
-
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &workGroupCount[0]);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &workGroupCount[1]);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &workGroupCount[2]);
-
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &workGroupSize[0]);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &workGroupSize[1]);
-			glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &workGroupSize[2]);
-
-			ZN_CORE_INFO("    Max texture size supported: {1} {2} {3}", workGroupSize[0], workGroupSize[1], workGroupSize[2]);
-
 		}
 
 		glDetachShader(rendererID, shader);

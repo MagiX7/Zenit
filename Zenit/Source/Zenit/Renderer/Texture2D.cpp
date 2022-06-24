@@ -17,7 +17,7 @@ namespace Zenit {
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &rendererId);
 		glBindTexture(GL_TEXTURE_2D, rendererId);
-		glTextureStorage2D(rendererId, 1, GL_RGBA8, width, height);
+		//glTextureStorage2D(rendererId, 1, GL_RGBA8, width, height);
 
 		glTextureParameteri(rendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTextureParameteri(rendererId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -25,7 +25,8 @@ namespace Zenit {
 		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTextureSubImage2D(rendererId, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		//glTextureSubImage2D(rendererId, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}

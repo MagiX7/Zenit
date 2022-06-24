@@ -402,13 +402,12 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		node->noiseShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
-		uint32_t data = 0xffffffff;
-		node->noiseTex = std::make_unique<Texture2D>(&data, 16, 16);
+		node->noiseTex = std::make_unique<Texture2D>(nullptr, 1024, 1024);
 
 		node->noiseTex->BindImage();
 		node->noiseShader->Bind();
 		node->noiseShader->SetUniform1i("imgOutput", 0);
-		glDispatchCompute(node->noiseTex->GetWidth(), node->noiseTex->GetHeight(), 1);
+		glDispatchCompute(node->noiseTex->GetWidth() / 8, node->noiseTex->GetHeight() / 4, 1); // 8 and 4 is bc of the shader file
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		return nodes.back();
