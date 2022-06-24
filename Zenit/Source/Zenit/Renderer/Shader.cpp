@@ -111,15 +111,15 @@ namespace Zenit {
 		glUniform1f(location, f);
 	}
 
-	void Shader::SetUnifromVec2f(const std::string& name, float v0, float v1)
+	void Shader::SetUniformVec2f(const std::string& name, float v0, float v1)
 	{
 		GLint location = glGetUniformLocation(rendererID, name.c_str());
 		glUniform2f(location, v0, v1);
 	}
 
-	void Shader::SetUnifromVec2f(const std::string& name, glm::vec2 v)
+	void Shader::SetUniformVec2f(const std::string& name, glm::vec2 v)
 	{
-		SetUnifromVec2f(name, v.x, v.y);
+		SetUniformVec2f(name, v.x, v.y);
 	}
 
 	void Shader::SetUniformVec3f(const std::string& name, float v0, float v1, float v2)

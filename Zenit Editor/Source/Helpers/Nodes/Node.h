@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Zenit.h"
+
 #include <imgui_node_editor.h>
 #include <string>
 #include <vector>
@@ -33,6 +35,7 @@ namespace Zenit {
 		Tree,
 		Comment,
 		FLAT_COLOR,
+		PERLIN_NOISE,
 	};
 
 	struct Node;
@@ -51,6 +54,13 @@ namespace Zenit {
 		}
 	};
 
+	struct LinkInfo
+	{
+		ed::LinkId id;
+		ed::PinId  inputId;
+		ed::PinId  outputId;
+	};
+
 	struct Node
 	{
 		ed::NodeId id;
@@ -63,8 +73,11 @@ namespace Zenit {
 		ImVec2 pos;
 		ImVec2 size;
 
+		std::string state;
+		std::string savedState;
+
 		Node(int id, const char* name, NodeType type, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), nodeColor(color), type(NodeType::Blueprint), size(5, 5)
+			: id(id), name(name), nodeColor(color), type(type), size(5, 5)
 		{
 		}
 

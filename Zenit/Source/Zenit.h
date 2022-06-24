@@ -15,6 +15,7 @@
 #include "Zenit/Renderer/VertexBuffer.h"
 #include "Zenit/Renderer/IndexBuffer.h"
 #include "Zenit/Renderer/Shader.h"
+#include "Zenit/Renderer/ComputeShader.h"
 #include "Zenit/Renderer/Texture2D.h"
 #include "Zenit/Renderer/Skybox.h"
 

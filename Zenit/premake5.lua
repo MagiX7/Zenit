@@ -18,8 +18,18 @@ project "Zenit"
         "%{prj.location}/Dependencies/stb_image/**.cpp",
         "%{prj.location}/Dependencies/spdlog/src/**.h",
         "%{prj.location}/Dependencies/spdlog/src/**.cpp",
-        "%{prj.location}/Dependencies/imgui-node-editor/NodeEditor/Source/**.h",
-        "%{prj.location}/Dependencies/imgui-node-editor/NodeEditor/Source/**.cpp",
+
+        "%{prj.location}/Dependencies/imgui-node-editor/crude_json.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/crude_json.cpp",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_bezier_math.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_canvas.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_canvas.cpp",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_extra_math.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_node_editor.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_node_editor.cpp",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_node_editor_api.h",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_node_editor_api.cpp",
+        "%{prj.location}/Dependencies/imgui-node-editor/imgui_node_editor_internal.h",
     }
 
     defines

@@ -43,8 +43,8 @@ namespace Zenit {
 		void SetUniform1i(const std::string& name, int i);
 		void SetUniform1f(const std::string& name, float f);
 
-		void SetUnifromVec2f(const std::string& name, float v0, float v1);
-		void SetUnifromVec2f(const std::string& name, glm::vec2 v);
+		void SetUniformVec2f(const std::string& name, float v0, float v1);
+		void SetUniformVec2f(const std::string& name, glm::vec2 v);
 
 		void SetUniformVec3f(const std::string& name, float v0, float v1, float v2);
 		void SetUniformVec3f(const std::string& name, glm::vec3 v);

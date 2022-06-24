@@ -38,9 +38,19 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
+
+		// Nodes =============
+	private:
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
+		Node* CreatePerlinNoiseNode(const char* name);
+
+
+
 		void HandleNodes();
 		void DrawNodes();
+		Node* FindNode(ed::NodeId id);
+		
+		// Nodes =============
 
 	private:
 		PanelInspector panelInspector;
@@ -68,8 +78,11 @@ namespace Zenit {
 
 		// Nodes-related
 		ed::EditorContext* context;
+		ed::Config config;
 		std::vector<Node*> nodes;
+		std::vector<LinkInfo> links;
 		bool showCreationPopup = false;
+		int creationId = 1;
 		
 	};
 }

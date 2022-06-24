@@ -30,6 +30,7 @@ project "Zenit Editor"
         "%{IncludeDir.assimp}",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.node_editor}",
+        "%{IncludeDir.ImGui}",
     }
 
     links

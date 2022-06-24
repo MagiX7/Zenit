@@ -1,7 +1,10 @@
 #include "EditorLayer.h"
+#include "EditorLayer.h"
+#include "EditorLayer.h"
 #include "Zenit/Core/Log.h"
 
 #include "Helpers/Nodes/ColorNode.h"
+#include "Helpers/Nodes/PerlinNoiseNode.h"
 
 #include <ImGui/imgui.h>
 #include <stb_image/stb_image_write.h>
@@ -10,7 +13,6 @@ namespace Zenit {
 
 	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f))
 	{
-
 	}
 
 	EditorLayer::~EditorLayer()
@@ -49,19 +51,22 @@ namespace Zenit {
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
 
-		context = ed::CreateEditor();
+		config = ed::Config();
+		config.SettingsFile = "Settings/NodeEditor.json";
+		context = ed::CreateEditor(&config);
+		ed::SetCurrentEditor(context);
 	}
 
 	void EditorLayer::OnDetach()
 	{
 		ed::DestroyEditor(context);
 
-		/*for (int i = 0; i < nodes.size(); ++i)
+		for (auto n : nodes)
 		{
-			delete nodes[i];
-			nodes[i] = nullptr;
-		}*/
-		//nodes.clear();
+			delete n;
+			n = nullptr;
+		}
+		nodes.clear();
 	}
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
@@ -122,8 +127,6 @@ namespace Zenit {
 
 	void EditorLayer::HandleNodes()
 	{
-		ed::SetCurrentEditor(context);
-
 		ImGui::Begin("Node editor");
 
 		if (ImGui::IsWindowHovered())
@@ -139,20 +142,28 @@ namespace Zenit {
 			ImGui::OpenPopup("CreationPopup");
 			if (ImGui::BeginPopup("CreationPopup"))
 			{
-				if (ImGui::BeginMenu("Create"))
+				if (ImGui::BeginMenu("Basics"))
 				{
 					if (ImGui::MenuItem("Flat Color"))
 					{
-						//if (ed::BeginCreate())
-						{
-							CreateFlatColorNode("Flat Color", { 1,0,0 });
-						}
+						CreateFlatColorNode("Flat Color", { 1,0,0 });
 						showCreationPopup = false;
 					}
-
 					ImGui::EndMenu();
 				}
-
+				if (ImGui::BeginMenu("Filters"))
+				{
+					ImGui::EndMenu();
+				}
+				if (ImGui::BeginMenu("Generators"))
+				{
+					if (ImGui::MenuItem("Perlin Noise"))
+					{
+						CreatePerlinNoiseNode("Perlin Noise");
+						showCreationPopup = false;
+					}
+					ImGui::EndMenu();
+				}
 				ImGui::EndPopup();
 			}
 			ImGui::CloseCurrentPopup();
@@ -160,30 +171,12 @@ namespace Zenit {
 
 
 		// NODES WORKSPACE =======================================================
-
-
-		ed::Begin("", { 0,0 });
+		ed::Begin("");
 		DrawNodes();
-		
-
-		//int uniqueId = 1;
-		//ed::BeginNode(uniqueId++);
-		//{
-		//	ImGui::Text("Node A");
-		//	ed::BeginPin(uniqueId++, ed::PinKind::Input);
-		//		ImGui::Text("-> In");
-		//	ed::EndPin();
-		//	ImGui::SameLine();
-		//	ed::BeginPin(uniqueId++, ed::PinKind::Output);
-		//		ImGui::Text("Out ->");
-		//	ed::EndPin();
-		//}
-		//ed::EndNode();
-
 		ed::End();
-		ImGui::End();
-
 		// NODES WORKSPACE =======================================================
+
+		ImGui::End();
 	}
 
 	void EditorLayer::DrawNodes()
@@ -214,10 +207,17 @@ namespace Zenit {
 					n = node;
 					break;
 				}
-
+				case NodeType::PERLIN_NOISE:
+				{
+					const auto node = (PerlinNoiseNode*)n;
+					ImGui::Image((ImTextureID*)node->noiseTex->GetId(), { 50,50 });
+					break;
+				}
 				default:
 					break;
 			}
+
+			ImGui::SameLine();
 
 			for (auto& output : n->outputs)
 			{
@@ -228,6 +228,60 @@ namespace Zenit {
 
 			ed::EndNode();
 		}
+
+		if (ed::BeginCreate())
+		{
+			ed::PinId inputPinId, outputPinId;
+			if (ed::QueryNewLink(&inputPinId, &outputPinId))
+			{
+				if (inputPinId && outputPinId) // both are valid, let's accept link
+				{
+					// ed::AcceptNewItem() return true when user release mouse button.
+					if (ed::AcceptNewItem())
+					{
+						static int linkId = 100;
+						// Since we accepted new link, lets add one to our list of links.
+						links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
+
+						// Draw new link.
+						ed::Link(links.back().id, links.back().inputId, links.back().outputId);
+					}
+				}
+			}
+		}
+		ed::EndCreate();
+
+		if (ed::BeginDelete())
+		{
+			// There may be many links marked for deletion, let's loop over them.
+			ed::LinkId deletedLinkId;
+			while (ed::QueryDeletedLink(&deletedLinkId))
+			{
+				// If you agree that link can be deleted, accept deletion.
+				if (ed::AcceptDeletedItem())
+				{
+					// Then remove link from your data.
+					for (int i = 0; i < links.size(); ++i)
+					{
+						if (links[i].id == deletedLinkId)
+						{
+							links.erase(links.begin() + i);
+							break;
+						}
+					}
+				}
+			}
+		}
+		ed::EndDelete();
+	}
+
+	Node* EditorLayer::FindNode(ed::NodeId id)
+	{
+		for (auto node : nodes)
+			if (node->id == id)
+				return node;
+
+		return nullptr;
 	}
 
 	void EditorLayer::DrawSkybox()
@@ -314,12 +368,8 @@ namespace Zenit {
 
 	Node* EditorLayer::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
-		static int creationId = 1;
 		ColorNode* node = new ColorNode(creationId++, name, NodeType::FLAT_COLOR, color);
-		node->pos = { 10,10 };
-
 		node->size = { 5,5 };
-		node->type = NodeType::FLAT_COLOR;
 		nodes.emplace_back(node);
 
 		Pin pin = Pin(creationId++, "Red", PinType::Float, ed::PinKind::Output);
@@ -333,6 +383,33 @@ namespace Zenit {
 		Pin pin3 = Pin(creationId++, "Blue", PinType::Float, ed::PinKind::Output);
 		pin3.node = node;
 		node->outputs.emplace_back(pin3);
+
+		return nodes.back();
+	}
+
+	Node* EditorLayer::CreatePerlinNoiseNode(const char* name)
+	{
+		PerlinNoiseNode* node = new PerlinNoiseNode(creationId++, name, NodeType::PERLIN_NOISE);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Delegate, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Delegate, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		node->noiseShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
+		uint32_t data = 0xffffffff;
+		node->noiseTex = std::make_unique<Texture2D>(&data, 16, 16);
+
+		node->noiseTex->BindImage();
+		node->noiseShader->Bind();
+		node->noiseShader->SetUniform1i("imgOutput", 0);
+		glDispatchCompute(node->noiseTex->GetWidth(), node->noiseTex->GetHeight(), 1);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 		return nodes.back();
 	}
