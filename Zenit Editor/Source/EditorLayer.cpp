@@ -11,7 +11,8 @@
 
 namespace Zenit {
 
-	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f))
+	EditorLayer::EditorLayer()
+	: camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
 	{
 	}
 
@@ -22,7 +23,7 @@ namespace Zenit {
 	void EditorLayer::OnAttach()
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
-		fbo = std::make_unique<FrameBuffer>(2048, 2048, 1);
+		//fbo = std::make_unique<FrameBuffer>(2048, 2048, 1);
 
 		std::vector<std::string> faces;
 		
@@ -72,13 +73,12 @@ namespace Zenit {
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
 		camera.Update(ts);
-
-		panelViewport.OnUpdate(ts, model);
+		panelViewport.OnUpdate(ts, model, camera);
 
 		fbo->Bind();
 		{
 			Renderer3D::Clear({ 0.15,0.15,0.15,1 });
-
+			
 			DrawSkybox();
 			
 			pbrShader->Bind();
@@ -123,6 +123,10 @@ namespace Zenit {
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
+	}
+
+	void EditorLayer::OnEvent(Event& e)
+	{
 	}
 
 	void EditorLayer::HandleNodes()

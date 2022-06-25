@@ -16,7 +16,8 @@
 
 namespace Zenit {
 
-	PerspectiveCamera::PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov) : position(pos), target(target), fovY(yFov)
+	PerspectiveCamera::PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov, float aspectRatio)
+		: position(pos), target(target), fovY(yFov), aspectRatio(aspectRatio)
 	{
 		direction = glm::normalize(position - target);
 		right = glm::normalize(glm::cross({ 0,1,0 }, direction));
@@ -26,7 +27,7 @@ namespace Zenit {
 		rotation = glm::vec3(0, 0, 0);
 
 		fovX = glm::atan(glm::tan(fovY * 0.5) * 1280 / 720);
-
+		
 		RecalculateMatrices();
 	}
 
@@ -37,34 +38,56 @@ namespace Zenit {
 
 	void PerspectiveCamera::Update(TimeStep ts)
 	{
-		if (HandleInput(ts))
-		{
-			RecalculateMatrices();
-		}
+		//if (HandleInput(ts))
+		//{
+		//	RecalculateMatrices();
+		//}
 	}
 
-	void PerspectiveCamera::UpdateFov(int width, int height)
+	void PerspectiveCamera::Scroll(TimeStep ts)
 	{
-		fovY = 2 * glm::atan((glm::tan(fovX / 2)) * (height / width));
-		fovX = 2 * glm::atan(glm::tan(fovY * 0.5) * (float)width / height);
-		
-		projection = glm::perspective(glm::radians(fovY), (float)width / height, 0.01f, 10000.0f);
+		if (float dy = Input::GetInstance()->GetMouseScrolDy())
+		{
+			position += dy * ts * 0.05f * forward;
+			RecalculateMatrices();
+		}
+		/*if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
+		{
+			position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
+			position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
+		}*/
+
+	}
+
+	void PerspectiveCamera::UpdateFovAndAspectRatio(float width, float height)
+	{
+		aspectRatio = width / height;
+		fovY = 2 * glm::atan((glm::tan(fovX / 2)) * 1 / aspectRatio);
+		fovX = 2 * glm::atan(glm::tan(fovY * 0.5) * aspectRatio);
+
+		projection = glm::perspective(glm::radians(fovY), aspectRatio, 0.01f, 100.0f);
+	}
+
+	void PerspectiveCamera::SetApsectRatio(float value)
+	{
+		aspectRatio = value;
+		projection = glm::perspective(glm::radians(fovY), aspectRatio, 0.01f, 100.0f);
 	}
 
 	bool PerspectiveCamera::HandleInput(TimeStep ts)
 	{
 		bool needToRecalculate = false;
-		if (float dy = Input::GetInstance()->GetMouseScrolDy())
-		{
-			position += Input::GetInstance()->GetMouseScrolDy() * ts * forward;
-			needToRecalculate = true;
-		}
-		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
-		{
-			position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
-			position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
-			needToRecalculate = true;
-		}
+		//if (float dy = Input::GetInstance()->GetMouseScrolDy())
+		//{
+		//	position += Input::GetInstance()->GetMouseScrolDy() * ts * forward;
+		//	needToRecalculate = true;
+		//}
+		//if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
+		//{
+		//	position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
+		//	position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
+		//	needToRecalculate = true;
+		//}
 
 		return needToRecalculate;
 	}
@@ -115,12 +138,10 @@ namespace Zenit {
 		// Should switch to quat
 		// Try with glm::rotate or glm::rotation;
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0), position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
+		const glm::mat4 transform = glm::translate(glm::mat4(1.0), position) * glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
 		view = glm::inverse(transform);
 
-		float h = Application::GetInstance().GetWindow().GetHeight();
-		float w = Application::GetInstance().GetWindow().GetWidth();
-		projection = glm::perspective(glm::radians(fovY), w / h, 0.01f, 10000.0f);
+		projection = glm::perspective(glm::radians(fovY), aspectRatio, 0.01f, 100.0f);
 	}
 
 }

@@ -45,11 +45,11 @@ namespace Zenit {
 		//float dx = Input::GetInstance()->GetMouseMotionX();
 		//float dy = Input::GetInstance()->GetMouseMotionY();
 
-		if (!Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
+		if (!Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 		{
 			firstInput = true;
 		}
-		else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
+		else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 		{
 			if (firstInput)
 			{

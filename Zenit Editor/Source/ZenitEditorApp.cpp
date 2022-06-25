@@ -13,8 +13,6 @@ namespace Zenit {
 		ZenitEditorApp()
 		{
 			PushLayer(new EditorLayer());
-
-			
 		}
 
 		~ZenitEditorApp()

@@ -33,6 +33,7 @@ namespace Zenit {
 		virtual void OnDetach() override;
 		virtual void OnUpdate(const TimeStep ts) override;
 		virtual void OnImGuiRender() override;
+		virtual void OnEvent(Event& e) override;
 
 	private:
 		void DrawSkybox();
@@ -58,7 +59,6 @@ namespace Zenit {
 		PanelSkybox panelSkybox;
 
 		std::unique_ptr<FrameBuffer> fbo;
-		std::unique_ptr<FrameBuffer> diffuseFbo;
 
 		std::unique_ptr<Skybox> skybox;
 

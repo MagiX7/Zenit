@@ -18,10 +18,12 @@ namespace Zenit {
 	{
 	}
 
-	void PanelViewport::OnUpdate(TimeStep ts, Model* model)
+	void PanelViewport::OnUpdate(TimeStep ts, Model* model, PerspectiveCamera& camera)
 	{
 		if (!allowModelRotation)
 			return;
+
+		camera.Scroll(ts);		
 
 		float x = Input::GetInstance()->GetMouseX();
 		float y = Input::GetInstance()->GetMouseY();
@@ -29,12 +31,13 @@ namespace Zenit {
 		const float dx = Input::GetInstance()->GetMouseMotionX();
 		const float dy = Input::GetInstance()->GetMouseMotionY();
 		
-		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
+		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 			model->Update(ts, dx, dy);
 	}
 
-	void PanelViewport::OnImGuiRender(FrameBuffer* fbo, const PerspectiveCamera& camera)
+	void PanelViewport::OnImGuiRender(FrameBuffer* fbo, PerspectiveCamera& camera)
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 0,0 });
 		ImGui::Begin("Viewport");
 
 		ImGui::IsWindowHovered() ? allowModelRotation = true : allowModelRotation = false;
@@ -44,14 +47,14 @@ namespace Zenit {
 		{
 			fbo->Resize(dimensions.x, dimensions.y);
 			Renderer3D::OnResize(dimensions.x, dimensions.y);
-			//camera.UpdateFov(dimensions.x, dimensions.y);
-			
+			camera.SetApsectRatio(dimensions.x / dimensions.y);
 			ZN_CORE_TRACE("Viewport Resized");
 			viewportSize = { dimensions.x, dimensions.y };
 		}
 		
 		ImGui::Image((ImTextureID*)fbo->GetColorId(), { viewportSize.x, viewportSize.y }, { 0,1 }, { 1,0 });
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 }

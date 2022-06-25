@@ -11,20 +11,25 @@ namespace Zenit {
 	{
 	public:
 		// FOV Y in degrees.
-		PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov);
+		PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov, float aspectRatio);
 		~PerspectiveCamera();
 		void Update(TimeStep ts);
 
-		inline const glm::mat4x4& GetView() { return view; }
-		inline const glm::mat4x4& GetProjection() { return projection; }
+		void Scroll(TimeStep ts);
+		void UpdateFovAndAspectRatio(float width, float height);
+		void SetApsectRatio(float value);
 
-		inline const glm::vec3& GetPosition() { return position; }
-		inline const glm::vec3& GetDirection() { return direction; }
-		inline const glm::vec3& GetUp() { return up; }
-		inline const glm::vec3& GetRight() { return right; }
-		inline const glm::vec3& GetForward() { return forward; }
+		inline const glm::mat4x4& GetView() const { return view; }
+		inline const glm::mat4x4& GetProjection() const { return projection; }
 
-		void UpdateFov(int width, int height);
+		inline const glm::vec3& GetPosition() const { return position; }
+		inline const glm::vec3& GetDirection()const { return direction; }
+		inline const glm::vec3& GetUp() const { return up; }
+		inline const glm::vec3& GetRight() const { return right; }
+		inline const glm::vec3& GetForward() const { return forward; }
+
+		inline float GetFovX() const { return fovX; }
+		inline float GetFovY() const { return fovY; }
 
 	private:
 		bool HandleInput(TimeStep ts);
@@ -46,7 +51,7 @@ namespace Zenit {
 
 		float fovY;
 		float fovX;
-		float yaw, pitch, roll;
+		float aspectRatio = 0;
 	};
 
 }
