@@ -46,10 +46,11 @@ namespace Zenit {
 		Node* CreatePerlinNoiseNode(const char* name);
 
 
-
 		void HandleNodes();
+		void HandleLinks();
 		void DrawNodes();
-		Node* FindNode(ed::NodeId id);
+		Node* FindNode(ed::NodeId id) const ;
+		Pin* FindPin(ed::PinId id) const;
 		
 		// Nodes =============
 

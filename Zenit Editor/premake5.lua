@@ -19,6 +19,8 @@ project "Zenit Editor"
         "GLFW_INCLUDE_NONE"
     }
 
+    characterset("MBCS")
+
     includedirs
     {
         "Source",

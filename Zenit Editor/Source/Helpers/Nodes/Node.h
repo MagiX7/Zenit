@@ -30,12 +30,17 @@ namespace Zenit {
 
 	enum class NodeType
 	{
-		Blueprint,
-		Simple,
-		Tree,
-		Comment,
 		FLAT_COLOR,
 		PERLIN_NOISE,
+	};
+
+	struct Pin;
+
+	struct LinkInfo
+	{
+		ed::LinkId id;
+		ed::PinId  inputId;
+		ed::PinId  outputId;
 	};
 
 	struct Node;
@@ -48,19 +53,14 @@ namespace Zenit {
 		PinType type;
 		ed::PinKind kind;
 
+		std::vector<LinkInfo> links;
+
 		Pin(int pinId, const char* pinName, PinType type, ed::PinKind kind)
 			: id(pinId), node(nullptr), name(pinName), type(type), kind(kind)
 		{
 		}
 	};
-
-	struct LinkInfo
-	{
-		ed::LinkId id;
-		ed::PinId  inputId;
-		ed::PinId  outputId;
-	};
-
+	
 	struct Node
 	{
 		ed::NodeId id;

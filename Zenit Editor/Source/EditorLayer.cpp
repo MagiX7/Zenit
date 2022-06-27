@@ -4,7 +4,7 @@
 #include "Zenit/Core/Log.h"
 
 #include "Helpers/Nodes/ColorNode.h"
-#include "Helpers/Nodes/PerlinNoiseNode.h"
+#include "Helpers/Nodes/ComputeShaderNode.h"
 
 #include <ImGui/imgui.h>
 #include <stb_image/stb_image_write.h>
@@ -12,7 +12,7 @@
 namespace Zenit {
 
 	EditorLayer::EditorLayer()
-	: camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
+		: camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
 	{
 	}
 
@@ -23,17 +23,14 @@ namespace Zenit {
 	void EditorLayer::OnAttach()
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
-		//fbo = std::make_unique<FrameBuffer>(2048, 2048, 1);
 
 		std::vector<std::string> faces;
-		
 		faces.push_back("Assets/Skyboxes/Sea/right.jpg");
 		faces.push_back("Assets/Skyboxes/Sea/left.jpg");
 		faces.push_back("Assets/Skyboxes/Sea/top.jpg");
 		faces.push_back("Assets/Skyboxes/Sea/bottom.jpg");
 		faces.push_back("Assets/Skyboxes/Sea/front.jpg");
 		faces.push_back("Assets/Skyboxes/Sea/back.jpg");
-		
 		skybox = std::make_unique<Skybox>(faces);
 
 		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
@@ -183,6 +180,85 @@ namespace Zenit {
 		ImGui::End();
 	}
 
+	void EditorLayer::HandleLinks()
+	{
+		if (ed::BeginCreate())
+		{
+			ed::PinId inputPinId, outputPinId;
+			if (ed::QueryNewLink(&inputPinId, &outputPinId))
+			{
+				if (inputPinId && outputPinId)
+				{
+					Pin startPin = *FindPin(inputPinId);
+					Pin endPin = *FindPin(outputPinId);
+					
+					if (startPin.kind == ed::PinKind::Input)
+					{
+						std::swap(startPin, endPin);
+						std::swap(inputPinId, outputPinId);
+					}
+
+					if (!startPin.id.Invalid && !endPin.id.Invalid)
+					{
+						if (endPin.id == startPin.id)
+						{
+							ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+						}
+
+						else if (endPin.kind == startPin.kind)
+						{
+							ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
+						}
+
+						else if (endPin.type != startPin.type)
+						{
+							ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+						}
+
+						else if (ed::AcceptNewItem())
+						{
+							static int linkId = 100;
+							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
+
+							if (endPin.node->type == NodeType::PERLIN_NOISE)
+							{
+								const auto n = (ComputeShaderNode*)endPin.node;
+								n->BindCoreData();
+								if (startPin.node->type == NodeType::FLAT_COLOR)
+								{
+									const auto inNode = (ColorNode*)startPin.node;
+									n->computeShader->SetUniformVec3f("inputColor", inNode->color);
+								}
+								n->DispatchCompute(8, 4);
+							}
+						}
+					}					
+				}
+			}
+		}
+		ed::EndCreate();
+
+		if (ed::BeginDelete())
+		{
+			ed::LinkId deletedLinkId;
+			while (ed::QueryDeletedLink(&deletedLinkId))
+			{
+				if (ed::AcceptDeletedItem())
+				{
+					for (int i = 0; i < links.size(); ++i)
+					{
+						if (links[i].id == deletedLinkId)
+						{
+							links.erase(links.begin() + i);
+							break;
+						}
+					}
+				}
+			}
+		}
+		ed::EndDelete();
+	}
+
 	void EditorLayer::DrawNodes()
 	{
 		for (auto n : nodes)
@@ -213,8 +289,8 @@ namespace Zenit {
 				}
 				case NodeType::PERLIN_NOISE:
 				{
-					const auto node = (PerlinNoiseNode*)n;
-					ImGui::Image((ImTextureID*)node->noiseTex->GetId(), { 50,50 });
+					const auto node = (ComputeShaderNode*)n;
+					ImGui::Image((ImTextureID*)node->texture->GetId(), { 50,50 });
 					break;
 				}
 				default:
@@ -233,85 +309,69 @@ namespace Zenit {
 			ed::EndNode();
 		}
 
-		if (ed::BeginCreate())
-		{
-			ed::PinId inputPinId, outputPinId;
-			if (ed::QueryNewLink(&inputPinId, &outputPinId))
-			{
-				if (inputPinId && outputPinId) // both are valid, let's accept link
-				{
-					// ed::AcceptNewItem() return true when user release mouse button.
-					if (ed::AcceptNewItem())
-					{
-						static int linkId = 100;
-						// Since we accepted new link, lets add one to our list of links.
-						links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
+		// Links creation
+		HandleLinks();
 
-						// Draw new link.
-						ed::Link(links.back().id, links.back().inputId, links.back().outputId);
-					}
-				}
-			}
-		}
-		ed::EndCreate();
+		// Links Drawing
+		for (const auto& link : links)
+			ed::Link(link.id, link.inputId, link.outputId);
 
-		if (ed::BeginDelete())
-		{
-			// There may be many links marked for deletion, let's loop over them.
-			ed::LinkId deletedLinkId;
-			while (ed::QueryDeletedLink(&deletedLinkId))
-			{
-				// If you agree that link can be deleted, accept deletion.
-				if (ed::AcceptDeletedItem())
-				{
-					// Then remove link from your data.
-					for (int i = 0; i < links.size(); ++i)
-					{
-						if (links[i].id == deletedLinkId)
-						{
-							links.erase(links.begin() + i);
-							break;
-						}
-					}
-				}
-			}
-		}
-		ed::EndDelete();
 	}
 
-	Node* EditorLayer::FindNode(ed::NodeId id)
+	Node* EditorLayer::FindNode(ed::NodeId id) const
 	{
-		for (auto node : nodes)
+		for (const auto node : nodes)
+		{
 			if (node->id == id)
 				return node;
+		}
+
+		return nullptr;
+	}
+
+	Pin* EditorLayer::FindPin(ed::PinId id) const
+	{
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			for (auto inputPin : nodes[i]->inputs)
+			{
+				if (inputPin.id == id)
+					return &inputPin;
+			}
+
+			for (auto outputPin : nodes[i]->outputs)
+			{
+				if (outputPin.id == id)
+					return &outputPin;
+			}
+		}
 
 		return nullptr;
 	}
 
 	void EditorLayer::DrawSkybox()
 	{
-		if (skyboxProps.draw)
-		{
-			glDisable(GL_CULL_FACE);
-			glDepthFunc(GL_LEQUAL);
+		if (!skyboxProps.draw)
+			return;
 
-			skyboxShader->Bind();
-			skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
-			skyboxShader->SetUniformMatrix4f("projection", camera.GetProjection());
+		glDisable(GL_CULL_FACE);
+		glDepthFunc(GL_LEQUAL);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->GetId());
-			skyboxShader->SetUniform1i("skybox", 0);
+		skyboxShader->Bind();
+		skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
+		skyboxShader->SetUniformMatrix4f("projection", camera.GetProjection());
 
-			skybox->Draw();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->GetId());
+		skyboxShader->SetUniform1i("skybox", 0);
 
-			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-			skyboxShader->Unbind();
+		skybox->Draw();
 
-			glDepthFunc(GL_LESS);
-			glEnable(GL_CULL_FACE);
-		}
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		skyboxShader->Unbind();
 
+		glDepthFunc(GL_LESS);
+		glEnable(GL_CULL_FACE);
 	}
 
 	void EditorLayer::SetModelShaderData()
@@ -355,19 +415,68 @@ namespace Zenit {
 
 	void EditorLayer::ExportTextures()
 	{
-		constexpr int channels = 3;
-		const int w = fbo->GetWidth();
-		const int h = fbo->GetHeight();
+		std::string path = FileDialog::SaveFile("png (*.png)\0*.png\0");
+		if (path.empty())
+			return;
+
+		constexpr int channels = 4;
+		const int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
+		const int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
 		GLubyte* data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
-		
-		fbo->Bind();
+
+		diffuse->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
-		stbi_write_png("mytex.png", w, h, channels, data, w * channels);
+		stbi_write_png((path + "_diffuse.png").c_str(), w, h, channels, data, w * channels);
 		delete[] data;
+
+
+		data = new GLubyte[channels * w * h];
+		memset(data, 0, channels * w * h);
+		normal->Bind(0);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		stbi_flip_vertically_on_write(1);
+		stbi_write_png((path + "_normals.png").c_str(), w, h, channels, data, w * channels);
+		delete[] data;
+
+
+		data = new GLubyte[channels * w * h];
+		memset(data, 0, channels * w * h);
+		metallic->Bind(0);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		stbi_flip_vertically_on_write(1);
+		stbi_write_png((path + "_metallic.png").c_str(), w, h, channels, data, w * channels);
+		delete[] data;
+
+
+		data = new GLubyte[channels * w * h];
+		memset(data, 0, channels * w * h);
+		roughness->Bind(0);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		stbi_flip_vertically_on_write(1);
+		stbi_write_png((path + "_roughness.png").c_str(), w, h, channels, data, w * channels);
+		delete[] data;
+
+
+		data = new GLubyte[channels * w * h];
+		memset(data, 0, channels * w * h);
+		ambientOcclusion->Bind(0);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		stbi_flip_vertically_on_write(1);
+		stbi_write_png((path + "_ambientOcclusion.png").c_str(), w, h, channels, data, w * channels);
+		delete[] data;
+
 	}
 
 	Node* EditorLayer::CreateFlatColorNode(const char* name, const glm::vec3& color)
@@ -393,26 +502,24 @@ namespace Zenit {
 
 	Node* EditorLayer::CreatePerlinNoiseNode(const char* name)
 	{
-		PerlinNoiseNode* node = new PerlinNoiseNode(creationId++, name, NodeType::PERLIN_NOISE);
+		ComputeShaderNode* node = new ComputeShaderNode(creationId++, name, NodeType::PERLIN_NOISE);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "Input", PinType::Delegate, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "Input", PinType::Float, ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "Output", PinType::Delegate, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
-		node->noiseShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
-		node->noiseTex = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
+		node->texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
 
-		node->noiseTex->BindImage();
-		node->noiseShader->Bind();
-		node->noiseShader->SetUniform1i("imgOutput", 0);
-		glDispatchCompute(node->noiseTex->GetWidth() / 8, node->noiseTex->GetHeight() / 4, 1); // 8 and 4 is bc of the shader file
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		node->BindCoreData();
+		node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+		node->DispatchCompute(8, 4);
 
 		return nodes.back();
 	}

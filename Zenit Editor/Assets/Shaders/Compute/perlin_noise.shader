@@ -3,7 +3,7 @@
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
-//out vec4 fragColor;
+uniform vec3 inputColor;
 
 float random(in vec2 st)
 {
@@ -43,7 +43,7 @@ void main()
 
     // Use the noise function
     float n = noise(pos);
-    color = vec4(vec3(n), 1);
+    color = vec4(vec3(n), 1) * vec4(inputColor, 1);
 
     imageStore(imgOutput, pixelCoords, color);
 }
