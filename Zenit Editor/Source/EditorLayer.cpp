@@ -40,11 +40,11 @@ namespace Zenit {
 
 
 		uint32_t data = 0xffffffff;
-		diffuse = std::make_unique<Texture2D>(&data, 1, 1);
-		normal = std::make_unique<Texture2D>(&data, 1, 1);
-		metallic = std::make_unique<Texture2D>(&data, 1, 1);
-		roughness = std::make_unique<Texture2D>(&data, 1, 1);
-		ambientOcclusion = std::make_unique<Texture2D>(&data, 1, 1);
+		diffuse = new Texture2D(&data, 1, 1);
+		normal = new Texture2D(&data, 1, 1);
+		metallic = new Texture2D(&data, 1, 1);
+		roughness = new Texture2D(&data, 1, 1);
+		ambientOcclusion = new Texture2D(&data, 1, 1);
 
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
@@ -116,6 +116,8 @@ namespace Zenit {
 		panelInspector.OnImGuiRender(model, dirLight);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 
+		ImGui::Image((void*)diffuse->GetId(), { 100,100 });
+
 		HandleNodes();
 
 		if (showDemoWindow)
@@ -133,9 +135,14 @@ namespace Zenit {
 		if (ImGui::IsWindowHovered())
 		{
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
-				showCreationPopup = true;
+			{
+				rightClickedNodeId = ed::GetHoveredNode() ? showNodePopup = true : showCreationPopup = true;
+			}
 			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
+			{
 				showCreationPopup = false;
+				showNodePopup = false;
+			}
 		}
 
 		if (showCreationPopup)
@@ -170,10 +177,56 @@ namespace Zenit {
 			ImGui::CloseCurrentPopup();
 		}
 
+		if (showNodePopup)
+		{
+			ImGui::OpenPopup("NodePopup");
+			if (ImGui::BeginPopup("NodePopup"))
+			{
+				if (ImGui::BeginMenu("Set as Output"))
+				{
+					if (rightClickedNodeId.Get() != -1)
+					{
+						Node* node = FindNode(rightClickedNodeId);
+
+						if (ImGui::MenuItem("Diffuse"))
+						{
+							diffuseOutput = node;
+							SetDiffuseData();
+							showNodePopup = false;
+						}
+						else if (ImGui::MenuItem("Normals"))
+						{
+							normalsOutput = node;
+							showNodePopup = false;
+						}
+						else if (ImGui::MenuItem("Metallic"))
+						{
+							metallicOutput = node;
+							showNodePopup = false;
+						}
+						else if (ImGui::MenuItem("Roughness"))
+						{
+							roughnessOutput = node;
+							showNodePopup = false;
+						}
+						else if (ImGui::MenuItem("Ambient Occlusion"))
+						{
+							aoOutput = node;
+							showNodePopup = false;
+						}
+					}
+
+					ImGui::EndMenu();
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::CloseCurrentPopup();
+		}
+
 
 		// NODES WORKSPACE =======================================================
 		ed::Begin("");
-		DrawNodes();
+			DrawNodes();
 		ed::End();
 		// NODES WORKSPACE =======================================================
 
@@ -349,6 +402,51 @@ namespace Zenit {
 		return nullptr;
 	}
 
+	void EditorLayer::SetDiffuseData()
+	{
+		if (!diffuseOutput)
+			return;
+
+		switch (diffuseOutput->type)
+		{
+			case NodeType::PERLIN_NOISE:
+			{
+				const auto node = (ComputeShaderNode*)diffuseOutput;
+				diffuse = node->texture.get();
+				break;
+			}
+			case NodeType::FLAT_COLOR:
+			{
+				//auto node = (ColorNode*)n;
+				break;
+			}
+		}
+
+		//for(const auto n : nodes)
+		//{
+		//	if (n->isOutput)
+		//	{
+		//		switch(n->type)
+		//		{
+		//			case NodeType::PERLIN_NOISE:
+		//			{
+		//				const auto node = (ComputeShaderNode*)n;
+		//				diffuse = node->texture.get();
+		//				break;
+		//			}
+		//			case NodeType::FLAT_COLOR:
+		//			{
+		//				//auto node = (ColorNode*)n;
+		//				break;
+		//			}
+		//		}
+		//
+		//		break;
+		//	}
+		//}
+
+	}
+
 	void EditorLayer::DrawSkybox()
 	{
 		if (!skyboxProps.draw)
@@ -427,7 +525,8 @@ namespace Zenit {
 
 		diffuse->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		//glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_diffuse.png").c_str(), w, h, channels, data, w * channels);
@@ -438,7 +537,7 @@ namespace Zenit {
 		memset(data, 0, channels * w * h);
 		normal->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_normals.png").c_str(), w, h, channels, data, w * channels);
@@ -449,7 +548,7 @@ namespace Zenit {
 		memset(data, 0, channels * w * h);
 		metallic->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_metallic.png").c_str(), w, h, channels, data, w * channels);
@@ -460,7 +559,7 @@ namespace Zenit {
 		memset(data, 0, channels * w * h);
 		roughness->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_roughness.png").c_str(), w, h, channels, data, w * channels);
@@ -471,7 +570,7 @@ namespace Zenit {
 		memset(data, 0, channels * w * h);
 		ambientOcclusion->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_ambientOcclusion.png").c_str(), w, h, channels, data, w * channels);

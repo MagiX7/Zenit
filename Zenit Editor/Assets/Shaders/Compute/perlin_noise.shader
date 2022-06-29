@@ -39,7 +39,7 @@ void main()
     // get index in global work group i.e x,y position
     ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 
-    vec2 pos = vec2(pixelCoords * 15.0);
+    vec2 pos = vec2(pixelCoords * 5.0);
 
     // Use the noise function
     float n = noise(pos);

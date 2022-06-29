@@ -76,8 +76,10 @@ namespace Zenit {
 		std::string state;
 		std::string savedState;
 
+		bool isOutput; // Output written into the mesh
+
 		Node(int id, const char* name, NodeType type, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), nodeColor(color), type(type), size(5, 5)
+			: id(id), name(name), nodeColor(color), type(type), size(5, 5), isOutput(false)
 		{
 		}
 

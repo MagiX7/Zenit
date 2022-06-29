@@ -19,8 +19,8 @@ namespace Zenit {
 	struct DirectionalLight
 	{
 		glm::vec3 dir = { 0,0,0 };
-		glm::vec3 ambient = { 1,0,0 };
-		glm::vec3 diffuse = { 0,0,1 };
+		glm::vec3 ambient = { 1,1,1 };
+		glm::vec3 diffuse = { 1,1,1 };
 	};
 
 	class EditorLayer : public Layer
@@ -45,6 +45,8 @@ namespace Zenit {
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		Node* CreatePerlinNoiseNode(const char* name);
 
+		template<class T>
+		T* GetNode(ed::NodeId id);
 
 		void HandleNodes();
 		void HandleLinks();
@@ -53,6 +55,8 @@ namespace Zenit {
 		Pin* FindPin(ed::PinId id) const;
 		
 		// Nodes =============
+
+		void SetDiffuseData();
 
 	private:
 		PanelInspector panelInspector;
@@ -68,11 +72,11 @@ namespace Zenit {
 
 		std::unique_ptr<Shader> pbrShader;
 		std::unique_ptr<Shader> skyboxShader;
-		std::unique_ptr<Texture2D> diffuse;
-		std::unique_ptr<Texture2D> normal;
-		std::unique_ptr<Texture2D> metallic;
-		std::unique_ptr<Texture2D> roughness;
-		std::unique_ptr<Texture2D> ambientOcclusion;
+		Texture2D* diffuse;
+		Texture2D* normal;
+		Texture2D* metallic;
+		Texture2D* roughness;
+		Texture2D* ambientOcclusion;
 
 		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
@@ -83,7 +87,31 @@ namespace Zenit {
 		std::vector<Node*> nodes;
 		std::vector<LinkInfo> links;
 		bool showCreationPopup = false;
+		bool showNodePopup = false;
 		int creationId = 1;
-		
+
+		Node* diffuseOutput = nullptr;
+		Node* normalsOutput = nullptr;
+		Node* metallicOutput = nullptr;
+		Node* roughnessOutput = nullptr;
+		Node* aoOutput = nullptr;
+		ed::NodeId rightClickedNodeId = -1;
 	};
+
+	template <class T>
+	T* EditorLayer::GetNode(ed::NodeId id)
+	{
+		T* node = nullptr;
+
+		for (std::vector<Node*>::iterator it = nodes.begin(); it < nodes.end(); ++it)
+		{
+			if ((*it)->id == id)
+			{
+				node = dynamic_cast<T*>(*it);
+				return node;
+			}
+		}
+
+		return nullptr;
+	}
 }

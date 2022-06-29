@@ -10,25 +10,11 @@
 
 namespace Zenit {
 
-	Texture2D::Texture2D(uint32_t* data, int w, int h)
+	Texture2D::Texture2D(uint32_t* data, int w, int h) : data(data)
 	{
 		width = w;
 		height = h;
-
-		glCreateTextures(GL_TEXTURE_2D, 1, &rendererId);
-		glBindTexture(GL_TEXTURE_2D, rendererId);
-		//glTextureStorage2D(rendererId, 1, GL_RGBA8, width, height);
-
-		glTextureParameteri(rendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(rendererId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		//glTextureSubImage2D(rendererId, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		glGenerateMipmap(GL_TEXTURE_2D);
+		SetData(data);
 	}
 
 	Texture2D::Texture2D(const std::string& path) : path(path), width(0), height(0)
@@ -36,7 +22,10 @@ namespace Zenit {
 		int w, h, channels;
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
-		
+
+		// TODO: Data from stbi gets deleted later. May affect when an image is loaded
+		this->data = data;
+
 		if (!data)
 		{
 			ZN_CORE_ERROR("Texture {0} couldn't be loaded.", path);
@@ -83,6 +72,27 @@ namespace Zenit {
 	Texture2D::~Texture2D()
 	{
 		glDeleteTextures(1, &rendererId);
+	}
+
+	void Texture2D::SetData(void* data)
+	{
+		if (rendererId > 0)
+			glDeleteTextures(1, &rendererId);
+
+		this->data = data;
+		glCreateTextures(GL_TEXTURE_2D, 1, &rendererId);
+		glBindTexture(GL_TEXTURE_2D, rendererId);
+
+		glTextureParameteri(rendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(rendererId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		glGenerateMipmap(GL_TEXTURE_2D);		
+
 	}
 
 	void Texture2D::Bind(uint32_t slot)

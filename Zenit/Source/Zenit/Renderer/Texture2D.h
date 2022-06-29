@@ -11,9 +11,13 @@ namespace Zenit {
 		Texture2D(const std::string& path);
 		~Texture2D();
 
+		void SetData(void* data);
+
 		void Bind(uint32_t slot = 0);
 		void BindImage();
 		void Unbind();
+
+		inline const void* GetData() const { return data; }
 
 		inline unsigned int GetWidth() { return width; }
 		inline unsigned int GetHeight() { return height; }
@@ -26,6 +30,7 @@ namespace Zenit {
 		std::string path;
 		unsigned int width;
 		unsigned int height;
+		void* data;
 	};
 
 }

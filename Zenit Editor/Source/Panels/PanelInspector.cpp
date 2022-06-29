@@ -15,9 +15,14 @@ namespace Zenit {
 		if (ImGui::CollapsingHeader("Light"))
 		{
 			ImGui::Indent();
+			ImGui::Text("Direction");
+			ImGui::SameLine();
+			ImGui::DragFloat3("###Direction", glm::value_ptr(light.dir));
+			ImGui::Separator();
 
-			ImGui::DragFloat3("Direction", glm::value_ptr(light.dir));
+			ImGui::SetNextItemWidth(200);
 			ImGui::ColorPicker3("Ambient", glm::value_ptr(light.ambient));
+			ImGui::SetNextItemWidth(200);
 			ImGui::ColorPicker3("Diffuse", glm::value_ptr(light.diffuse));
 
 			ImGui::Unindent();
