@@ -39,6 +39,8 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
+		void ShowNodeCreationPopup();
+		void ShowNodeOptionsPopup();
 
 		// Nodes =============
 	private:

@@ -11,7 +11,7 @@ namespace Zenit {
 		Texture2D(const std::string& path);
 		~Texture2D();
 
-		void SetData(void* data);
+		void SetData(uint32_t* data);
 
 		void Bind(uint32_t slot = 0);
 		void BindImage();

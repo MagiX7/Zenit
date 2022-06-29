@@ -5,6 +5,7 @@
 
 #include "Helpers/Nodes/ColorNode.h"
 #include "Helpers/Nodes/ComputeShaderNode.h"
+#include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
 #include <stb_image/stb_image_write.h>
@@ -51,6 +52,7 @@ namespace Zenit {
 
 		config = ed::Config();
 		config.SettingsFile = "Settings/NodeEditor.json";
+		config.DragButtonIndex = 2;
 		context = ed::CreateEditor(&config);
 		ed::SetCurrentEditor(context);
 	}
@@ -147,80 +149,12 @@ namespace Zenit {
 
 		if (showCreationPopup)
 		{
-			ImGui::OpenPopup("CreationPopup");
-			if (ImGui::BeginPopup("CreationPopup"))
-			{
-				if (ImGui::BeginMenu("Basics"))
-				{
-					if (ImGui::MenuItem("Flat Color"))
-					{
-						CreateFlatColorNode("Flat Color", { 1,0,0 });
-						showCreationPopup = false;
-					}
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("Filters"))
-				{
-					ImGui::EndMenu();
-				}
-				if (ImGui::BeginMenu("Generators"))
-				{
-					if (ImGui::MenuItem("Perlin Noise"))
-					{
-						CreatePerlinNoiseNode("Perlin Noise");
-						showCreationPopup = false;
-					}
-					ImGui::EndMenu();
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::CloseCurrentPopup();
+			ShowNodeCreationPopup();
 		}
 
 		if (showNodePopup)
 		{
-			ImGui::OpenPopup("NodePopup");
-			if (ImGui::BeginPopup("NodePopup"))
-			{
-				if (ImGui::BeginMenu("Set as Output"))
-				{
-					if (rightClickedNodeId.Get() != -1)
-					{
-						Node* node = FindNode(rightClickedNodeId);
-
-						if (ImGui::MenuItem("Diffuse"))
-						{
-							diffuseOutput = node;
-							SetDiffuseData();
-							showNodePopup = false;
-						}
-						else if (ImGui::MenuItem("Normals"))
-						{
-							normalsOutput = node;
-							showNodePopup = false;
-						}
-						else if (ImGui::MenuItem("Metallic"))
-						{
-							metallicOutput = node;
-							showNodePopup = false;
-						}
-						else if (ImGui::MenuItem("Roughness"))
-						{
-							roughnessOutput = node;
-							showNodePopup = false;
-						}
-						else if (ImGui::MenuItem("Ambient Occlusion"))
-						{
-							aoOutput = node;
-							showNodePopup = false;
-						}
-					}
-
-					ImGui::EndMenu();
-				}
-				ImGui::EndPopup();
-			}
-			ImGui::CloseCurrentPopup();
+			ShowNodeOptionsPopup();
 		}
 
 
@@ -273,7 +207,7 @@ namespace Zenit {
 							static int linkId = 100;
 							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
 
-							if (endPin.node->type == NodeType::PERLIN_NOISE)
+							if (endPin.node->type == NodeType::TEXTURE)
 							{
 								const auto n = (ComputeShaderNode*)endPin.node;
 								n->BindCoreData();
@@ -337,10 +271,15 @@ namespace Zenit {
 					ImGui::SetNextItemWidth(150);
 					constexpr ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel;
 					ImGui::ColorPicker3("Color", glm::value_ptr(node->color), flags);
+					if (diffuseOutput == node)
+					{
+						uint32_t data = Math::GetRGBAHexadecimal(node->color);
+						diffuse->SetData(&data);
+					}
 					n = node;
 					break;
 				}
-				case NodeType::PERLIN_NOISE:
+				case NodeType::TEXTURE:
 				{
 					const auto node = (ComputeShaderNode*)n;
 					ImGui::Image((ImTextureID*)node->texture->GetId(), { 50,50 });
@@ -409,7 +348,7 @@ namespace Zenit {
 
 		switch (diffuseOutput->type)
 		{
-			case NodeType::PERLIN_NOISE:
+			case NodeType::TEXTURE:
 			{
 				const auto node = (ComputeShaderNode*)diffuseOutput;
 				diffuse = node->texture.get();
@@ -417,34 +356,13 @@ namespace Zenit {
 			}
 			case NodeType::FLAT_COLOR:
 			{
-				//auto node = (ColorNode*)n;
+				const auto node = (ColorNode*)diffuseOutput;
+				uint32_t data = Math::GetRGBAHexadecimal(node->color);
+				diffuse->SetData(&data);
+
 				break;
 			}
 		}
-
-		//for(const auto n : nodes)
-		//{
-		//	if (n->isOutput)
-		//	{
-		//		switch(n->type)
-		//		{
-		//			case NodeType::PERLIN_NOISE:
-		//			{
-		//				const auto node = (ComputeShaderNode*)n;
-		//				diffuse = node->texture.get();
-		//				break;
-		//			}
-		//			case NodeType::FLAT_COLOR:
-		//			{
-		//				//auto node = (ColorNode*)n;
-		//				break;
-		//			}
-		//		}
-		//
-		//		break;
-		//	}
-		//}
-
 	}
 
 	void EditorLayer::DrawSkybox()
@@ -525,7 +443,6 @@ namespace Zenit {
 
 		diffuse->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		//glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 		stbi_flip_vertically_on_write(1);
@@ -578,6 +495,84 @@ namespace Zenit {
 
 	}
 
+	void EditorLayer::ShowNodeCreationPopup()
+	{
+		ImGui::OpenPopup("CreationPopup");
+		if (ImGui::BeginPopup("CreationPopup"))
+		{
+			if (ImGui::BeginMenu("Basics"))
+			{
+				if (ImGui::MenuItem("Flat Color"))
+				{
+					CreateFlatColorNode("Flat Color", { 1,0,0 });
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Filters"))
+			{
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Generators"))
+			{
+				if (ImGui::MenuItem("Perlin Noise"))
+				{
+					CreatePerlinNoiseNode("Perlin Noise");
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::CloseCurrentPopup();
+	}
+
+	void EditorLayer::ShowNodeOptionsPopup()
+	{
+		ImGui::OpenPopup("NodePopup");
+		if (ImGui::BeginPopup("NodePopup"))
+		{
+			if (ImGui::BeginMenu("Set as Output"))
+			{
+				if (rightClickedNodeId.Get() != -1)
+				{
+					Node* node = FindNode(rightClickedNodeId);
+
+					if (ImGui::MenuItem("Diffuse"))
+					{
+						diffuseOutput = node;
+						SetDiffuseData();
+						showNodePopup = false;
+					}
+					else if (ImGui::MenuItem("Normals"))
+					{
+						normalsOutput = node;
+						showNodePopup = false;
+					}
+					else if (ImGui::MenuItem("Metallic"))
+					{
+						metallicOutput = node;
+						showNodePopup = false;
+					}
+					else if (ImGui::MenuItem("Roughness"))
+					{
+						roughnessOutput = node;
+						showNodePopup = false;
+					}
+					else if (ImGui::MenuItem("Ambient Occlusion"))
+					{
+						aoOutput = node;
+						showNodePopup = false;
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
+		ImGui::CloseCurrentPopup();
+	}
+
 	Node* EditorLayer::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
 		ColorNode* node = new ColorNode(creationId++, name, NodeType::FLAT_COLOR, color);
@@ -601,7 +596,7 @@ namespace Zenit {
 
 	Node* EditorLayer::CreatePerlinNoiseNode(const char* name)
 	{
-		ComputeShaderNode* node = new ComputeShaderNode(creationId++, name, NodeType::PERLIN_NOISE);
+		ComputeShaderNode* node = new ComputeShaderNode(creationId++, name, NodeType::TEXTURE);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 

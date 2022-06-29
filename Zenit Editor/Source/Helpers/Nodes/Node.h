@@ -31,7 +31,7 @@ namespace Zenit {
 	enum class NodeType
 	{
 		FLAT_COLOR,
-		PERLIN_NOISE,
+		TEXTURE,
 	};
 
 	struct Pin;

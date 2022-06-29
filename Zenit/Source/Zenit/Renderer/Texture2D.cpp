@@ -74,7 +74,7 @@ namespace Zenit {
 		glDeleteTextures(1, &rendererId);
 	}
 
-	void Texture2D::SetData(void* data)
+	void Texture2D::SetData(uint32_t* data)
 	{
 		if (rendererId > 0)
 			glDeleteTextures(1, &rendererId);
