@@ -4,6 +4,7 @@ layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 uniform vec3 inputColor;
+uniform float seed;
 
 float random(in vec2 st)
 {
@@ -14,8 +15,8 @@ float random(in vec2 st)
 // https://www.shadertoy.com/view/4dS3Wd
 float noise(in vec2 st)
 {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
+    vec2 i = floor(st) * seed;
+    vec2 f = fract(st) * seed;
 
     // Four corners in 2D of a tile
     float a = random(i);

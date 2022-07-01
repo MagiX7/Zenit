@@ -1,14 +1,17 @@
 #include "Zenit/Core/Resources/Model.h"
 
+#include "EditorLayer.h"
 #include "PanelInspector.h"
 
-#include "EditorLayer.h"
+#include "Helpers/Nodes/Node.h"
+#include "Helpers/Nodes/ColorNode.h"
+#include "Helpers/Nodes/PerlinNoiseNode.h"
 
 #include <ImGui/imgui.h>
 
 namespace Zenit {
 
-	void PanelInspector::OnImGuiRender(Model* model, DirectionalLight& light)
+	void PanelInspector::OnImGuiRender(Model* model, DirectionalLight& light, Node* currentNode)
 	{
 		ImGui::Begin("Inspector");
 
@@ -35,6 +38,37 @@ namespace Zenit {
 			model->ResetRotation();
 		}
 
+		ShowNodeSpecs(currentNode);
+
 		ImGui::End();
+	}
+
+	void PanelInspector::ShowNodeSpecs(Node* node)
+	{
+		if (!node)
+			return;
+
+		switch(node->type)
+		{
+			case NodeType::PERLIN_NOISE:
+			{
+				ImGui::Separator();
+				const auto n = (PerlinNoiseNode*)node;
+				ImGui::DragFloat("Noise Size", &n->seed);
+				ImGui::Image((void*)n->texture->GetId(), { 300,300 });
+				break;
+			}
+
+			case NodeType::COLOR:
+			{
+				const auto n = (ColorNode*)node;
+				ImGui::SetNextItemWidth(300);
+				ImGui::ColorPicker3("Color", glm::value_ptr(n->color));
+				break;
+			}
+
+			default: break;
+		}
+
 	}
 }

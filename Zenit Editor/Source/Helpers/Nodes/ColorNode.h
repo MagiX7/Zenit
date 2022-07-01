@@ -6,13 +6,16 @@
 
 namespace Zenit {
 
-	struct ColorNode : public Node
+	class ColorNode : public Node
 	{
-		ColorNode(int id, const char* name, NodeType type, const glm::vec3& color)
-			: Node(id, name, type), color(color)
-		{
-		}
+	public:
+		ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color);
 
+		virtual void Update(TimeStep) override;
+
+		virtual void OnImGuiRender() override;
+
+	public:
 		glm::vec3 color;
 	};
 }

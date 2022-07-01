@@ -28,10 +28,17 @@ namespace Zenit {
 		Input
 	};
 
-	enum class NodeType
+	enum class NodeOutputType
 	{
 		FLAT_COLOR,
 		TEXTURE,
+	};
+
+	enum class NodeType
+	{
+		COLOR,
+		PERLIN_NOISE,
+		VORONOI,
 	};
 
 	struct Pin;
@@ -69,7 +76,8 @@ namespace Zenit {
 		std::vector<Pin> outputs;
 
 		ImColor nodeColor;
-		NodeType type;
+		NodeOutputType outputType;
+		NodeType type; // To be defined in each node
 		ImVec2 pos;
 		ImVec2 size;
 
@@ -78,11 +86,13 @@ namespace Zenit {
 
 		bool isOutput; // Output written into the mesh
 
-		Node(int id, const char* name, NodeType type, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), nodeColor(color), type(type), size(5, 5), isOutput(false)
+		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255))
+			: id(id), name(name), nodeColor(color), outputType(outputType), size(5, 5), isOutput(false)
 		{
 		}
 
+		virtual void Update(TimeStep ts) = 0;
+		virtual void OnImGuiRender() = 0;
 	};
 
 }

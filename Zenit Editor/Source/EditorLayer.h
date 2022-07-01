@@ -97,7 +97,8 @@ namespace Zenit {
 		Node* metallicOutput = nullptr;
 		Node* roughnessOutput = nullptr;
 		Node* aoOutput = nullptr;
-		ed::NodeId rightClickedNodeId = -1;
+		ed::NodeId rightClickedNodeId = 0;
+		ed::NodeId selectedNodeId = 0;
 	};
 
 	template <class T>
