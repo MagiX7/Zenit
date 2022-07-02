@@ -153,6 +153,10 @@ namespace Zenit {
 				{
 					selectedNodeId = id;
 				}
+				else
+				{
+					selectedNodeId = 0;
+				}
 				showCreationPopup = false;
 				showNodePopup = false;
 			}
@@ -169,6 +173,20 @@ namespace Zenit {
 			ShowNodeOptionsPopup();
 		}
 
+		if (Input::GetInstance()->IsKeyPressed(KEY_DELETE))
+		{
+			if (selectedNodeId.Get() != 0)
+			{
+				ed::DeleteNode(selectedNodeId);
+				DeleteNode(selectedNodeId);
+				selectedNodeId = 0;
+			}
+			else if (const ed::LinkId id = ed::GetHoveredLink())
+			{
+				ed::DeleteLink(id);
+			}
+		}
+			
 
 		// NODES WORKSPACE =======================================================
 		ed::Begin("");
@@ -292,32 +310,6 @@ namespace Zenit {
 					}
 				}
 
-				//switch (n->outputType)
-				//{
-				//case NodeOutputType::FLAT_COLOR:
-				//{
-				//	const auto node = (ColorNode*)n;
-				//	ImGui::SetNextItemWidth(150);
-				//	constexpr ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel;
-				//	ImGui::ColorPicker3("Color", glm::value_ptr(node->color), flags);
-				//	if (diffuseOutput == node)
-				//	{
-				//		uint32_t data = Math::GetRGBAHexadecimal(node->color);
-				//		diffuse->SetData(&data);
-				//	}
-				//	n = node;
-				//	break;
-				//}
-				////case NodeOutputType::TEXTURE:
-				////{
-				////	const auto node = (ComputeShaderNode*)n;
-				////	ImGui::Image((ImTextureID*)node->texture->GetId(), { 50,50 });
-				////	break;
-				////}
-				//default:
-				//	break;
-				//}
-
 				ImGui::TableNextColumn();
 				for (auto& output : n->outputs)
 				{
@@ -370,6 +362,22 @@ namespace Zenit {
 		}
 
 		return nullptr;
+	}
+
+	void EditorLayer::DeleteNode(ed::NodeId id)
+	{
+		int i = 0;
+		for (auto node : nodes)
+		{
+			if (id == node->id)
+			{
+				delete node;
+				node = nullptr;
+				nodes.erase(nodes.begin() + i);
+				break;
+			}
+			i++;
+		}
 	}
 
 	void EditorLayer::SetDiffuseData()

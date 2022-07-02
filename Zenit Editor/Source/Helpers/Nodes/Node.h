@@ -93,6 +93,11 @@ namespace Zenit {
 
 		virtual void Update(TimeStep ts) = 0;
 		virtual void OnImGuiRender() = 0;
+
+		bool operator==(const Node& other) const
+		{
+			return id == other.id;
+		}
 	};
 
 }

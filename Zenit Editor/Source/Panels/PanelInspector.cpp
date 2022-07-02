@@ -54,7 +54,7 @@ namespace Zenit {
 			{
 				ImGui::Separator();
 				const auto n = (PerlinNoiseNode*)node;
-				ImGui::DragFloat("Noise Size", &n->seed);
+				ImGui::DragFloat("Seed", &n->seed);
 				ImGui::Image((void*)n->texture->GetId(), { 300,300 });
 				break;
 			}
