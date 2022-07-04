@@ -1,10 +1,7 @@
 #include "EditorLayer.h"
-#include "EditorLayer.h"
-#include "EditorLayer.h"
 #include "Zenit/Core/Log.h"
 
 #include "Helpers/Nodes/ColorNode.h"
-//#include "Helpers/Nodes/ComputeShaderNode.h"
 #include "Helpers/Nodes/PerlinNoiseNode.h"
 #include "Helpers/Math.h"
 
@@ -27,12 +24,12 @@ namespace Zenit {
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
 		std::vector<std::string> faces;
-		faces.push_back("Assets/Skyboxes/Sea/right.jpg");
-		faces.push_back("Assets/Skyboxes/Sea/left.jpg");
-		faces.push_back("Assets/Skyboxes/Sea/top.jpg");
-		faces.push_back("Assets/Skyboxes/Sea/bottom.jpg");
-		faces.push_back("Assets/Skyboxes/Sea/front.jpg");
-		faces.push_back("Assets/Skyboxes/Sea/back.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/right.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/left.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/top.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/bottom.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/front.jpg");
+		faces.emplace_back("Assets/Skyboxes/Sea/back.jpg");
 		skybox = std::make_unique<Skybox>(faces);
 
 		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
@@ -183,7 +180,7 @@ namespace Zenit {
 			}
 			else if (const ed::LinkId id = ed::GetHoveredLink())
 			{
-				ed::DeleteLink(id);
+				DeleteLink(id);
 			}
 		}
 			
@@ -364,6 +361,16 @@ namespace Zenit {
 		return nullptr;
 	}
 
+	LinkInfo* EditorLayer::FindLink(const ed::LinkId& id) const
+	{
+		for (auto link : links)
+		{
+			if (link.id == id)
+				return &link;
+		}
+		return nullptr;
+	}
+
 	void EditorLayer::DeleteNode(ed::NodeId id)
 	{
 		int i = 0;
@@ -378,6 +385,23 @@ namespace Zenit {
 			}
 			i++;
 		}
+	}
+
+	void EditorLayer::DeleteLink(const ed::LinkId& id) const
+	{
+		const LinkInfo link = *FindLink(id);
+		Pin output = *FindPin(link.outputId);
+
+		Node* other = output.node;
+		if (other->outputType == NodeOutputType::TEXTURE)
+		{
+			const auto node = (ComputeShaderNode*)other;
+			node->BindCoreData();
+			node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+			node->DispatchCompute(8, 4);
+		}
+
+		ed::DeleteLink(id);
 	}
 
 	void EditorLayer::SetDiffuseData()
@@ -619,17 +643,17 @@ namespace Zenit {
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
-		Pin pin = Pin(creationId++, "Red", PinType::Float, ed::PinKind::Output);
+		Pin pin = Pin(creationId++, "Output", PinType::Float, ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
-		Pin pin2 = Pin(creationId++, "Green", PinType::Float, ed::PinKind::Output);
-		pin2.node = node;
-		node->outputs.emplace_back(pin2);
-
-		Pin pin3 = Pin(creationId++, "Blue", PinType::Float, ed::PinKind::Output);
-		pin3.node = node;
-		node->outputs.emplace_back(pin3);
+		//Pin pin2 = Pin(creationId++, "Green", PinType::Float, ed::PinKind::Output);
+		//pin2.node = node;
+		//node->outputs.emplace_back(pin2);
+		//
+		//Pin pin3 = Pin(creationId++, "Blue", PinType::Float, ed::PinKind::Output);
+		//pin3.node = node;
+		//node->outputs.emplace_back(pin3);
 
 		return nodes.back();
 	}

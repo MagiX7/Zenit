@@ -55,7 +55,9 @@ namespace Zenit {
 		void DrawNodes();
 		Node* FindNode(ed::NodeId id) const ;
 		Pin* FindPin(ed::PinId id) const;
+		LinkInfo* FindLink(const ed::LinkId& id) const;
 		void DeleteNode(ed::NodeId id);
+		void DeleteLink(const ed::LinkId& id) const;
 		// Nodes =============
 
 		void SetDiffuseData();
