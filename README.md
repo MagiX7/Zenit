@@ -7,7 +7,7 @@
 Zenit is a material editor node-based in OpenGL and C++ for the final thesis at UPC-CITM.
 This tool is centered in the PBR metallic workflow, allowing to create each different textures that take part in this technique.
 
-custom FBX model loading is also supported.
+Zenit also supports custom FBX model loading.
 
 ## Files generation
 
