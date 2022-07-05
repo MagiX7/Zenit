@@ -1,5 +1,7 @@
 # Zenit
 
+![](https://github.com/MagiX7/Zenit/blob/main/Logo/Zenit%20Logo.png)
+
 ## Introduction
 
 Zenit is a material editor node-based in OpenGL and C++ for the final thesis at UPC-CITM.
