@@ -13,7 +13,7 @@ namespace Zenit {
 	}
 
 	// Layers to stay at the beginning of the vector
-	void LayerStack::PushLayer(Layer* layer)
+	void LayerStack::PushLayer(EngineLayer* layer)
 	{
 		layers.emplace(layers.begin() + layerIndex, layer);
 		layer->OnAttach();
@@ -21,15 +21,15 @@ namespace Zenit {
 	}
 
 	// Overlays to stay at the end of the vector
-	void LayerStack::PushOverlay(Layer* overlay)
+	void LayerStack::PushOverlay(EngineLayer* overlay)
 	{
 		layers.emplace_back(overlay);
 		overlay->OnAttach();
 	}
 
-	void LayerStack::PopLayer(Layer* layer)
+	void LayerStack::PopLayer(EngineLayer* layer)
 	{
-		std::vector<Layer*>::iterator it = std::find(layers.begin(), layers.end(), layer);
+		std::vector<EngineLayer*>::iterator it = std::find(layers.begin(), layers.end(), layer);
 		if (it != layers.end())
 		{
 			layers.erase(it);
@@ -39,9 +39,9 @@ namespace Zenit {
 		layer->OnDetach();
 	}
 
-	void LayerStack::PopOverlay(Layer* overlay)
+	void LayerStack::PopOverlay(EngineLayer* overlay)
 	{
-		std::vector<Layer*>::iterator it = std::find(layers.begin(), layers.end(), overlay);
+		std::vector<EngineLayer*>::iterator it = std::find(layers.begin(), layers.end(), overlay);
 		if (it != layers.end())
 			layers.erase(it);
 

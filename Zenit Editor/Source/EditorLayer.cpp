@@ -1,8 +1,8 @@
 #include "EditorLayer.h"
 #include "Zenit/Core/Log.h"
 
-#include "Helpers/Nodes/ColorNode.h"
-#include "Helpers/Nodes/PerlinNoiseNode.h"
+#include "Nodes/ColorNode.h"
+#include "Nodes/PerlinNoiseNode.h"
 #include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
@@ -32,7 +32,7 @@ namespace Zenit {
 		faces.emplace_back("Assets/Skyboxes/Sea/back.jpg");
 		skybox = std::make_unique<Skybox>(faces);
 
-		model = ModelImporter::ImportModel("Assets/Models/Cube/Cube.fbx");
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/Cube.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/PBR.shader");
 		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
@@ -120,6 +120,7 @@ namespace Zenit {
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 		panelInspector.OnImGuiRender(model, dirLight, FindNode(selectedNodeId));
+		panelLayerStack.OnImGuiRender(layers);
 
 		ImGui::Image((void*)diffuse->GetId(), { 100,100 });
 
@@ -390,7 +391,7 @@ namespace Zenit {
 	void EditorLayer::DeleteLink(const ed::LinkId& id) const
 	{
 		const LinkInfo link = *FindLink(id);
-		Pin output = *FindPin(link.outputId);
+		const Pin output = *FindPin(link.outputId);
 
 		Node* other = output.node;
 		if (other->outputType == NodeOutputType::TEXTURE)

@@ -3,9 +3,9 @@
 #include "EditorLayer.h"
 #include "PanelInspector.h"
 
-#include "Helpers/Nodes/Node.h"
-#include "Helpers/Nodes/ColorNode.h"
-#include "Helpers/Nodes/PerlinNoiseNode.h"
+#include "Nodes/Node.h"
+#include "Nodes/ColorNode.h"
+#include "Nodes/PerlinNoiseNode.h"
 
 #include <ImGui/imgui.h>
 

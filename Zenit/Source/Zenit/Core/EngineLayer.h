@@ -7,11 +7,11 @@
 
 namespace Zenit {
 
-	class Layer
+	class EngineLayer
 	{
 	public:
-		Layer(const std::string& name = "Default Layer", bool enabled = true);
-		virtual ~Layer();
+		EngineLayer(const std::string& name = "Default Layer", bool enabled = true);
+		virtual ~EngineLayer();
 
 		virtual void OnAttach() {};
 		virtual void OnDetach() {};

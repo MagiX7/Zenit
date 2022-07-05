@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Zenit/Core/Layer.h"
+#include "Zenit/Core/EngineLayer.h"
 
 #include "Zenit/Events/ApplicationEvent.h"
 #include "Zenit/Events/Event.h"
@@ -10,7 +10,7 @@
 
 namespace Zenit {
 
-	class ImGuiLayer : public Layer
+	class ImGuiLayer : public EngineLayer
 	{
 	public:
 		ImGuiLayer();

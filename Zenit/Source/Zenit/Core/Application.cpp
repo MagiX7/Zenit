@@ -68,22 +68,22 @@ namespace Zenit {
 		}
 	}
 
-	void Application::PushLayer(Layer* layer)
+	void Application::PushLayer(EngineLayer* layer)
 	{
 		layerStack.PushLayer(layer);
 	}
 
-	void Application::PopLayer(Layer* layer)
+	void Application::PopLayer(EngineLayer* layer)
 	{
 		layerStack.PopLayer(layer);
 	}
 
-	void Application::PushOverlay(Layer* overlay)
+	void Application::PushOverlay(EngineLayer* overlay)
 	{
 		layerStack.PushOverlay(overlay);
 	}
 
-	void Application::PopOverlay(Layer* overlay)
+	void Application::PopOverlay(EngineLayer* overlay)
 	{
 		layerStack.PopOverlay(overlay);
 	}

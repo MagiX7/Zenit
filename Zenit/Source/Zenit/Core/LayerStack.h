@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Layer.h"
+#include "EngineLayer.h"
 #include <vector>
 
 namespace Zenit {
@@ -11,17 +11,17 @@ namespace Zenit {
 		LayerStack();
 		virtual ~LayerStack();
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
+		void PushLayer(EngineLayer* layer);
+		void PushOverlay(EngineLayer* overlay);
 
-		void PopLayer(Layer* layer);
-		void PopOverlay(Layer* overlay);
+		void PopLayer(EngineLayer* layer);
+		void PopOverlay(EngineLayer* overlay);
 
-		std::vector<Layer*>::iterator begin() { return layers.begin(); }
-		std::vector<Layer*>::iterator end() { return layers.end(); }
+		std::vector<EngineLayer*>::iterator begin() { return layers.begin(); }
+		std::vector<EngineLayer*>::iterator end() { return layers.end(); }
 
 	private:
-		std::vector<Layer*> layers;
+		std::vector<EngineLayer*> layers;
 		unsigned int layerIndex = 0;
 
 	};

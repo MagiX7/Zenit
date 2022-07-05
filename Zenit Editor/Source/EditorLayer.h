@@ -4,13 +4,15 @@
 #include "Panels/PanelInspector.h"
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelSkybox.h"
+#include "Panels/PanelLayerStack.h"
 
 #include "Helpers/SkyboxProperties.h"
+#include "Nodes/Node.h"
 
 #include <imgui_node_editor.h>
-#include "Helpers/Nodes/Node.h"
 
 #include <memory>
+#include <stack>
 
 namespace ed = ax::NodeEditor;
 
@@ -23,7 +25,7 @@ namespace Zenit {
 		glm::vec3 diffuse = { 1,1,1 };
 	};
 
-	class EditorLayer : public Layer
+	class EditorLayer : public EngineLayer
 	{
 	public:
 		EditorLayer();
@@ -66,6 +68,7 @@ namespace Zenit {
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelSkybox panelSkybox;
+		PanelLayerStack panelLayerStack;
 
 		std::unique_ptr<FrameBuffer> fbo;
 
@@ -94,13 +97,18 @@ namespace Zenit {
 		bool showNodePopup = false;
 		int creationId = 1;
 
+		ed::NodeId rightClickedNodeId = 0;
+		ed::NodeId selectedNodeId = 0;
+
+		// Final textures
 		Node* diffuseOutput = nullptr;
 		Node* normalsOutput = nullptr;
 		Node* metallicOutput = nullptr;
 		Node* roughnessOutput = nullptr;
 		Node* aoOutput = nullptr;
-		ed::NodeId rightClickedNodeId = 0;
-		ed::NodeId selectedNodeId = 0;
+
+		std::stack<Layer*> layers;
+
 	};
 
 	template <class T>

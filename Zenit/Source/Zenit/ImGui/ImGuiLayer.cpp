@@ -9,7 +9,7 @@
 
 namespace Zenit {
 
-	ImGuiLayer::ImGuiLayer() : Layer("ImGui Layer")
+	ImGuiLayer::ImGuiLayer() : EngineLayer("ImGui Layer")
 	{
 	}
 

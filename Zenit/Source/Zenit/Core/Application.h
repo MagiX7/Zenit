@@ -22,10 +22,10 @@ namespace Zenit {
 		void Run();
 		void OnEvent(Event& e);
 
-		void PushLayer(Layer* layer);
-		void PopLayer(Layer* layer);
-		void PushOverlay(Layer* overlay);
-		void PopOverlay(Layer* overlay);
+		void PushLayer(EngineLayer* layer);
+		void PopLayer(EngineLayer* layer);
+		void PushOverlay(EngineLayer* overlay);
+		void PopOverlay(EngineLayer* overlay);
 
 		inline Window& GetWindow() { return *window; }
 
