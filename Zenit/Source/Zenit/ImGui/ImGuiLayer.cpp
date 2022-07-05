@@ -92,9 +92,9 @@ namespace Zenit {
 		colors[ImGuiCol_ScrollbarGrabActive] = { 0.6f,0.6f,0.6f,1 };
 		colors[ImGuiCol_ScrollbarGrabHovered] = { 0.5,0.5,0.5,1 };
 
-		colors[ImGuiCol_FrameBg] = { 0.1f,0.1f,0.1f,1 };
+		colors[ImGuiCol_FrameBg] = { 0.2f,0.2f,0.2f,1 };
 		colors[ImGuiCol_FrameBgActive] = { 0.3f,0.3f,0.3f,1 };
-		colors[ImGuiCol_FrameBgHovered] = { 0.4f,0.4f,0.4f,1 };
+		colors[ImGuiCol_FrameBgHovered] = { 0.35f,0.35f,0.35f,1 };
 
 		colors[ImGuiCol_Header] = { 0.2f,0.2f,0.2f,1 };
 		colors[ImGuiCol_HeaderActive] = { 0.33f,0.33f,0.33f,1 };

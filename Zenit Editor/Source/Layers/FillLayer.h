@@ -7,7 +7,7 @@ namespace Zenit {
 	class FillLayer : public Layer
 	{
 	public:
-		FillLayer();
+		FillLayer(int id);
 		virtual void OnImGuiRender() override;
 
 	};

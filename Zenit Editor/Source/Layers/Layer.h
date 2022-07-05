@@ -17,19 +17,20 @@ namespace Zenit {
 	class Layer
 	{
 	public:
-		Layer(LayerType layerType);
+		Layer(LayerType layerType, int id);
 
 		virtual void OnImGuiRender() = 0;
 
 		std::string& GetName() { return name; }
 		void SetName(const std::string& newName) { name = newName; }
 
-		std::shared_ptr<Texture2D> GetTexture() { return texture; }
+		const std::unique_ptr<Texture2D>& GetTexture() { return texture; }
 
 	private:
 		LayerType type;
 		std::string name;
-		std::shared_ptr<Texture2D> texture;
+		std::unique_ptr<Texture2D> texture;
+		int id;
 	};
 
 }

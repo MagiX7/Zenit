@@ -10,17 +10,24 @@ namespace Zenit {
 	{
 		ImGui::Begin("Layers");
 
-		if (ImGui::BeginMenu("+"))
+		static bool showCreationMenu = false;
+		static int layerId = 0;
+		if (ImGui::Button("+"))
+		{
+			showCreationMenu = true;
+		}
+
+		if (showCreationMenu)
 		{
 			if (ImGui::MenuItem("Fill Layer"))
 			{
-				layers.push(new FillLayer());
+				layers.push(new FillLayer(layerId++));
+				showCreationMenu = false;
 			}
 			else if (ImGui::MenuItem("Paint Layer"))
 			{
-				
+				showCreationMenu = false;
 			}
-			ImGui::EndMenu();
 		}
 
 		std::stack<Layer*> stack = layers;
@@ -28,9 +35,12 @@ namespace Zenit {
 		{
 			Layer* layer = stack.top();
 
-			//ImGui::InputText("Name", &layer->GetName());
-			ImGui::NewLine();
-			ImGui::Image((void*)layer->GetTexture()->GetId(), { 20,20 });
+			ImGui::Spacing();
+			ImGui::SetNextItemWidth(150.0f);
+			ImGui::InputText("Name", &layer->GetName());
+			ImGui::Image((void*)layer->GetTexture()->GetId(), { 64,64 });
+			ImGui::Spacing();
+			ImGui::Separator();
 
 			stack.pop();
 		}

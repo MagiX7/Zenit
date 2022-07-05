@@ -4,7 +4,7 @@
 
 namespace Zenit {
 
-	FillLayer::FillLayer() : Layer(LayerType::FILL)
+	FillLayer::FillLayer(int id) : Layer(LayerType::FILL, id)
 	{
 	}
 
