@@ -9,6 +9,7 @@ namespace Zenit {
 	public:
 
 		PerlinNoiseNode(int id, const char* name, NodeOutputType outputType);
+		virtual ~PerlinNoiseNode();
 
 		void Update(TimeStep ts) override;
 		void OnImGuiRender() override;

@@ -48,6 +48,7 @@ namespace Zenit {
 	private:
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		Node* CreatePerlinNoiseNode(const char* name);
+		Node* CreateVoronoiNode(const char* name);
 
 		template<class T>
 		T* GetNode(ed::NodeId id);

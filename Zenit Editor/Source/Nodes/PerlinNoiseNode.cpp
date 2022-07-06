@@ -8,6 +8,10 @@ namespace Zenit {
 		type = NodeType::PERLIN_NOISE;
 	}
 
+	PerlinNoiseNode::~PerlinNoiseNode()
+	{
+	}
+
 	void PerlinNoiseNode::Update(TimeStep ts)
 	{
 		BindCoreData();
@@ -17,6 +21,6 @@ namespace Zenit {
 
 	void PerlinNoiseNode::OnImGuiRender()
 	{
-		ImGui::Image((ImTextureID*)texture->GetId(), { 50,50 });
+		ImGui::Image((ImTextureID*)texture->GetId(), { 50,50 }, { 0,1 }, { 1,0 });
 	}
 }

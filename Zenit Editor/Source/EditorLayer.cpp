@@ -3,6 +3,7 @@
 
 #include "Nodes/ColorNode.h"
 #include "Nodes/PerlinNoiseNode.h"
+#include "Nodes/VoronoiNode.h"
 #include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
@@ -585,6 +586,11 @@ namespace Zenit {
 					CreatePerlinNoiseNode("Perlin Noise");
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Voronoi"))
+				{
+					CreateVoronoiNode("Voronoi");
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			ImGui::EndPopup();
@@ -674,7 +680,7 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
-		node->texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		node->texture = std::make_unique<Texture2D>(nullptr, 512, 512);
 
 		node->BindCoreData();
 		node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
@@ -682,5 +688,25 @@ namespace Zenit {
 		node->DispatchCompute(8, 4);
 
 		return nodes.back();
+	}
+
+	Node* EditorLayer::CreateVoronoiNode(const char* name)
+	{
+		VoronoiNode* node = new VoronoiNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/voronoi.shader");
+		node->texture = std::make_unique<Texture2D>(nullptr, 512, 512);
+
+		node->BindCoreData();
+		//node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+		node->DispatchCompute(8, 4);
+
+		return node;
 	}
 }

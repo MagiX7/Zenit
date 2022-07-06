@@ -6,6 +6,7 @@
 #include "Nodes/Node.h"
 #include "Nodes/ColorNode.h"
 #include "Nodes/PerlinNoiseNode.h"
+#include "Nodes/VoronoiNode.h"
 
 #include <ImGui/imgui.h>
 
@@ -55,7 +56,15 @@ namespace Zenit {
 				ImGui::Separator();
 				const auto n = (PerlinNoiseNode*)node;
 				ImGui::DragFloat("Seed", &n->seed);
-				ImGui::Image((void*)n->texture->GetId(), { 300,300 });
+				ImGui::Image((void*)n->texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
+				break;
+			}
+
+			case NodeType::VORONOI:
+			{
+				ImGui::Separator();
+				const auto n = (VoronoiNode*)node;
+				ImGui::Image((void*)n->texture->GetId(), { 512,512 }, { 0, 1 }, { 1,0 });
 				break;
 			}
 

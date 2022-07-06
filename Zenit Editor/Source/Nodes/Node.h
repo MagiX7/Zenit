@@ -50,7 +50,7 @@ namespace Zenit {
 		ed::PinId  outputId;
 	};
 
-	struct Node;
+	class Node;
 
 	struct Pin
 	{
@@ -67,9 +67,15 @@ namespace Zenit {
 		{
 		}
 	};
-	
-	struct Node
+
+	// TODO: Create cpp and clear all the lists
+	class Node
 	{
+	public:
+		Node();
+		virtual ~Node() {}
+
+	public:
 		ed::NodeId id;
 		std::string name;
 		std::vector<Pin> inputs;
