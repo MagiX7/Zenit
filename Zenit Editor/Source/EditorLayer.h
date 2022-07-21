@@ -5,6 +5,7 @@
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelSkybox.h"
 #include "Panels/PanelLayerStack.h"
+#include "Panels/PanelNodes.h"
 
 #include "Helpers/SkyboxProperties.h"
 #include "Nodes/Node.h"
@@ -13,8 +14,6 @@
 
 #include <memory>
 #include <stack>
-
-namespace ed = ax::NodeEditor;
 
 namespace Zenit {
 
@@ -41,35 +40,18 @@ namespace Zenit {
 		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();
-		void ShowNodeCreationPopup();
-		void ShowNodeOptionsPopup();
 
 		// Nodes =============
 	private:
-		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
-		Node* CreatePerlinNoiseNode(const char* name);
-		Node* CreateVoronoiNode(const char* name);
-
-		template<class T>
-		T* GetNode(ed::NodeId id);
-
-		void HandleNodes();
-		void HandleLinks();
-		void DrawNodes();
-		Node* FindNode(ed::NodeId id) const ;
-		Pin* FindPin(ed::PinId id) const;
-		LinkInfo* FindLink(const ed::LinkId& id) const;
-		void DeleteNode(ed::NodeId id);
-		void DeleteLink(const ed::LinkId& id) const;
-		// Nodes =============
-
-		void SetDiffuseData();
+		
+		bool SetDiffuseData();
 
 	private:
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelSkybox panelSkybox;
 		PanelLayerStack panelLayerStack;
+		PanelNodes* panelNodes;
 
 		std::unique_ptr<FrameBuffer> fbo;
 
@@ -89,18 +71,6 @@ namespace Zenit {
 		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
 
-		// Nodes-related
-		ed::EditorContext* context;
-		ed::Config config;
-		std::vector<Node*> nodes;
-		std::vector<LinkInfo> links;
-		bool showCreationPopup = false;
-		bool showNodePopup = false;
-		int creationId = 1;
-
-		ed::NodeId rightClickedNodeId = 0;
-		ed::NodeId selectedNodeId = 0;
-
 		// Final textures
 		Node* diffuseOutput = nullptr;
 		Node* normalsOutput = nullptr;
@@ -110,22 +80,8 @@ namespace Zenit {
 
 		std::stack<Layer*> layers;
 
+
+		friend class PanelNodes;
 	};
 
-	template <class T>
-	T* EditorLayer::GetNode(ed::NodeId id)
-	{
-		T* node = nullptr;
-
-		for (std::vector<Node*>::iterator it = nodes.begin(); it < nodes.end(); ++it)
-		{
-			if ((*it)->id == id)
-			{
-				node = dynamic_cast<T*>(*it);
-				return node;
-			}
-		}
-
-		return nullptr;
-	}
 }
