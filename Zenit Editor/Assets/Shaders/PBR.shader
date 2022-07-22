@@ -70,8 +70,8 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir)
 
 	vec3 ambient = light.ambient * vec3(texture(diffuseTexture, vTexCoords));
 	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseTexture, vTexCoords));
-	//vec3 specular = light.specular * spec * vec3(texture(diffuseTexture, TexCoords));
-	return ambient + diffuse;
+	vec3 specular = light.specular * spec * vec3(texture(diffuseTexture, vTexCoords));
+	return ambient + diffuse + specular;
 }
 
 void main()
@@ -85,5 +85,5 @@ void main()
 	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
 		fragColor = texture2D(diffuseTexture, vTexCoords) * vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
 	else
-	fragColor = texture2D(diffuseTexture, vTexCoords) * vec4(color, 1);
+		fragColor = texture2D(diffuseTexture, vTexCoords) * vec4(color, 1);
 }

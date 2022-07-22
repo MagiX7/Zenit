@@ -35,7 +35,7 @@ namespace Zenit {
 
 		model = ModelImporter::ImportModel("Assets/Models/Primitives/Cube.fbx");
 
-		pbrShader = std::make_unique<Shader>("Assets/Shaders/PBR.shader");
+		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
 
 
@@ -105,10 +105,8 @@ namespace Zenit {
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
-		//panelInspector.OnImGuiRender(model, dirLight, FindNode(selectedNodeId));
-		panelNodes->OnImGuiRender(&panelInspector);
 		panelLayerStack.OnImGuiRender(layers);
-
+		panelNodes->OnImGuiRender(&panelInspector);
 
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
@@ -118,26 +116,87 @@ namespace Zenit {
 	{
 	}
 
-	bool EditorLayer::SetDiffuseData()
+	bool EditorLayer::SetDiffuseData(Node* node)
 	{
-		if (!diffuseOutput)
-			return false;
-
-		switch (diffuseOutput->outputType)
+		switch (node->outputType)
 		{
 			case NodeOutputType::TEXTURE:
 			{
-				const auto node = (ComputeShaderNode*)diffuseOutput;
-				diffuse = node->texture.get();
-				//rightClickedNodeId = 0;
+				const auto n = (ComputeShaderNode*)node;
+				diffuse = n->texture.get();
 				return true;
 			}
 			case NodeOutputType::FLAT_COLOR:
 			{
-				const auto node = (ColorNode*)diffuseOutput;
-				uint32_t data = Math::GetRGBAHexadecimal(node->color);
+				const auto n = (ColorNode*)node;
+				uint32_t data = Math::GetRGBAHexadecimal(n->color);
 				diffuse->SetData(&data);
-				//rightClickedNodeId = 0;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool EditorLayer::SetNormalsData(Node* node)
+	{
+		switch (node->outputType)
+		{
+			case NodeOutputType::TEXTURE:
+			{
+				const auto n = (ComputeShaderNode*)node;
+				normal = n->texture.get();
+				return true;
+			}
+			case NodeOutputType::FLAT_COLOR:
+			{
+				const auto n = (ColorNode*)node;
+				uint32_t data = Math::GetRGBAHexadecimal(n->color);
+				normal->SetData(&data);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool EditorLayer::SetMetallicData(Node* node)
+	{
+		switch (node->outputType)
+		{
+			case NodeOutputType::TEXTURE:
+			{
+				const auto n = (ComputeShaderNode*)node;
+				metallic = n->texture.get();
+				return true;
+			}
+			case NodeOutputType::FLAT_COLOR:
+			{
+				const auto n = (ColorNode*)node;
+				uint32_t data = Math::GetRGBAHexadecimal(n->color);
+				metallic->SetData(&data);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool EditorLayer::SetRoughnessData(Node* node)
+	{
+		switch (node->outputType)
+		{
+			case NodeOutputType::TEXTURE:
+			{
+				const auto n = (ComputeShaderNode*)node;
+				roughness = n->texture.get();
+				return true;
+			}
+			case NodeOutputType::FLAT_COLOR:
+			{
+				const auto n = (ColorNode*)node;
+				uint32_t data = Math::GetRGBAHexadecimal(n->color);
+				roughness->SetData(&data);
 				return true;
 			}
 		}

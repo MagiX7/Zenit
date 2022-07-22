@@ -30,6 +30,7 @@ namespace Zenit {
 
 	enum class NodeOutputType
 	{
+		NONE,
 		FLAT_COLOR,
 		TEXTURE,
 	};
@@ -73,7 +74,21 @@ namespace Zenit {
 	{
 	public:
 		Node();
-		virtual ~Node() {}
+		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255))
+			: id(id), name(name), nodeColor(color), outputType(outputType), size(5, 5), isOutput(false)
+		{
+		}
+
+		virtual ~Node() {}		
+
+		virtual void Update(TimeStep ts) {};
+		virtual void OnImGuiRender() {};
+
+		bool operator==(const Node& other) const
+		{
+			return id == other.id;
+		}
+
 
 	public:
 		ed::NodeId id;
@@ -81,7 +96,7 @@ namespace Zenit {
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
 
-		ImColor nodeColor;
+		ImColor nodeColor = { 255,255,255,255 };
 		NodeOutputType outputType;
 		NodeType type; // To be defined in each node
 		ImVec2 pos;
@@ -92,18 +107,6 @@ namespace Zenit {
 
 		bool isOutput; // Output written into the mesh
 
-		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), nodeColor(color), outputType(outputType), size(5, 5), isOutput(false)
-		{
-		}
-
-		virtual void Update(TimeStep ts) = 0;
-		virtual void OnImGuiRender() = 0;
-
-		bool operator==(const Node& other) const
-		{
-			return id == other.id;
-		}
 	};
 
 }

@@ -28,6 +28,8 @@ namespace Zenit {
 			ImGui::ColorPicker3("Ambient", glm::value_ptr(light.ambient));
 			ImGui::SetNextItemWidth(200);
 			ImGui::ColorPicker3("Diffuse", glm::value_ptr(light.diffuse));
+			ImGui::SetNextItemWidth(200);
+			ImGui::ColorPicker3("Specular", glm::value_ptr(light.specular));
 
 			ImGui::Unindent();
 		}

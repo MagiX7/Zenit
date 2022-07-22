@@ -17,6 +17,28 @@ namespace Zenit {
 		config.NavigateButtonIndex = 2;
 		context = ed::CreateEditor(&config);
 		ed::SetCurrentEditor(context);
+
+
+		Node* node = new Node(creationId++, "Output", NodeOutputType::NONE);
+
+		Pin albedo = Pin(creationId++, "Albedo", PinType::Object, ed::PinKind::Input);
+		albedo.node = node;
+		node->inputs.emplace_back(albedo);
+
+		Pin normals = Pin(creationId++, "Normals", PinType::Object, ed::PinKind::Input);
+		normals.node = node;
+		node->inputs.emplace_back(normals);
+
+		Pin metallic = Pin(creationId++, "Metallic", PinType::Object, ed::PinKind::Input);
+		metallic.node = node;
+		node->inputs.emplace_back(metallic);
+
+		Pin roughness = Pin(creationId++, "Roughness", PinType::Object, ed::PinKind::Input);
+		roughness.node = node;
+		node->inputs.emplace_back(roughness);
+
+		nodes.emplace_back(node);
+
 	}
 
 	PanelNodes::~PanelNodes()
@@ -109,6 +131,7 @@ namespace Zenit {
 		for (auto n : nodes)
 		{
 			ed::BeginNode(n->id);
+			ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
 			ImGui::Text(n->name.c_str());
 			ImGui::NewLine();
 
@@ -148,6 +171,7 @@ namespace Zenit {
 				}
 
 				ImGui::EndTable();
+				ed::PopStyleColor();
 			}
 			ed::EndNode();
 		}
@@ -212,6 +236,44 @@ namespace Zenit {
 								}
 								n->DispatchCompute(8, 4);
 							}
+
+							if (endPin.node->id == ed::NodeId(1))
+							{
+								switch (endPin.id.Get())
+								{
+									// Albedo
+									case 2:
+									{
+										editorLayer->SetDiffuseData(startPin.node);
+										break;
+									}
+									// Normals
+									case 3:
+									{
+
+										break;
+									}
+									// Metallic
+									case 4:
+									{
+
+										break;
+									}
+									// Roughness
+									case 5:
+									{
+
+										break;
+									}
+									
+									default:
+										break;
+
+								}
+
+								editorLayer->SetDiffuseData(startPin.node);
+							}
+
 						}
 					}
 				}
@@ -290,9 +352,9 @@ namespace Zenit {
 
 					if (ImGui::MenuItem("Diffuse"))
 					{
-						editorLayer->diffuseOutput = node;
+						//editorLayer->diffuseOutput = node;
 						
-						if (editorLayer->SetDiffuseData())
+						if (editorLayer->SetDiffuseData(node))
 							rightClickedNodeId = 0;
 
 						showNodePopup = false;
@@ -407,7 +469,7 @@ namespace Zenit {
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
-		Pin pin = Pin(creationId++, "Output", PinType::Float, ed::PinKind::Output);
+		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
@@ -428,7 +490,7 @@ namespace Zenit {
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "Input", PinType::Float, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 

@@ -22,6 +22,7 @@ namespace Zenit {
 		glm::vec3 dir = { 0,0,0 };
 		glm::vec3 ambient = { 1,1,1 };
 		glm::vec3 diffuse = { 1,1,1 };
+		glm::vec3 specular = { 1,1,1 };
 	};
 
 	class EditorLayer : public EngineLayer
@@ -36,15 +37,15 @@ namespace Zenit {
 		virtual void OnImGuiRender() override;
 		virtual void OnEvent(Event& e) override;
 
+		bool SetDiffuseData(Node* node);
+		bool SetNormalsData(Node* node);
+		bool SetMetallicData(Node* node);
+		bool SetRoughnessData(Node* node);
+
 	private:
 		void DrawSkybox();
 		void SetModelShaderData();
-		void ExportTextures();
-
-		// Nodes =============
-	private:
-		
-		bool SetDiffuseData();
+		void ExportTextures();		
 
 	private:
 		PanelInspector panelInspector;
