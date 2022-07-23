@@ -4,6 +4,7 @@
 #include "Nodes/ColorNode.h"
 #include "Nodes/PerlinNoiseNode.h"
 #include "Nodes/VoronoiNode.h"
+#include "Nodes/Constants/Vec1Node.h"
 #include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
@@ -118,6 +119,9 @@ namespace Zenit {
 
 	bool EditorLayer::SetDiffuseData(Node* node)
 	{
+		if (!node)
+			return false;
+
 		switch (node->outputType)
 		{
 			case NodeOutputType::TEXTURE:
@@ -140,6 +144,9 @@ namespace Zenit {
 
 	bool EditorLayer::SetNormalsData(Node* node)
 	{
+		if (!node)
+			return false;
+
 		switch (node->outputType)
 		{
 			case NodeOutputType::TEXTURE:
@@ -162,6 +169,9 @@ namespace Zenit {
 
 	bool EditorLayer::SetMetallicData(Node* node)
 	{
+		if (!node)
+			return false;
+
 		switch (node->outputType)
 		{
 			case NodeOutputType::TEXTURE:
@@ -184,6 +194,9 @@ namespace Zenit {
 
 	bool EditorLayer::SetRoughnessData(Node* node)
 	{
+		if (!node)
+			return false;
+
 		switch (node->outputType)
 		{
 			case NodeOutputType::TEXTURE:
@@ -198,6 +211,13 @@ namespace Zenit {
 				uint32_t data = Math::GetRGBAHexadecimal(n->color);
 				roughness->SetData(&data);
 				return true;
+			}
+			case NodeOutputType::VEC1:
+			{
+				const auto n = (Vec1Node*)node;
+				roughnessValue = n->value;
+				return true;
+				break;
 			}
 		}
 
@@ -240,6 +260,7 @@ namespace Zenit {
 		pbrShader->SetUniformVec3f("dirLight.direction", dirLight.dir);
 		pbrShader->SetUniformVec3f("dirLight.ambient", dirLight.ambient);
 		pbrShader->SetUniformVec3f("dirLight.diffuse", dirLight.diffuse);
+		pbrShader->SetUniformVec3f("dirLight.specular", dirLight.specular);
 
 		diffuse->Bind();
 		pbrShader->SetUniform1i("diffuseTexture", 0);
@@ -247,14 +268,17 @@ namespace Zenit {
 		normal->Bind(1);
 		pbrShader->SetUniform1i("normalsTexture", 1);
 
-		metallic->Bind(2);
-		pbrShader->SetUniform1i("metallicTexture", 2);
-
-		roughness->Bind(3);
-		pbrShader->SetUniform1i("roughnessTexture", 3);
+		//metallic->Bind(2);
+		//pbrShader->SetUniform1i("metallicTexture", 2);
+		//
+		//roughness->Bind(3);
+		//pbrShader->SetUniform1i("roughnessTexture", 3);
 
 		ambientOcclusion->Bind(4);
 		pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
+
+		pbrShader->SetUniform1f("metallic", metallicValue);
+		pbrShader->SetUniform1f("roughness", roughnessValue);
 
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);

@@ -12,7 +12,6 @@ namespace Zenit {
 		texture->BindImage();
 		computeShader->Bind();
 		computeShader->SetUniform1i("imgOutput", 0);
-
 	}
 
 	void ComputeShaderNode::DispatchCompute(int xPixels, int yPixels) const

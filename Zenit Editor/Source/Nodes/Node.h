@@ -33,6 +33,9 @@ namespace Zenit {
 		NONE,
 		FLAT_COLOR,
 		TEXTURE,
+		VEC1,
+		VEC2,
+		VEC3,
 	};
 
 	enum class NodeType

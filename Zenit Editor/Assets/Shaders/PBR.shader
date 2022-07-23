@@ -27,10 +27,13 @@ void main()
 
 layout(location = 0) uniform sampler2D diffuseTexture;
 layout(location = 1) uniform sampler2D normalsTexture;
-layout(location = 2) uniform sampler2D metallicTexture;
-layout(location = 3) uniform sampler2D roughnessTexture;
+//layout(location = 2) uniform sampler2D metallicTexture;
+//layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
 layout(location = 5) uniform samplerCube skybox;
+
+uniform float metallic;
+uniform float roughness;
 
 uniform vec3 camPos;
 uniform float skyboxIntensity;
@@ -66,11 +69,13 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir)
 	float diff = max(dot(normal, lightDir), 0);
 
 	vec3 reflectDir = reflect(-lightDir, normal);
-	float spec = max(dot(viewDir, reflectDir), 0.0);
+	float spec = pow(max(dot(viewDir, reflectDir), 0), roughness);
+
 
 	vec3 ambient = light.ambient * vec3(texture(diffuseTexture, vTexCoords));
 	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseTexture, vTexCoords));
-	vec3 specular = light.specular * spec * vec3(texture(diffuseTexture, vTexCoords));
+	vec3 specular = light.specular * spec /** vec3(texture(diffuseTexture, vTexCoords))*/;
+	//vec3 specular = light.specular * spec * roughness;
 	return ambient + diffuse + specular;
 }
 

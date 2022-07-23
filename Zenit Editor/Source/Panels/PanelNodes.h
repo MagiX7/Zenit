@@ -39,6 +39,7 @@ namespace Zenit {
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		Node* CreatePerlinNoiseNode(const char* name);
 		Node* CreateVoronoiNode(const char* name);
+		Node* CreateVector1Node(const char* name);
 
 	private:
 		EditorLayer* editorLayer;
@@ -55,6 +56,13 @@ namespace Zenit {
 
 		bool showCreationPopup = false;
 		bool showNodePopup = false;
+
+		Node* diffuseNode = nullptr;
+		Node* normalsNode = nullptr;
+		Node* metallicNode = nullptr;
+		Node* roughnessNode = nullptr;
+
+
 	};
 
 }

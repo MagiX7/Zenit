@@ -5,6 +5,7 @@
 #include "Nodes/ComputeShaderNode.h"
 #include "Nodes/PerlinNoiseNode.h"
 #include "Nodes/VoronoiNode.h"
+#include "Nodes/Constants/Vec1Node.h"
 
 #include "EditorLayer.h"
 
@@ -29,11 +30,11 @@ namespace Zenit {
 		normals.node = node;
 		node->inputs.emplace_back(normals);
 
-		Pin metallic = Pin(creationId++, "Metallic", PinType::Object, ed::PinKind::Input);
+		Pin metallic = Pin(creationId++, "Metallic", PinType::Float, ed::PinKind::Input);
 		metallic.node = node;
 		node->inputs.emplace_back(metallic);
 
-		Pin roughness = Pin(creationId++, "Roughness", PinType::Object, ed::PinKind::Input);
+		Pin roughness = Pin(creationId++, "Roughness", PinType::Float, ed::PinKind::Input);
 		roughness.node = node;
 		node->inputs.emplace_back(roughness);
 
@@ -60,6 +61,11 @@ namespace Zenit {
 		{
 			node->Update(ts);
 		}
+
+		editorLayer->SetDiffuseData(diffuseNode);
+		editorLayer->SetNormalsData(normalsNode);
+		editorLayer->SetMetallicData(metallicNode);
+		editorLayer->SetRoughnessData(roughnessNode);
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
@@ -209,18 +215,15 @@ namespace Zenit {
 						{
 							ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 						}
-
 						else if (endPin.kind == startPin.kind)
 						{
 							ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 						}
-
 						else if (endPin.type != startPin.type)
 						{
 							ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
 						}
-
-						else if (ed::AcceptNewItem())
+						else if (ed::AcceptNewItem(ImColor(128, 255,128)))
 						{
 							static int linkId = 100;
 							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
@@ -237,6 +240,7 @@ namespace Zenit {
 								n->DispatchCompute(8, 4);
 							}
 
+							// The output node has id == 1
 							if (endPin.node->id == ed::NodeId(1))
 							{
 								switch (endPin.id.Get())
@@ -245,6 +249,7 @@ namespace Zenit {
 									case 2:
 									{
 										editorLayer->SetDiffuseData(startPin.node);
+										diffuseNode = startPin.node;
 										break;
 									}
 									// Normals
@@ -262,7 +267,8 @@ namespace Zenit {
 									// Roughness
 									case 5:
 									{
-
+										editorLayer->SetRoughnessData(startPin.node);
+										roughnessNode = startPin.node;
 										break;
 									}
 									
@@ -270,10 +276,7 @@ namespace Zenit {
 										break;
 
 								}
-
-								editorLayer->SetDiffuseData(startPin.node);
 							}
-
 						}
 					}
 				}
@@ -281,6 +284,7 @@ namespace Zenit {
 		}
 		ed::EndCreate();
 
+		// TODO: Handle node behaviour when link gets deleted
 		if (ed::BeginDelete())
 		{
 			ed::LinkId deletedLinkId;
@@ -312,6 +316,15 @@ namespace Zenit {
 				if (ImGui::MenuItem("Flat Color"))
 				{
 					CreateFlatColorNode("Flat Color", { 1,0,0 });
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Constants"))
+			{
+				if (ImGui::MenuItem("Vector1"))
+				{
+					CreateVector1Node("Vector 1");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -352,8 +365,6 @@ namespace Zenit {
 
 					if (ImGui::MenuItem("Diffuse"))
 					{
-						//editorLayer->diffuseOutput = node;
-						
 						if (editorLayer->SetDiffuseData(node))
 							rightClickedNodeId = 0;
 
@@ -525,6 +536,19 @@ namespace Zenit {
 		node->BindCoreData();
 		//node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
 		node->DispatchCompute(8, 4);
+
+		return node;
+	}
+
+	Node* PanelNodes::CreateVector1Node(const char* name)
+	{
+		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1	);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin output = Pin(creationId++, "Output", PinType::Float, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
 
 		return node;
 	}
