@@ -104,6 +104,29 @@ namespace Zenit {
 		ImGui::EndMainMenuBar();
 
 
+		ImGui::Begin("Lightning Settings");
+		{
+			ImGui::Text("Direction");
+			ImGui::SameLine();
+			ImGui::DragFloat3("##Direction", glm::value_ptr(dirLight.dir));
+			
+			ImGui::Text("Intensity");
+			ImGui::SameLine();
+			ImGui::DragFloat("##Intensity", &dirLight.intensity, 0.05f, 0.0f);
+			
+			ImGui::Separator();
+
+			ImGui::SetNextItemWidth(200);
+			ImGui::ColorPicker3("Ambient", glm::value_ptr(dirLight.ambient));
+			ImGui::SetNextItemWidth(200);
+			ImGui::ColorPicker3("Diffuse", glm::value_ptr(dirLight.diffuse));
+			ImGui::SetNextItemWidth(200);
+			ImGui::ColorPicker3("Specular", glm::value_ptr(dirLight.specular));
+
+		}
+		ImGui::End();
+
+
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 		panelLayerStack.OnImGuiRender(layers);
@@ -261,6 +284,7 @@ namespace Zenit {
 		pbrShader->SetUniformVec3f("dirLight.ambient", dirLight.ambient);
 		pbrShader->SetUniformVec3f("dirLight.diffuse", dirLight.diffuse);
 		pbrShader->SetUniformVec3f("dirLight.specular", dirLight.specular);
+		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
 		diffuse->Bind();
 		pbrShader->SetUniform1i("diffuseTexture", 0);

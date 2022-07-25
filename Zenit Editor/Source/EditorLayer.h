@@ -23,6 +23,7 @@ namespace Zenit {
 		glm::vec3 ambient = { 1,1,1 };
 		glm::vec3 diffuse = { 1,1,1 };
 		glm::vec3 specular = { 1,1,1 };
+		float intensity = 1.0f;
 	};
 
 	class EditorLayer : public EngineLayer

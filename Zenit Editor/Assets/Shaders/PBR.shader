@@ -53,6 +53,7 @@ struct Light
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	float intensity;
 };
 uniform Light dirLight;
 
@@ -76,7 +77,7 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir)
 	vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseTexture, vTexCoords));
 	vec3 specular = light.specular * spec /** vec3(texture(diffuseTexture, vTexCoords))*/;
 	//vec3 specular = light.specular * spec * roughness;
-	return ambient + diffuse + specular;
+	return (ambient + diffuse + specular) * light.intensity;
 }
 
 void main()
