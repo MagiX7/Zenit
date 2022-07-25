@@ -198,6 +198,13 @@ namespace Zenit {
 			ed::PinId inputPinId, outputPinId;
 			if (ed::QueryNewLink(&inputPinId, &outputPinId))
 			{
+				if (ed::PinHadAnyLinks(outputPinId))
+				{
+					ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
+					ed::EndCreate();
+					return;
+				}
+
 				if (inputPinId && outputPinId)
 				{
 					Pin startPin = *FindPin(inputPinId);
@@ -223,6 +230,7 @@ namespace Zenit {
 						{
 							ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
 						}
+						
 						else if (ed::AcceptNewItem(ImColor(128, 255,128)))
 						{
 							static int linkId = 100;
@@ -335,9 +343,9 @@ namespace Zenit {
 			}
 			if (ImGui::BeginMenu("Generators"))
 			{
-				if (ImGui::MenuItem("Perlin Noise"))
+				if (ImGui::MenuItem("Noise"))
 				{
-					CreatePerlinNoiseNode("Perlin Noise");
+					CreateNoiseNode("Noise");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))
@@ -495,7 +503,7 @@ namespace Zenit {
 		return nodes.back();
 	}
 
-	Node* PanelNodes::CreatePerlinNoiseNode(const char* name)
+	Node* PanelNodes::CreateNoiseNode(const char* name)
 	{
 		PerlinNoiseNode* node = new PerlinNoiseNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
@@ -509,7 +517,7 @@ namespace Zenit {
 		output.node = node;
 		node->outputs.emplace_back(output);
 
-		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
+		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/noise.shader");
 		node->texture = std::make_unique<Texture2D>(nullptr, 512, 512);
 
 		node->BindCoreData();
