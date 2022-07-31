@@ -11,7 +11,7 @@ namespace Zenit {
 		~Vec1Node();
 
 		virtual void Update(TimeStep ts) override;
-		virtual void OnImGuiRender() override;
+		virtual void OnImGuiNodeRender() override;
 
 	public:
 		float value;

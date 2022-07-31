@@ -19,8 +19,15 @@ namespace Zenit {
 		DispatchCompute(8, 4);
 	}
 
-	void PerlinNoiseNode::OnImGuiRender()
+	void PerlinNoiseNode::OnImGuiNodeRender()
 	{
 		ImGui::Image((ImTextureID*)texture->GetId(), { 50,50 }, { 0,1 }, { 1,0 });
+	}
+
+	void PerlinNoiseNode::OnImGuiInspectorRender()
+	{
+		ImGui::Separator();
+		ImGui::DragFloat("Seed", &seed);
+		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
 	}
 }

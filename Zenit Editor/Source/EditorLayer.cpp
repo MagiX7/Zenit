@@ -46,6 +46,8 @@ namespace Zenit {
 		metallic = new Texture2D(&data, 1, 1);
 		roughness = new Texture2D(&data, 1, 1);
 		ambientOcclusion = new Texture2D(&data, 1, 1);
+		
+		white = new Texture2D("Settings/white.png");
 
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
@@ -55,6 +57,13 @@ namespace Zenit {
 
 	void EditorLayer::OnDetach()
 	{
+		delete diffuse;
+		delete normal;
+		delete metallic;
+		delete roughness;
+		delete ambientOcclusion;
+		delete white;
+
 		delete panelNodes;
 	}
 
@@ -143,7 +152,11 @@ namespace Zenit {
 	bool EditorLayer::SetDiffuseData(Node* node)
 	{
 		if (!node)
+		{
+			if (diffuse != white)
+				diffuse = white;
 			return false;
+		}
 
 		switch (node->outputType)
 		{

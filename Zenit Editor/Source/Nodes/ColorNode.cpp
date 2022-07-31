@@ -11,10 +11,16 @@ namespace Zenit {
 	{
 	}
 
-	void ColorNode::OnImGuiRender()
+	void ColorNode::OnImGuiNodeRender()
 	{
 		ImGui::SetNextItemWidth(150);
 		constexpr ImGuiColorEditFlags flags = ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel;
 		ImGui::ColorPicker3("Color", glm::value_ptr(color), flags);
+	}
+
+	void ColorNode::OnImGuiInspectorRender()
+	{
+		ImGui::SetNextItemWidth(300);
+		ImGui::ColorPicker3("Color", glm::value_ptr(color));
 	}
 }

@@ -15,7 +15,7 @@ namespace Zenit {
 	{
 	}
 
-	void Vec1Node::OnImGuiRender()
+	void Vec1Node::OnImGuiNodeRender()
 	{
 		ImGui::SetNextItemWidth(50);
 		ImGui::DragFloat("##Value", &value, 0.01f, 0.0f);

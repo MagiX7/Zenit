@@ -21,7 +21,9 @@ namespace Zenit {
 			model->ResetRotation();
 		}
 
-		ShowNodeSpecs(currentNode);
+		if (currentNode)
+			currentNode->OnImGuiInspectorRender();
+		//ShowNodeSpecs(currentNode);
 
 		ImGui::End();
 	}

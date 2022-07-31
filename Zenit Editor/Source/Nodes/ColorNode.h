@@ -12,7 +12,8 @@ namespace Zenit {
 		ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color);
 
 		virtual void Update(TimeStep ts) override;
-		virtual void OnImGuiRender() override;
+		virtual void OnImGuiNodeRender() override;
+		virtual void OnImGuiInspectorRender() override;
 
 	public:
 		glm::vec3 color;

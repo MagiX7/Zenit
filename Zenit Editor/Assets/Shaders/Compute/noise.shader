@@ -22,7 +22,8 @@ float N21(vec2 p)
 // https://www.shadertoy.com/view/4dS3Wd
 float noise(in vec2 st)
 {
-    vec2 i = floor(st) * seed;
+    float s = seed == 0.0f ? 0.1 : seed;
+    vec2 i = floor(st) * s;
     float a = N21(i);
     return a;
 }

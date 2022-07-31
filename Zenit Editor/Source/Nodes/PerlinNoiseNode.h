@@ -11,8 +11,9 @@ namespace Zenit {
 		PerlinNoiseNode(int id, const char* name, NodeOutputType outputType);
 		virtual ~PerlinNoiseNode();
 
-		void Update(TimeStep ts) override;
-		void OnImGuiRender() override;
+		virtual void Update(TimeStep ts) override;
+		virtual void OnImGuiNodeRender() override;
+		virtual void OnImGuiInspectorRender() override;
 
 	public:
 		float seed;

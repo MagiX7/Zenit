@@ -9,6 +9,12 @@
 
 #include "EditorLayer.h"
 
+#define OUTPUT_NODE_ID 1
+#define OUTPUT_ALBEDO_PIN_ID 2
+#define OUTPUT_NORMALS_PIN_ID 3
+#define OUTPUT_METALLIC_PIN_ID 4
+#define OUTPUT_ROUGHNESS_PIN_ID 5
+
 namespace Zenit {
 
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
@@ -20,26 +26,27 @@ namespace Zenit {
 		ed::SetCurrentEditor(context);
 
 
-		Node* node = new Node(creationId++, "Output", NodeOutputType::NONE);
+		Node* node = new Node(OUTPUT_NODE_ID, "Output", NodeOutputType::NONE);
 
-		Pin albedo = Pin(creationId++, "Albedo", PinType::Object, ed::PinKind::Input);
+		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", PinType::Object, ed::PinKind::Input);
 		albedo.node = node;
 		node->inputs.emplace_back(albedo);
 
-		Pin normals = Pin(creationId++, "Normals", PinType::Object, ed::PinKind::Input);
+		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", PinType::Object, ed::PinKind::Input);
 		normals.node = node;
 		node->inputs.emplace_back(normals);
 
-		Pin metallic = Pin(creationId++, "Metallic", PinType::Float, ed::PinKind::Input);
+		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Float, ed::PinKind::Input);
 		metallic.node = node;
 		node->inputs.emplace_back(metallic);
 
-		Pin roughness = Pin(creationId++, "Roughness", PinType::Float, ed::PinKind::Input);
+		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Float, ed::PinKind::Input);
 		roughness.node = node;
 		node->inputs.emplace_back(roughness);
 
 		nodes.emplace_back(node);
-
+		
+		creationId += 5;
 	}
 
 	PanelNodes::~PanelNodes()
@@ -155,17 +162,7 @@ namespace Zenit {
 
 				ImGui::TableNextColumn();
 
-				n->OnImGuiRender();
-
-				//if (n->outputType == NodeOutputType::FLAT_COLOR)
-				//{
-				//	if (diffuseOutput == n)
-				//	{
-				//		const auto node = (ColorNode*)n;
-				//		uint32_t data = Math::GetRGBAHexadecimal(node->color);
-				//		diffuse->SetData(&data);
-				//	}
-				//}
+				n->OnImGuiNodeRender();
 
 				ImGui::TableNextColumn();
 				for (auto& output : n->outputs)
@@ -248,43 +245,8 @@ namespace Zenit {
 								n->DispatchCompute(8, 4);
 							}
 
-							// The output node has id == 1
-							if (endPin.node->id == ed::NodeId(1))
-							{
-								switch (endPin.id.Get())
-								{
-									// Albedo
-									case 2:
-									{
-										editorLayer->SetDiffuseData(startPin.node);
-										diffuseNode = startPin.node;
-										break;
-									}
-									// Normals
-									case 3:
-									{
-
-										break;
-									}
-									// Metallic
-									case 4:
-									{
-
-										break;
-									}
-									// Roughness
-									case 5:
-									{
-										editorLayer->SetRoughnessData(startPin.node);
-										roughnessNode = startPin.node;
-										break;
-									}
-									
-									default:
-										break;
-
-								}
-							}
+							UpdateOutputNodeData(startPin, endPin, false);
+							
 						}
 					}
 				}
@@ -292,7 +254,6 @@ namespace Zenit {
 		}
 		ed::EndCreate();
 
-		// TODO: Handle node behaviour when link gets deleted
 		if (ed::BeginDelete())
 		{
 			ed::LinkId deletedLinkId;
@@ -304,7 +265,26 @@ namespace Zenit {
 					{
 						if (links[i].id == deletedLinkId)
 						{
+							LinkInfo link = links[i];
+							Pin inputPin = *FindPin(link.inputId);
+							Pin outputPin = *FindPin(link.outputId);
+							Node* inputNode = inputPin.node;
+							Node* outputNode = outputPin.node;
+
+							UpdateOutputNodeData(inputPin, outputPin, true);
+
+							// TODO: Handle links deletion between normal/current nodes
+
+							for (int j = 0; j < outputPin.links.size(); ++j)
+							{
+								if (outputPin.links[j].id == deletedLinkId)
+								{
+									outputPin.links.erase(outputPin.links.begin() + j);
+								}
+							}
+
 							links.erase(links.begin() + i);
+
 							break;
 						}
 					}
@@ -492,14 +472,6 @@ namespace Zenit {
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
-		//Pin pin2 = Pin(creationId++, "Green", PinType::Float, ed::PinKind::Output);
-		//pin2.node = node;
-		//node->outputs.emplace_back(pin2);
-		//
-		//Pin pin3 = Pin(creationId++, "Blue", PinType::Float, ed::PinKind::Output);
-		//pin3.node = node;
-		//node->outputs.emplace_back(pin3);
-
 		return nodes.back();
 	}
 
@@ -559,6 +531,54 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		return node;
+	}
+
+	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
+	{
+		if (endPin.node->id == ed::NodeId(OUTPUT_NODE_ID))
+		{
+			switch (endPin.id.Get())
+			{
+				// Albedo
+				case OUTPUT_ALBEDO_PIN_ID:
+				{
+					if (!resetData)
+					{
+						editorLayer->SetDiffuseData(startPin.node);
+						diffuseNode = startPin.node;
+					}
+					else
+					{
+						editorLayer->SetDiffuseData(nullptr);
+						diffuseNode = nullptr;
+					}
+					break;
+				}
+				// Normals
+				case OUTPUT_NORMALS_PIN_ID:
+				{
+
+					break;
+				}
+				// Metallic
+				case OUTPUT_METALLIC_PIN_ID:
+				{
+
+					break;
+				}
+				// Roughness
+				case OUTPUT_ROUGHNESS_PIN_ID:
+				{
+					editorLayer->SetRoughnessData(startPin.node);
+					roughnessNode = startPin.node;
+					break;
+				}
+
+				default:
+					break;
+
+			}
+		}
 	}
 
 }

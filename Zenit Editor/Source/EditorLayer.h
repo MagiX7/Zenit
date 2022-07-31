@@ -67,6 +67,7 @@ namespace Zenit {
 		Texture2D* diffuse;
 		Texture2D* normal;
 		Texture2D* metallic;
+		Texture2D* white;
 		float metallicValue = 1.0f;
 		Texture2D* roughness;
 		float roughnessValue = 1.0f;

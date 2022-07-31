@@ -85,7 +85,8 @@ namespace Zenit {
 		virtual ~Node() {}		
 
 		virtual void Update(TimeStep ts) {};
-		virtual void OnImGuiRender() {};
+		virtual void OnImGuiNodeRender() {};
+		virtual void OnImGuiInspectorRender() {};
 
 		bool operator==(const Node& other) const
 		{

@@ -41,6 +41,8 @@ namespace Zenit {
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
 
+		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
+
 	private:
 		EditorLayer* editorLayer;
 
