@@ -26,9 +26,9 @@ namespace Zenit {
 
 	private:
 		void DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links);
+		void HandleNodes(std::vector<Node*>& nodes);
 		void HandleLinks(std::vector<LinkInfo>& links);
 		void ShowNodeCreationPopup();
-		void ShowNodeOptionsPopup();
 
 		Node* FindNode(ed::NodeId id) const;
 		Pin* FindPin(ed::PinId id) const;
@@ -55,7 +55,6 @@ namespace Zenit {
 		ed::Config config;
 
 		ed::NodeId rightClickedNodeId = 0;
-		ed::NodeId selectedNodeId = 0;
 
 		bool showCreationPopup = false;
 		bool showNodePopup = false;

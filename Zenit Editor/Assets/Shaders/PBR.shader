@@ -84,8 +84,11 @@ void main()
 {
 	float ratio = 1.00 / 1.52;
 	vec3 R = GetSkyboxReflection(ratio);
+	
+	vec3 normal = normalize(vNormals);
+	vec3 viewDir = normalize(camPos - vPosition);
 
-	vec3 color = CalculateDirLight(dirLight, vNormals, (camPos - vPosition));
+	vec3 color = CalculateDirLight(dirLight, normal, viewDir);
 
 
 	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))

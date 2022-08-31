@@ -135,7 +135,6 @@ namespace Zenit {
 		}
 		ImGui::End();
 
-
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 		panelLayerStack.OnImGuiRender(layers);
@@ -293,7 +292,7 @@ namespace Zenit {
 		pbrShader->SetUniformMatrix4f("model", model->GetTransform());
 		pbrShader->SetUniformVec3f("camPos", camera.GetPosition());
 
-		pbrShader->SetUniformVec3f("dirLight.direction", dirLight.dir);
+		pbrShader->SetUniformVec3f("dirLight.direction", glm::normalize(dirLight.dir));
 		pbrShader->SetUniformVec3f("dirLight.ambient", dirLight.ambient);
 		pbrShader->SetUniformVec3f("dirLight.diffuse", dirLight.diffuse);
 		pbrShader->SetUniformVec3f("dirLight.specular", dirLight.specular);

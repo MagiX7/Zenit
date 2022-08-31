@@ -77,7 +77,9 @@ namespace Zenit {
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
 	{
-		panelInspector->OnImGuiRender(editorLayer->model, editorLayer->dirLight, FindNode(selectedNodeId));
+		ed::NodeId selectedId;
+		ed::GetSelectedNodes(&selectedId, 1);
+		panelInspector->OnImGuiRender(editorLayer->model, editorLayer->dirLight, FindNode(selectedId));
 
 		ImGui::Begin("Node editor");
 
@@ -86,52 +88,23 @@ namespace Zenit {
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
 			{
 				rightClickedNodeId = ed::GetHoveredNode();
-				rightClickedNodeId.Get() != 0 ? showNodePopup = true : showCreationPopup = true;
+				rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
 			}
 			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 			{
-				if (ed::NodeId id = ed::GetHoveredNode())
-				{
-					selectedNodeId = id;
-				}
-				else
-				{
-					selectedNodeId = 0;
-				}
 				showCreationPopup = false;
 				showNodePopup = false;
 			}
 		}
-
 
 		if (showCreationPopup)
 		{
 			ShowNodeCreationPopup();
 		}
 
-		if (showNodePopup)
-		{
-			ShowNodeOptionsPopup();
-		}
-
-		if (Input::GetInstance()->IsKeyPressed(KEY_DELETE))
-		{
-			if (selectedNodeId.Get() != 0)
-			{
-				ed::DeleteNode(selectedNodeId);
-				DeleteNode(selectedNodeId);
-				selectedNodeId = 0;
-			}
-			else if (const ed::LinkId id = ed::GetHoveredLink())
-			{
-				ed::DeleteLink(id);
-			}
-		}
-
-
 		// NODES WORKSPACE =======================================================
 		ed::Begin("");
-		DrawNodes(nodes, links);
+			DrawNodes(nodes, links);
 		ed::End();
 		// NODES WORKSPACE =======================================================
 
@@ -141,7 +114,9 @@ namespace Zenit {
 
 	void PanelNodes::DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links)
 	{
-		for (auto n : nodes)
+		HandleNodes(nodes);
+
+		for (const auto& n : nodes)
 		{
 			ed::BeginNode(n->id);
 			ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
@@ -153,7 +128,7 @@ namespace Zenit {
 			{
 				ImGui::TableNextColumn();
 
-				for (auto& input : n->inputs)
+				for (const auto& input : n->inputs)
 				{
 					ed::BeginPin(input.id, input.kind);
 					ImGui::Text(input.name.c_str());
@@ -165,7 +140,7 @@ namespace Zenit {
 				n->OnImGuiNodeRender();
 
 				ImGui::TableNextColumn();
-				for (auto& output : n->outputs)
+				for (const auto& output : n->outputs)
 				{
 					ed::BeginPin(output.id, output.kind);
 					ImGui::Text(output.name.c_str());
@@ -186,6 +161,33 @@ namespace Zenit {
 		for (const auto& link : links)
 			ed::Link(link.id, link.inputId, link.outputId);
 
+	}
+
+	void PanelNodes::HandleNodes(std::vector<Node*>& nodes)
+	{
+		if (ed::BeginDelete())
+		{
+			ed::NodeId id;
+			if (ed::QueryDeletedNode(&id))
+			{
+				if (ed::AcceptDeletedItem())
+				{
+					Node* node = FindNode(id);
+					for (auto& output : node->outputs)
+					{
+						for (auto& link : output.links)
+						{
+							Pin inputPin = *FindPin(link.inputId);
+							Pin outputPin = *FindPin(link.outputId);
+							UpdateOutputNodeData(inputPin, outputPin, true);
+						}
+					}
+					DeleteNode(id);
+					ed::DeleteNode(id);
+				}
+			}
+		}
+		ed::EndDelete();
 	}
 
 	void PanelNodes::HandleLinks(std::vector<LinkInfo>& links)
@@ -246,7 +248,6 @@ namespace Zenit {
 							}
 
 							UpdateOutputNodeData(startPin, endPin, false);
-							
 						}
 					}
 				}
@@ -344,54 +345,6 @@ namespace Zenit {
 		}
 		ImGui::CloseCurrentPopup();
 	}
-
-	void PanelNodes::ShowNodeOptionsPopup()
-	{
-		ImGui::OpenPopup("NodePopup");
-		if (ImGui::BeginPopup("NodePopup"))
-		{
-			if (ImGui::BeginMenu("Set as Output"))
-			{
-				if (rightClickedNodeId.Get() != 0)
-				{
-					Node* node = FindNode(rightClickedNodeId);
-
-					if (ImGui::MenuItem("Diffuse"))
-					{
-						if (editorLayer->SetDiffuseData(node))
-							rightClickedNodeId = 0;
-
-						showNodePopup = false;
-					}
-					else if (ImGui::MenuItem("Normals"))
-					{
-						editorLayer->normalsOutput = node;
-						showNodePopup = false;
-					}
-					else if (ImGui::MenuItem("Metallic"))
-					{
-						editorLayer->metallicOutput = node;
-						showNodePopup = false;
-					}
-					else if (ImGui::MenuItem("Roughness"))
-					{
-						editorLayer->roughnessOutput = node;
-						showNodePopup = false;
-					}
-					else if (ImGui::MenuItem("Ambient Occlusion"))
-					{
-						editorLayer->aoOutput = node;
-						showNodePopup = false;
-					}
-				}
-
-				ImGui::EndMenu();
-			}
-			ImGui::EndPopup();
-		}
-		ImGui::CloseCurrentPopup();
-	}
-
 
 	Node* PanelNodes::FindNode(ed::NodeId id) const
 	{
@@ -525,50 +478,49 @@ namespace Zenit {
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
 	{
-		if (endPin.node->id == ed::NodeId(OUTPUT_NODE_ID))
+		if (endPin.node->id != ed::NodeId(OUTPUT_NODE_ID))
+			return;
+		
+		switch (endPin.id.Get())
 		{
-			switch (endPin.id.Get())
+			// Albedo
+			case OUTPUT_ALBEDO_PIN_ID:
 			{
-				// Albedo
-				case OUTPUT_ALBEDO_PIN_ID:
+				if (!resetData)
 				{
-					if (!resetData)
-					{
-						editorLayer->SetDiffuseData(startPin.node);
-						diffuseNode = startPin.node;
-					}
-					else
-					{
-						editorLayer->SetDiffuseData(nullptr);
-						diffuseNode = nullptr;
-					}
-					break;
+					editorLayer->SetDiffuseData(startPin.node);
+					diffuseNode = startPin.node;
 				}
-				// Normals
-				case OUTPUT_NORMALS_PIN_ID:
+				else
 				{
-
-					break;
+					editorLayer->SetDiffuseData(nullptr);
+					diffuseNode = nullptr;
 				}
-				// Metallic
-				case OUTPUT_METALLIC_PIN_ID:
-				{
-
-					break;
-				}
-				// Roughness
-				case OUTPUT_ROUGHNESS_PIN_ID:
-				{
-					editorLayer->SetRoughnessData(startPin.node);
-					roughnessNode = startPin.node;
-					break;
-				}
-
-				default:
-					break;
-
+				break;
 			}
+			// Normals
+			case OUTPUT_NORMALS_PIN_ID:
+			{
+
+				break;
+			}
+			// Metallic
+			case OUTPUT_METALLIC_PIN_ID:
+			{
+
+				break;
+			}
+			// Roughness
+			case OUTPUT_ROUGHNESS_PIN_ID:
+			{
+				editorLayer->SetRoughnessData(startPin.node);
+				roughnessNode = startPin.node;
+				break;
+			}
+
+			default:
+				break;
+
 		}
 	}
-
 }
