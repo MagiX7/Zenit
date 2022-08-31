@@ -23,4 +23,5 @@ namespace Zenit {
 	void ComputeShaderNode::Update(TimeStep ts)
 	{
 	}
+
 }

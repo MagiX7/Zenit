@@ -2,7 +2,7 @@
 #include "Zenit/Core/Log.h"
 
 #include "Nodes/ColorNode.h"
-#include "Nodes/PerlinNoiseNode.h"
+#include "Nodes/NoiseNode.h"
 #include "Nodes/VoronoiNode.h"
 #include "Nodes/Constants/Vec1Node.h"
 #include "Helpers/Math.h"

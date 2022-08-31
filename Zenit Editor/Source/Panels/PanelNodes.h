@@ -12,6 +12,7 @@ namespace Zenit {
 
 	class EditorLayer;
 	class PanelInspector;
+	enum class NoiseType;
 
 	class PanelNodes
 	{
@@ -37,7 +38,7 @@ namespace Zenit {
 		void DeleteLink(const ed::LinkId& id) const;
 
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
-		Node* CreateNoiseNode(const char* name);
+		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
 

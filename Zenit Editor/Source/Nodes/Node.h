@@ -40,8 +40,10 @@ namespace Zenit {
 
 	enum class NodeType
 	{
-		COLOR,
+		COLOR = 0,
+		NOISE,
 		PERLIN_NOISE,
+		DERIVATIVE_NOISE,
 		VORONOI,
 	};
 

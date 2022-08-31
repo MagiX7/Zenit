@@ -3,7 +3,7 @@
 
 #include "Nodes/ColorNode.h"
 #include "Nodes/ComputeShaderNode.h"
-#include "Nodes/PerlinNoiseNode.h"
+#include "Nodes/NoiseNode.h"
 #include "Nodes/VoronoiNode.h"
 #include "Nodes/Constants/Vec1Node.h"
 
@@ -325,7 +325,12 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Noise"))
 				{
-					CreateNoiseNode("Noise");
+					CreateNoiseNode("Noise", NoiseType::NORMAL);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Perlin Noise"))
+				{
+					CreateNoiseNode("Noise", NoiseType::PERLIN);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))
@@ -475,9 +480,9 @@ namespace Zenit {
 		return nodes.back();
 	}
 
-	Node* PanelNodes::CreateNoiseNode(const char* name)
+	Node* PanelNodes::CreateNoiseNode(const char* name, NoiseType noiseType)
 	{
-		PerlinNoiseNode* node = new PerlinNoiseNode(creationId++, name, NodeOutputType::TEXTURE);
+		NoiseNode* node = new NoiseNode(creationId++, name, NodeOutputType::TEXTURE, noiseType);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
@@ -487,15 +492,7 @@ namespace Zenit {
 
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
-		node->outputs.emplace_back(output);
-
-		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/noise.shader");
-		node->texture = std::make_unique<Texture2D>(nullptr, 512, 512);
-
-		node->BindCoreData();
-		node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-		node->computeShader->SetUniform1f("size", node->seed);
-		node->DispatchCompute(8, 4);
+		node->outputs.emplace_back(output);		
 
 		return nodes.back();
 	}
@@ -509,13 +506,6 @@ namespace Zenit {
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
-
-		node->computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/voronoi.shader");
-		node->texture = std::make_unique<Texture2D>(nullptr, 512, 512);
-
-		node->BindCoreData();
-		//node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-		node->DispatchCompute(8, 4);
 
 		return node;
 	}

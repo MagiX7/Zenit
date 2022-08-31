@@ -1,14 +1,15 @@
 #version 430 core
 
-layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 uniform float brightness;
+uniform float seed;
 
 vec2 Noise(vec2 p)
 {
 	vec3 a = fract(p.xyx * vec3(123.34, 234.45, 345.56));
-	a += dot(a, a + 34.45f);
+	a += dot(a, a);
 	return fract(vec2(a.x * a.y, a.y * a.z));
 }
 
@@ -21,19 +22,26 @@ void main()
 
 	vec4 color = vec4(0, 0, 0, 1);
 
-	float m = 0;
-	float minDist = 50000;
+	uv *= 7.0;
+	vec2 gv = fract(uv) - 0.5; // Grid
+	vec2 id = floor(uv); // Id of each quad of the grid
 
-	for (int i = 0; i < 50; ++i)
+	float minDist = 5000;
+	vec2 cell = vec2(-1);
+	for (int y = -1; y <= 1; ++y)
 	{
-		vec2 n = Noise(vec2(i));
-		vec2 p = n;
-		float d = length(uv - p);
-		m += smoothstep(0.01, 0.009, d);
-		
-		if (d < minDist)
+		for (int x = -1; x <= 1; ++x)
 		{
-			minDist = d;
+			vec2 offset = vec2(x, y);
+			vec2 n = Noise(id + offset) * seed;
+			vec2 p = offset + sin(n) * 0.5;
+			float d = length(gv - p);
+
+			if (d < minDist)
+			{
+				minDist = d;
+				cell = id + offset;
+			}
 		}
 	}
 

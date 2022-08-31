@@ -22,18 +22,16 @@ float N21(vec2 p)
 // https://www.shadertoy.com/view/4dS3Wd
 float noise(in vec2 st)
 {
-    float s = seed == 0.0f ? 0.1 : seed;
-    vec2 i = floor(st) * s;
-    float a = N21(i);
-    return a;
+    vec2 i = floor(st) * seed;
+    return N21(i);
 }
 
 void main()
 {
     ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-    vec2 pos = vec2(pixelCoords * 5.0);
+    vec2 uv = vec2(pixelCoords * 5.0);
 
-    vec4 color = vec4(vec3(noise(pos)), 1) * vec4(inputColor, 1);
+    vec4 color = vec4(vec3(noise(uv)), 1) * vec4(inputColor, 1);
 
     imageStore(imgOutput, pixelCoords, color);
 }
