@@ -112,4 +112,9 @@ namespace Zenit {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	void Texture2D::UnbindImage()
+	{
+		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+	}
+
 }

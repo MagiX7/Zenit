@@ -41,7 +41,9 @@ namespace Zenit {
 		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
+		Node* CreateNormalMapNode(const char* name);
 
+		void OnLinkCreation(Pin& startPin, Pin& endPin);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
 	private:

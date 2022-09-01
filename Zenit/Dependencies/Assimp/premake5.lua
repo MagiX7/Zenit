@@ -1,4 +1,4 @@
-project "assimp"
+project "Assimp"
 	kind "StaticLib"
 	warnings "Off"
 	language "C"

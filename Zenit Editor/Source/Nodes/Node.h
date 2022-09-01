@@ -45,6 +45,7 @@ namespace Zenit {
 		PERLIN_NOISE,
 		DERIVATIVE_NOISE,
 		VORONOI,
+		NORMAL_MAP,
 	};
 
 	struct Pin;

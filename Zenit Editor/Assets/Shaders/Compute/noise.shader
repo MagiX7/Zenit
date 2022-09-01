@@ -1,4 +1,5 @@
-#version 430 core
+#version 460 core
+#extension GL_NV_compute_shader_derivatives : enable
 
 layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
@@ -32,6 +33,8 @@ void main()
     vec2 uv = vec2(pixelCoords * 5.0);
 
     vec4 color = vec4(vec3(noise(uv)), 1) * vec4(inputColor, 1);
+
+    float x = dFdx(0.56f);
 
     imageStore(imgOutput, pixelCoords, color);
 }

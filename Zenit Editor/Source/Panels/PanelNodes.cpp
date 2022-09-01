@@ -5,6 +5,7 @@
 #include "Nodes/ComputeShaderNode.h"
 #include "Nodes/NoiseNode.h"
 #include "Nodes/VoronoiNode.h"
+#include "Nodes/NormalMapNode.h"
 #include "Nodes/Constants/Vec1Node.h"
 
 #include "EditorLayer.h"
@@ -238,18 +239,7 @@ namespace Zenit {
 							static int linkId = 100;
 							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
 							
-							if (endPin.node->outputType == NodeOutputType::TEXTURE)
-							{
-								const auto n = (ComputeShaderNode*)endPin.node;
-								n->BindCoreData();
-								if (startPin.node->outputType == NodeOutputType::FLAT_COLOR)
-								{
-									const auto inNode = (ColorNode*)startPin.node;
-									n->computeShader->SetUniformVec3f("inputColor", inNode->color);
-								}
-								n->DispatchCompute(8, 4);
-							}
-
+							OnLinkCreation(startPin, endPin);
 							UpdateOutputNodeData(startPin, endPin, false);
 						}
 					}
@@ -323,6 +313,11 @@ namespace Zenit {
 			}
 			if (ImGui::BeginMenu("Filters"))
 			{
+				if (ImGui::MenuItem("Normal Map"))
+				{
+					CreateNormalMapNode("Normal Map");
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Generators"))
@@ -448,7 +443,7 @@ namespace Zenit {
 
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
-		node->outputs.emplace_back(output);		
+		node->outputs.emplace_back(output);
 
 		return nodes.back();
 	}
@@ -479,6 +474,58 @@ namespace Zenit {
 		return node;
 	}
 
+	Node* PanelNodes::CreateNormalMapNode(const char* name)
+	{
+		NormalMapNode* node = new NormalMapNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
+	void PanelNodes::OnLinkCreation(Pin& startPin, Pin& endPin)
+	{
+		if (endPin.node->outputType == NodeOutputType::TEXTURE)
+		{
+
+			if (startPin.node->outputType == NodeOutputType::FLAT_COLOR)
+			{
+				const auto n = (ComputeShaderNode*)endPin.node;
+				const auto inNode = (ColorNode*)startPin.node;
+				n->BindCoreData();
+				n->computeShader->SetUniformVec3f("inputColor", inNode->color);
+				n->DispatchCompute(8, 4);
+			}
+			else if (startPin.node->outputType == NodeOutputType::TEXTURE)
+			{
+				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
+				if (endPin.node->type == NodeType::NORMAL_MAP)
+				{
+					const auto n = (NormalMapNode*)endPin.node;
+					const auto inNode = (ComputeShaderNode*)startPin.node;
+					*n->inputTexture = *inNode->texture;
+
+					//n->BindCoreData();
+					//inNode->texture->Bind();
+					//n->computeShader->SetUniform1i("inputTexture", 0);
+					//inNode->texture->Unbind();
+					//n->DispatchCompute(1, 1);
+				}
+
+			}
+
+		}
+
+	}
+
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
 	{
 		if (endPin.node->id != ed::NodeId(OUTPUT_NODE_ID))
@@ -504,7 +551,16 @@ namespace Zenit {
 			// Normals
 			case OUTPUT_NORMALS_PIN_ID:
 			{
-
+				if (!resetData)
+				{
+					editorLayer->SetNormalsData(startPin.node);
+					normalsNode = startPin.node;
+				}
+				else
+				{
+					editorLayer->SetNormalsData(nullptr);
+					normalsNode = nullptr;
+				}
 				break;
 			}
 			// Metallic

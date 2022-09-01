@@ -61,7 +61,7 @@ namespace Zenit {
 		SetStyle();
 
 		ImGui_ImplGlfw_InitForOpenGL(Application::GetInstance().GetWindow().GetNativeWindow(), true);
-		ImGui_ImplOpenGL3_Init("#version 430");
+		ImGui_ImplOpenGL3_Init("#version 460");
 	}
 
 	void ImGuiLayer::OnDetach()

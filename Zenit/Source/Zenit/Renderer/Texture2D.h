@@ -16,6 +16,7 @@ namespace Zenit {
 		void Bind(uint32_t slot = 0);
 		void BindImage();
 		void Unbind();
+		void UnbindImage();
 
 		inline const void* GetData() const { return data; }
 

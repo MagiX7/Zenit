@@ -180,7 +180,11 @@ namespace Zenit {
 	bool EditorLayer::SetNormalsData(Node* node)
 	{
 		if (!node)
+		{
+			if (normal != white)
+				normal = white;
 			return false;
+		}
 
 		switch (node->outputType)
 		{
@@ -190,13 +194,13 @@ namespace Zenit {
 				normal = n->texture.get();
 				return true;
 			}
-			case NodeOutputType::FLAT_COLOR:
-			{
-				const auto n = (ColorNode*)node;
-				uint32_t data = Math::GetRGBAHexadecimal(n->color);
-				normal->SetData(&data);
-				return true;
-			}
+			//case NodeOutputType::FLAT_COLOR:
+			//{
+			//	const auto n = (ColorNode*)node;
+			//	uint32_t data = Math::GetRGBAHexadecimal(n->color);
+			//	normal->SetData(&data);
+			//	return true;
+			//}
 		}
 
 		return false;
