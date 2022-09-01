@@ -173,13 +173,16 @@ namespace Zenit {
 				if (ed::AcceptDeletedItem())
 				{
 					Node* node = FindNode(id);
-					for (auto& output : node->outputs)
+					for (int i = 0; i < links.size(); ++i)
 					{
-						for (auto& link : output.links)
+						LinkInfo& link = links[i];
+
+						Pin inputPin = *FindPin(link.inputId);
+						Pin outputPin = *FindPin(link.outputId);
+						if (outputPin.node->id.Get() == OUTPUT_NODE_ID)
 						{
-							Pin inputPin = *FindPin(link.inputId);
-							Pin outputPin = *FindPin(link.outputId);
 							UpdateOutputNodeData(inputPin, outputPin, true);
+							links.erase(links.begin() + i);
 						}
 					}
 					DeleteNode(id);
@@ -234,7 +237,7 @@ namespace Zenit {
 						{
 							static int linkId = 100;
 							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
-
+							
 							if (endPin.node->outputType == NodeOutputType::TEXTURE)
 							{
 								const auto n = (ComputeShaderNode*)endPin.node;
