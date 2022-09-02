@@ -340,8 +340,8 @@ namespace Zenit {
 			return;
 
 		constexpr int channels = 4;
-		const int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
-		const int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
+		int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
+		int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
 		GLubyte* data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 
@@ -354,9 +354,11 @@ namespace Zenit {
 		delete[] data;
 
 
+		w = normals->GetWidth() == 1 ? 1024 : normals->GetWidth();
+		h = normals->GetHeight() == 1 ? 1024 : normals->GetHeight();
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
-		normals->Bind(1);
+		normals->Bind(0);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
@@ -365,6 +367,8 @@ namespace Zenit {
 		delete[] data;
 
 
+		w = metallic->GetWidth() == 1 ? 1024 : metallic->GetWidth();
+		h = metallic->GetHeight() == 1 ? 1024 : metallic->GetHeight();
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		metallic->Bind(2);
@@ -376,6 +380,8 @@ namespace Zenit {
 		delete[] data;
 
 
+		w = roughness->GetWidth() == 1 ? 1024 : roughness->GetWidth();
+		h = roughness->GetHeight() == 1 ? 1024 : roughness->GetHeight();
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		roughness->Bind(0);
@@ -387,6 +393,8 @@ namespace Zenit {
 		delete[] data;
 
 
+		w = ambientOcclusion->GetWidth() == 1 ? 1024 : ambientOcclusion->GetWidth();
+		h = ambientOcclusion->GetHeight() == 1 ? 1024 : ambientOcclusion->GetHeight();
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		ambientOcclusion->Bind(0);
@@ -396,7 +404,6 @@ namespace Zenit {
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_ambientOcclusion.png").c_str(), w, h, channels, data, w * channels);
 		delete[] data;
-
 	}
 
 }
