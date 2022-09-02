@@ -69,10 +69,18 @@ namespace Zenit {
                 vertex.texCoords = { 0,0 };
             }
 
+            if (mesh->HasTangentsAndBitangents())
+            {
+                vertex.tangents.x = mesh->mTangents[i].x;
+                vertex.tangents.y = mesh->mTangents[i].y;
+                vertex.tangents.z = mesh->mTangents[i].z;
+
+                vertex.biTangents.x = mesh->mBitangents[i].x;
+                vertex.biTangents.y = mesh->mBitangents[i].y;
+                vertex.biTangents.z = mesh->mBitangents[i].z;
+            }
+
             vertices.push_back(vertex);
-
-            // Load textures
-
         }
         
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -82,6 +90,37 @@ namespace Zenit {
                 indices.push_back(face.mIndices[j]);
         }
 
+        if (!mesh->HasTangentsAndBitangents())
+        {
+            ComputeTangentsAndBiTangents(vertices, mesh->mNumFaces);
+        }
+
         return new Mesh(vertices, indices);
+    }
+
+    void ModelImporter::ComputeTangentsAndBiTangents(std::vector<Vertex>& vertices, unsigned int indicesCount)
+    {
+        for (int i = 0; i < indicesCount; i += 3)
+        {
+            glm::vec2 uv1 = { vertices[i].texCoords };
+            glm::vec2 uv2 = { vertices[i + 1].texCoords };
+            glm::vec2 uv3 = { vertices[i + 2].texCoords };
+
+            glm::vec2 deltaUv1 = uv2 - uv1;
+            glm::vec2 deltaUv2 = uv3 - uv1;
+
+            glm::vec3 edge1 = vertices[i + 1].position - vertices[i].position;
+            glm::vec3 edge2 = vertices[i + 2].position - vertices[i].position;
+
+            float f = 1.0f / (deltaUv1.x * deltaUv2.y - deltaUv2.x * deltaUv1.y);
+
+            vertices[i].tangents.x = f * (deltaUv2.y * edge1.x - deltaUv1.y * edge2.x);
+            vertices[i].tangents.y = f * (deltaUv2.y * edge1.y - deltaUv1.y * edge2.y);
+            vertices[i].tangents.z = f * (deltaUv2.y * edge1.z - deltaUv1.y * edge2.z);
+            vertices[i].tangents = glm::normalize(vertices[i].tangents);
+
+            if (i + 3 > indicesCount)
+                break;
+        }
     }
 }

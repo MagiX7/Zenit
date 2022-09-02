@@ -308,17 +308,17 @@ namespace Zenit {
 		normals->Bind(1);
 		pbrShader->SetUniform1i("normalsTexture", 1);
 
-		//metallic->Bind(2);
-		//pbrShader->SetUniform1i("metallicTexture", 2);
-		//
-		//roughness->Bind(3);
-		//pbrShader->SetUniform1i("roughnessTexture", 3);
+		metallic->Bind(2);
+		pbrShader->SetUniform1i("metallicTexture", 2);
+		
+		roughness->Bind(3);
+		pbrShader->SetUniform1i("roughnessTexture", 3);
 
 		ambientOcclusion->Bind(4);
 		pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
 
-		pbrShader->SetUniform1f("metallic", metallicValue);
-		pbrShader->SetUniform1f("roughness", roughnessValue);
+		//pbrShader->SetUniform1f("metallic", metallicValue);
+		//pbrShader->SetUniform1f("roughness", roughnessValue);
 
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);

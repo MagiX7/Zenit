@@ -33,6 +33,8 @@ namespace Zenit {
 			{ShaderDataType::VEC3F, "psoition"},
 			{ShaderDataType::VEC3F, "normals"},
 			{ShaderDataType::VEC2F, "texCoords"},
+			{ShaderDataType::VEC3F, "tangents"},
+			{ShaderDataType::VEC3F, "biTangents"},
 		});
 		vao->AddVertexBuffer(&*vbo);
 

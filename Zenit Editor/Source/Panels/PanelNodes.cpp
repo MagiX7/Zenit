@@ -37,11 +37,11 @@ namespace Zenit {
 		normals.node = node;
 		node->inputs.emplace_back(normals);
 
-		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Float, ed::PinKind::Input);
+		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Object, ed::PinKind::Input);
 		metallic.node = node;
 		node->inputs.emplace_back(metallic);
 
-		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Float, ed::PinKind::Input);
+		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Object, ed::PinKind::Input);
 		roughness.node = node;
 		node->inputs.emplace_back(roughness);
 
