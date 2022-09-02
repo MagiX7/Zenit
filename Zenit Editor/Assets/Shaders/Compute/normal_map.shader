@@ -3,8 +3,10 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
+layout(binding = 1) uniform sampler2D inputTexture;
 
-layout(location = 0) uniform sampler2D inputTexture;
+uniform float zoom;
+uniform float bumpness;
 
 float GetHeight(vec2 uv)
 {
@@ -14,8 +16,10 @@ float GetHeight(vec2 uv)
 void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-	vec2 uv = vec2(pixelCoords);
 	vec2 resolution = imageSize(imgOutput);
+	
+	vec2 uv = (pixelCoords - /*0.5 * */resolution.xy) / resolution.y;
+	uv *= zoom;
 
 	vec3 col = vec3(0);
 
@@ -27,7 +31,7 @@ void main()
 		GetHeight(uv + vec2(0, stepp.y))
 	);
 
-	col = normalize(vec3(dxy * 1 / stepp, 1.)) * 0.5 + 0.5;
+	col = normalize(vec3(dxy * bumpness / stepp, 1.)) * 0.5 + 0.5;
 
 	imageStore(imgOutput, pixelCoords, vec4(col, 1));
 }

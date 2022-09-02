@@ -104,7 +104,7 @@ namespace Zenit {
 
 	void Texture2D::BindImage()
 	{
-		glBindImageTexture(0, rendererId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+		glBindImageTexture(0, rendererId, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 	}
 
 	void Texture2D::Unbind()
@@ -114,7 +114,7 @@ namespace Zenit {
 
 	void Texture2D::UnbindImage()
 	{
-		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
 	}
 
 }

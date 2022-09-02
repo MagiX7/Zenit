@@ -65,7 +65,7 @@ namespace Zenit {
 		std::unique_ptr<Shader> pbrShader;
 		std::unique_ptr<Shader> skyboxShader;
 		Texture2D* diffuse;
-		Texture2D* normal;
+		Texture2D* normals;
 		Texture2D* metallic;
 		Texture2D* white;
 		float metallicValue = 1.0f;

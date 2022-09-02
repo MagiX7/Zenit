@@ -42,7 +42,7 @@ namespace Zenit {
 
 		uint32_t data = 0xffffffff;
 		diffuse = new Texture2D(&data, 1, 1);
-		normal = new Texture2D(&data, 1, 1);
+		normals = new Texture2D(&data, 1, 1);
 		metallic = new Texture2D(&data, 1, 1);
 		roughness = new Texture2D(&data, 1, 1);
 		ambientOcclusion = new Texture2D(&data, 1, 1);
@@ -58,7 +58,7 @@ namespace Zenit {
 	void EditorLayer::OnDetach()
 	{
 		delete diffuse;
-		delete normal;
+		delete normals;
 		delete metallic;
 		delete roughness;
 		delete ambientOcclusion;
@@ -181,8 +181,8 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (normal != white)
-				normal = white;
+			if (normals != white)
+				normals = white;
 			return false;
 		}
 
@@ -191,7 +191,7 @@ namespace Zenit {
 			case NodeOutputType::TEXTURE:
 			{
 				const auto n = (ComputeShaderNode*)node;
-				normal = n->texture.get();
+				normals = n->texture.get();
 				return true;
 			}
 			//case NodeOutputType::FLAT_COLOR:
@@ -305,7 +305,7 @@ namespace Zenit {
 		diffuse->Bind();
 		pbrShader->SetUniform1i("diffuseTexture", 0);
 
-		normal->Bind(1);
+		normals->Bind(1);
 		pbrShader->SetUniform1i("normalsTexture", 1);
 
 		//metallic->Bind(2);
@@ -356,7 +356,7 @@ namespace Zenit {
 
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
-		normal->Bind(0);
+		normals->Bind(1);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
@@ -367,7 +367,7 @@ namespace Zenit {
 
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
-		metallic->Bind(0);
+		metallic->Bind(2);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 

@@ -19,9 +19,11 @@ namespace Zenit {
 	void NormalMapNode::Update(TimeStep ts)
 	{
 		BindCoreData();
-		inputTexture->Bind();
-		computeShader->SetUniform1i("inputTexture", 0);
-		inputTexture->Unbind();
+		inputTexture->Bind(1);
+		computeShader->SetUniform1i("inputTexture", 1);
+		computeShader->SetUniform1f("zoom", zoom);
+		computeShader->SetUniform1f("bumpness", bumpness);
+		//inputTexture->Unbind();
 		DispatchCompute(1, 1);
 		//inputTexture->UnbindImage();
 	}
@@ -33,6 +35,8 @@ namespace Zenit {
 
 	void NormalMapNode::OnImGuiInspectorRender()
 	{
+		ImGui::DragFloat("Zoom", &zoom, 0.05f, 0.0f);
+		ImGui::DragFloat("Bumpness", &bumpness, 0.01f, -1.0f, 1.0f);
 		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
 		ImGui::Separator();
 		ImGui::Image((ImTextureID*)inputTexture->GetId(), { 50,50 }, { 0,1 }, { 1,0 });

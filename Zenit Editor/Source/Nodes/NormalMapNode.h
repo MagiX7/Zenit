@@ -16,6 +16,8 @@ namespace Zenit {
 
 	public:
 		std::shared_ptr<Texture2D> inputTexture;
+		float zoom = 1.0f;
+		float bumpness = 1.0f;
 	};
 
 }
