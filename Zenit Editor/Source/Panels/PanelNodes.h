@@ -38,11 +38,20 @@ namespace Zenit {
 		void DeleteLink(const ed::LinkId& id) const;
 
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
+		// Generators
 		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
-		Node* CreateNormalMapNode(const char* name);
 		Node* CreateCircleNode(const char* name);
+		// Generators
+		
+		// Filters
+		Node* CreateNormalMapNode(const char* name);
+		// Filters
+		
+		// Operators
+		Node* CreateBlendNode(const char* name);
+		// Operators
 
 		void OnLinkCreation(Pin& startPin, Pin& endPin);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);

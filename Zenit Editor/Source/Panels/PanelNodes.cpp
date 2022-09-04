@@ -7,7 +7,10 @@
 #include "Nodes/VoronoiNode.h"
 #include "Nodes/NormalMapNode.h"
 #include "Nodes/CircleNode.h"
+
 #include "Nodes/Constants/Vec1Node.h"
+
+#include "Nodes/Operators/BlendNode.h"
 
 #include "EditorLayer.h"
 
@@ -345,6 +348,15 @@ namespace Zenit {
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Operators"))
+			{
+				if (ImGui::MenuItem("Blend"))
+				{
+					CreateBlendNode("Blend");
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndPopup();
 		}
 		ImGui::CloseCurrentPopup();
@@ -514,11 +526,31 @@ namespace Zenit {
 		return nullptr;
 	}
 
+	Node* PanelNodes::CreateBlendNode(const char* name)
+	{
+		BlendNode* node = new BlendNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input2.node = node;
+		node->inputs.emplace_back(input2);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
 	void PanelNodes::OnLinkCreation(Pin& startPin, Pin& endPin)
 	{
 		if (endPin.node->outputType == NodeOutputType::TEXTURE)
 		{
-
 			if (startPin.node->outputType == NodeOutputType::FLAT_COLOR)
 			{
 				const auto n = (ComputeShaderNode*)endPin.node;
@@ -535,12 +567,30 @@ namespace Zenit {
 					const auto n = (NormalMapNode*)endPin.node;
 					const auto inNode = (ComputeShaderNode*)startPin.node;
 					*n->inputTexture = *inNode->texture;
+				}
+				else if (endPin.node->type == NodeType::BLEND)
+				{
+					const auto n = (BlendNode*)endPin.node;
+					const auto inNode = (ComputeShaderNode*)startPin.node;
+					
+					//n->tex1->GetName() == "white.png" ? *n->tex1 = *inNode->texture : *n->tex2 = *inNode->texture;
 
-					//n->BindCoreData();
-					//inNode->texture->Bind();
-					//n->computeShader->SetUniform1i("inputTexture", 0);
-					//inNode->texture->Unbind();
-					//n->DispatchCompute(1, 1);
+					for (auto& in : n->inputs)
+					{
+						if (in.id.Get() < endPin.id.Get())
+						{
+							*n->tex2 = *inNode->texture;
+							break;
+						}
+						else
+						{
+							*n->tex1 = *inNode->texture;
+							break;
+						}
+					}
+
+					int a = 0;
+					a += 9;
 				}
 
 			}

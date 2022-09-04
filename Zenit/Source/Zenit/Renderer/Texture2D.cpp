@@ -26,6 +26,8 @@ namespace Zenit {
 		// TODO: Data from stbi gets deleted later. May affect when an image is loaded
 		this->data = data;
 
+		name = path.substr(path.find_last_of("/") + 1, path.length());
+
 		if (!data)
 		{
 			ZN_CORE_ERROR("Texture {0} couldn't be loaded.", path);

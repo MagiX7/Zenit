@@ -46,6 +46,7 @@ namespace Zenit {
 		DERIVATIVE_NOISE,
 		VORONOI,
 		NORMAL_MAP,
+		BLEND
 	};
 
 	struct Pin;

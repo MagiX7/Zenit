@@ -25,10 +25,13 @@ namespace Zenit {
 
 		inline uint32_t GetId() { return rendererId; }
 
+		inline const std::string& GetName() { return name; }
+
 	private:
 		uint32_t rendererId;
 
 		std::string path;
+		std::string name;
 		unsigned int width;
 		unsigned int height;
 		void* data;

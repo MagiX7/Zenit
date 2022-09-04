@@ -13,7 +13,7 @@
 namespace Zenit {
 
 	EditorLayer::EditorLayer()
-		: camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
+		: camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
 	{
 	}
 
@@ -75,7 +75,7 @@ namespace Zenit {
 
 		fbo->Bind();
 		{
-			Renderer3D::Clear({ 0.15,0.15,0.15,1 });
+			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
 			
 			DrawSkybox();
 			
@@ -137,7 +137,7 @@ namespace Zenit {
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
-		panelLayerStack.OnImGuiRender(layers);
+		//panelLayerStack.OnImGuiRender(layers);
 		panelNodes->OnImGuiRender(&panelInspector);
 
 		if (showDemoWindow)
