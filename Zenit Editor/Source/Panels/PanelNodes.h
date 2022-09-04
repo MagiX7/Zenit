@@ -51,6 +51,7 @@ namespace Zenit {
 		
 		// Operators
 		Node* CreateBlendNode(const char* name);
+		Node* CreateClampNode(const char* name);
 		// Operators
 
 		void OnLinkCreation(Pin& startPin, Pin& endPin);
