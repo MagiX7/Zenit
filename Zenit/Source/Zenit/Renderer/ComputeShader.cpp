@@ -96,7 +96,7 @@ namespace Zenit {
 		glUniform2f(location, v0, v1);
 	}
 
-	void ComputeShader::SetUniformVec2f(const std::string& name, glm::vec2 v)
+	void ComputeShader::SetUniformVec2f(const std::string& name, const glm::vec2& v)
 	{
 		SetUniformVec2f(name, v.x, v.y);
 	}
@@ -107,7 +107,7 @@ namespace Zenit {
 		glUniform3f(location, v0, v1, v2);
 	}
 
-	void ComputeShader::SetUniformVec3f(const std::string& name, glm::vec3 v)
+	void ComputeShader::SetUniformVec3f(const std::string& name, const glm::vec3& v)
 	{
 		SetUniformVec3f(name, v.x, v.y, v.z);
 	}
@@ -118,7 +118,7 @@ namespace Zenit {
 		glUniform4f(location, v0, v1, v2, v3);
 	}
 
-	void ComputeShader::SetUniformVec4f(const std::string& name, glm::vec4 v)
+	void ComputeShader::SetUniformVec4f(const std::string& name, const glm::vec4& v)
 	{
 		SetUniformVec4f(name, v.x, v.y, v.z, v.w);
 	}

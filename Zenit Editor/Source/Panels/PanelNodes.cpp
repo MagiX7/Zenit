@@ -6,6 +6,7 @@
 #include "Nodes/NoiseNode.h"
 #include "Nodes/VoronoiNode.h"
 #include "Nodes/NormalMapNode.h"
+#include "Nodes/CircleNode.h"
 #include "Nodes/Constants/Vec1Node.h"
 
 #include "EditorLayer.h"
@@ -322,7 +323,12 @@ namespace Zenit {
 			}
 			if (ImGui::BeginMenu("Generators"))
 			{
-				if (ImGui::MenuItem("Noise"))
+				if (ImGui::MenuItem("Circle"))
+				{
+					CreateCircleNode("Circle");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Noise"))
 				{
 					CreateNoiseNode("Noise", NoiseType::NORMAL);
 					showCreationPopup = false;
@@ -489,6 +495,23 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		return node;
+	}
+
+	Node* PanelNodes::CreateCircleNode(const char* name)
+	{
+		CircleNode* node = new CircleNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		//Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		//input.node = node;
+		//node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return nullptr;
 	}
 
 	void PanelNodes::OnLinkCreation(Pin& startPin, Pin& endPin)

@@ -22,7 +22,7 @@ namespace Zenit {
 			}
 		}
 
-		texture = std::make_unique<Texture2D>(nullptr, 512, 512);
+		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
 
 		BindCoreData();
 		computeShader->SetUniformVec3f("inputColor", { 1,1,1 });

@@ -8,7 +8,7 @@ namespace Zenit {
 		type = NodeType::NORMAL_MAP;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/normal_map.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 512, 512);
+		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
 	}
 

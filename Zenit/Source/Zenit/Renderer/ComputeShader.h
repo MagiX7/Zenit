@@ -24,13 +24,13 @@ namespace Zenit {
 		void SetUniform1f(const std::string& name, float f);
 
 		void SetUniformVec2f(const std::string& name, float v0, float v1);
-		void SetUniformVec2f(const std::string& name, glm::vec2 v);
+		void SetUniformVec2f(const std::string& name, const glm::vec2& v);
 
 		void SetUniformVec3f(const std::string& name, float v0, float v1, float v2);
-		void SetUniformVec3f(const std::string& name, glm::vec3 v);
+		void SetUniformVec3f(const std::string& name, const glm::vec3& v);
 
 		void SetUniformVec4f(const std::string& name, float v0, float v1, float v2, float v3);
-		void SetUniformVec4f(const std::string& name, glm::vec4 v);
+		void SetUniformVec4f(const std::string& name, const glm::vec4& v);
 
 		void SetUniformMatrix3f(const std::string& name, const glm::mat3x3& mat);
 		void SetUniformMatrix4f(const std::string& name, const glm::mat4x4& mat);

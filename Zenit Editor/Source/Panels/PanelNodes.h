@@ -42,6 +42,7 @@ namespace Zenit {
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
 		Node* CreateNormalMapNode(const char* name);
+		Node* CreateCircleNode(const char* name);
 
 		void OnLinkCreation(Pin& startPin, Pin& endPin);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);

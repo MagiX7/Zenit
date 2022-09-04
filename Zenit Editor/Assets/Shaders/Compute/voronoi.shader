@@ -45,7 +45,8 @@ void main()
 		}
 	}
 
-	color.xyz = vec3(minDist) * brightness;
+	//color.xyz = vec3(minDist) * brightness;
+	color.rg = uv;
 
 	imageStore(imgOutput, pixelCoords, color);
 }
