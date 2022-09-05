@@ -67,17 +67,15 @@ struct Light
 };
 uniform Light dirLight;
 
-vec3 GetSkyboxReflection(float ratio)
+vec3 GetSkyboxReflection(float ratio, vec3 normal)
 {
-	// TODO: Change vNormals to normal map
 	vec3 I = normalize(vPosition - camPos);
-	return reflect(I, normalize(vNormals));
+	return reflect(I, normalize(normal));
 }
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
-	//return F0 + (1.0 - F0) * pow(clamp(1.0 - min(cosTheta, 1.0), 0.0, 1.0), 5.0);
-	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+	return F0 + (1.0 - F0) * pow(clamp(1.0 - min(cosTheta, 1.0), 0.0, 1.0), 5.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -93,19 +91,10 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	return a2 / denom;
 }
 
-float DisneyDistributionGGX(float NdotH, float roughness)
-{
-	float alpha = roughness * roughness;
-	float alphaSq = alpha * alpha;
-
-	float denom = (NdotH * NdotH) * (alphaSq - 1.0) + 1.0;
-	return alphaSq / (PI * denom * denom);
-}
-
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
 	float r = (roughness + 1.0);
-	float k = (r * r) / 2.0;
+	float k = (r * r) / 8.0;
 
 	float denom = NdotV * (1.0 - k) + k;
 
@@ -122,13 +111,6 @@ float GeometrySmith(float NdotV, float NdotL, float roughness)
 
 vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir, vec3 albedo, float metalness, float roughness)
 {
-	// Lh -> halfway
-	// Li -> lightDir
-	// Lo -> viewDir
-	// cosLh -> NdotH
-	// cosLi -> NdotL
-	// cosLo -> NdotV
-
 	vec3 lightDir = normalize(-light.direction);
 	vec3 halfway = normalize(viewDir + lightDir);
 
@@ -139,50 +121,27 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir, vec3 albedo, floa
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
 	
-
-
 	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
-	//float NDF = DistributionGGX(normal, halfway, roughness);
-	float NDF = DisneyDistributionGGX(NdotH, roughness);
+	float NDF = DistributionGGX(normal, halfway, roughness);
 	float G = GeometrySmith(NdotV, NdotL, roughness);
 	
+	vec3 numerator = NDF * F * G;
+	float denominator = 4 * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
+	vec3 specular = numerator / denominator;
+
 	vec3 ks = F;
 	vec3 kd = vec3(1.0) - ks;
 	kd *= 1.0f - metallic;
-	//vec3 kd = mix(vec3(1.0) - F, vec3(0.0), metalness);
-	
-	vec3 diffuseBRDF = kd * albedo;
-	vec3 specularBRDF = F * NDF * G / max(0.0001, 4 * NdotL * NdotV);
-	return diffuseBRDF + specularBRDF * light.intensity * 200 * light.diffuse * NdotL;
 
-	//vec3 specular = (NDF * G * F) / (4 * NdotV * NdotL);
-	//return (kd * (albedo * light.diffuse) / PI + specular * light.specular) * light.intensity * NdotL;
-
-
-
-
-
-	//float diff = max(dot(normal, lightDir), 0);
-	//
-	//vec3 reflectDir = reflect(-lightDir, normal);
-	//float spec = pow(max(dot(viewDir, reflectDir), 0), roughness);
-	//
-	//
-	//vec3 ambient = light.ambient * vec3(texture(diffuseTexture, vTexCoords));
-	//vec3 diffuse = light.diffuse * diff * vec3(texture(diffuseTexture, vTexCoords));
-	////vec3 specular = light.specular * spec /** vec3(texture(diffuseTexture, vTexCoords))*/;
-	////vec3 specular = light.specular * spec * roughness;
-	//return (ambient + diffuse + specular) * light.intensity;
+	return (kd * albedo / PI + specular) * light.intensity * light.ambient * NdotL;
 }
 
 void main()
-{
-	float ratio = 1.00 / 1.52;
-	vec3 R = GetSkyboxReflection(ratio);
-	
-	//vec3 normal = normalize(vNormals);
+{	
 	vec3 normal = normalize(2.0 * texture2D(normalsTexture, vTexCoords).xyz - 1.0);
-	normal = normalize(tbnMatrix * normal);
+	//vec3 normal = texture2D(normalsTexture, vTexCoords).xyz;
+	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
+	
 	vec3 viewDir = normalize(camPos - vPosition);
 
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;

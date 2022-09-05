@@ -353,6 +353,7 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Blend"))
 				{
+					// TODO: Handle blending between two colors
 					CreateBlendNode("Blend");
 					showCreationPopup = false;
 				}

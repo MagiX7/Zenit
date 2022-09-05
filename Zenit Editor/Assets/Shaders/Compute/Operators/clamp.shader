@@ -16,7 +16,6 @@ void main()
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 	vec2 resolution = imageSize(imgOutput);
 	vec2 uv = (pixelCoords - resolution.xy) / resolution.y;
-	//vec2 uv = vec2(pixelCoords);
 	
 	vec3 color = vec3(0);
 	vec3 data = bool(isTex) ? texture2D(tex, uv).rgb : inputColor;
