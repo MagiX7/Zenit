@@ -14,13 +14,10 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-		void SetInputColor(glm::vec3 color);
 		void SetInputTexture(const std::unique_ptr<Texture2D>& tex);
 
 	public:
 		float min, max;
-		bool isTex;
-		glm::vec3 inputColor;
 		std::unique_ptr<Texture2D> inputTexture;
 	};
 

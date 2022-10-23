@@ -160,25 +160,6 @@ namespace Zenit {
 		const auto n = (ComputeShaderNode*)node;
 		diffuse = n->texture.get();
 		return true;
-
-		//switch (node->outputType)
-		//{
-		//	case NodeOutputType::TEXTURE:
-		//	{
-		//		const auto n = (ComputeShaderNode*)node;
-		//		diffuse = n->texture.get();
-		//		return true;
-		//	}
-		//	case NodeOutputType::FLAT_COLOR:
-		//	{
-		//		const auto n = (ColorNode*)node;
-		//		uint32_t data = Math::GetRGBAHexadecimal(n->color);
-		//		diffuse->SetData(&data);
-		//		return true;
-		//	}
-		//}
-
-		return false;
 	}
 
 	bool EditorLayer::SetNormalsData(Node* node)
@@ -193,25 +174,6 @@ namespace Zenit {
 		const auto n = (ComputeShaderNode*)node;
 		normals = n->texture.get();
 		return true;
-
-		//switch (node->outputType)
-		//{
-		//	case NodeOutputType::TEXTURE:
-		//	{
-		//		const auto n = (ComputeShaderNode*)node;
-		//		normals = n->texture.get();
-		//		return true;
-		//	}
-		//	//case NodeOutputType::FLAT_COLOR:
-		//	//{
-		//	//	const auto n = (ColorNode*)node;
-		//	//	uint32_t data = Math::GetRGBAHexadecimal(n->color);
-		//	//	normal->SetData(&data);
-		//	//	return true;
-		//	//}
-		//}
-		//
-		//return false;
 	}
 
 	bool EditorLayer::SetMetallicData(Node* node)
@@ -222,25 +184,6 @@ namespace Zenit {
 		const auto n = (ComputeShaderNode*)node;
 		metallic = n->texture.get();
 		return true;
-
-		//switch (node->outputType)
-		//{
-		//	case NodeOutputType::TEXTURE:
-		//	{
-		//		const auto n = (ComputeShaderNode*)node;
-		//		metallic = n->texture.get();
-		//		return true;
-		//	}
-		//	case NodeOutputType::FLAT_COLOR:
-		//	{
-		//		const auto n = (ColorNode*)node;
-		//		uint32_t data = Math::GetRGBAHexadecimal(n->color);
-		//		metallic->SetData(&data);
-		//		return true;
-		//	}
-		//}
-
-		return false;
 	}
 
 	bool EditorLayer::SetRoughnessData(Node* node)
@@ -256,13 +199,6 @@ namespace Zenit {
 				roughness = n->texture.get();
 				return true;
 			}
-			//case NodeOutputType::FLAT_COLOR:
-			//{
-			//	const auto n = (ColorNode*)node;
-			//	uint32_t data = Math::GetRGBAHexadecimal(n->color);
-			//	roughness->SetData(&data);
-			//	return true;
-			//}
 			case NodeOutputType::VEC1:
 			{
 				const auto n = (Vec1Node*)node;
