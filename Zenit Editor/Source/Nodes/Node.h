@@ -78,17 +78,13 @@ namespace Zenit {
 		}
 	};
 
-	// TODO: Create cpp and clear all the lists
 	class Node
 	{
 	public:
-		Node();
-		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255))
-			: id(id), name(name), nodeColor(color), outputType(outputType), size(5, 5), isOutput(false)
-		{
-		}
+		Node() = delete;
+		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255));
 
-		virtual ~Node() {}		
+		virtual ~Node();
 
 		virtual void Update(TimeStep ts) {};
 		virtual void OnImGuiNodeRender() {};

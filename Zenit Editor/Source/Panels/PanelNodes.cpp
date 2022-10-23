@@ -445,10 +445,10 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
-		ColorNode* node = new ColorNode(creationId++, name, NodeOutputType::FLAT_COLOR, color);
+		ColorNode* node = new ColorNode(creationId++, name, NodeOutputType::TEXTURE, color);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
-
+		
 		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
@@ -575,24 +575,7 @@ namespace Zenit {
 	{
 		if (endPin.node->outputType == NodeOutputType::TEXTURE)
 		{
-			if (startPin.node->outputType == NodeOutputType::FLAT_COLOR)
-			{
-				if (endPin.node->type == NodeType::CLAMP)
-				{
-					const auto n = (ClampNode*)endPin.node;
-					const auto inNode = (ColorNode*)startPin.node;
-					n->SetInputColor(inNode->color);
-				}
-				else
-				{
-					const auto n = (ComputeShaderNode*)endPin.node;
-					const auto inNode = (ColorNode*)startPin.node;
-					n->BindCoreData();
-					n->computeShader->SetUniformVec3f("inputColor", inNode->color);
-					n->DispatchCompute(8, 4);
-				}
-			}
-			else if (startPin.node->outputType == NodeOutputType::TEXTURE)
+			if (startPin.node->outputType == NodeOutputType::TEXTURE)
 			{
 				const auto inNode = (ComputeShaderNode*)startPin.node;
 				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
@@ -613,8 +596,6 @@ namespace Zenit {
 				}
 			}
 		}
-
-
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)

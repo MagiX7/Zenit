@@ -2,11 +2,11 @@
 
 #include <glm/vec4.hpp>
 
-#include "Node.h"
+#include "ComputeShaderNode.h"
 
 namespace Zenit {
 
-	class ColorNode : public Node
+	class ColorNode : public ComputeShaderNode
 	{
 	public:
 		ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color);
