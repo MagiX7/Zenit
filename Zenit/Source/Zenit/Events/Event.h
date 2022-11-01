@@ -30,7 +30,6 @@ namespace Zenit {
 #define EVENT_CLASS_CATEGORY(category) virtual int GetCategoryFlags() const override { return category; }
 
 
-	// TODO: Implement virtual ToString()
 	class Event
 	{
 		friend class EventDispatcher;

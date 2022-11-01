@@ -34,11 +34,10 @@ namespace Zenit {
 		faces.emplace_back("Assets/Skyboxes/Sea/back.jpg");
 		skybox = std::make_unique<Skybox>(faces);
 
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/cube_rounded.fbx");
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
-
 
 		uint32_t data = 0xffffffff;
 		diffuse = new Texture2D(&data, 1, 1);
@@ -117,7 +116,7 @@ namespace Zenit {
 		{
 			ImGui::Text("Direction");
 			ImGui::SameLine();
-			ImGui::DragFloat3("##Direction", glm::value_ptr(dirLight.dir));
+			ImGui::DragFloat3("##Direction", glm::value_ptr(dirLight.dir), 0.1f);
 			
 			ImGui::Text("Intensity");
 			ImGui::SameLine();
@@ -126,14 +125,22 @@ namespace Zenit {
 			ImGui::Separator();
 
 			ImGui::SetNextItemWidth(200);
-			ImGui::ColorPicker3("Ambient", glm::value_ptr(dirLight.ambient));
-			ImGui::SetNextItemWidth(200);
-			ImGui::ColorPicker3("Diffuse", glm::value_ptr(dirLight.diffuse));
-			ImGui::SetNextItemWidth(200);
-			ImGui::ColorPicker3("Specular", glm::value_ptr(dirLight.specular));
+			ImGui::ColorEdit3("Color", glm::value_ptr(dirLight.color));
+			
+			ImGui::DragFloat("Roughness", &roughnessValue, 0.025);
 
 		}
 		ImGui::End();
+
+		ImGui::Begin("PBR Settings");
+		{
+			ImGui::Image((ImTextureID)diffuse->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
+			ImGui::Image((ImTextureID)normals->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
+			ImGui::Image((ImTextureID)metallic->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
+			ImGui::Image((ImTextureID)roughness->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
+		}
+		ImGui::End();
+
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		panelSkybox.OnImGuiRender(skybox, skyboxProps);
@@ -245,9 +252,7 @@ namespace Zenit {
 		pbrShader->SetUniformVec3f("camPos", camera.GetPosition());
 
 		pbrShader->SetUniformVec3f("dirLight.direction", glm::normalize(dirLight.dir));
-		pbrShader->SetUniformVec3f("dirLight.ambient", dirLight.ambient);
-		pbrShader->SetUniformVec3f("dirLight.diffuse", dirLight.diffuse);
-		pbrShader->SetUniformVec3f("dirLight.specular", dirLight.specular);
+		pbrShader->SetUniformVec3f("dirLight.color", dirLight.color);
 		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
 		diffuse->Bind();
@@ -266,7 +271,7 @@ namespace Zenit {
 		pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
 
 		//pbrShader->SetUniform1f("metallic", metallicValue);
-		//pbrShader->SetUniform1f("roughness", roughnessValue);
+		pbrShader->SetUniform1f("roughnessValue", roughnessValue);
 
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);

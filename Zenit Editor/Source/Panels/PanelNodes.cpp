@@ -75,10 +75,10 @@ namespace Zenit {
 			node->Update(ts);
 		}
 
-		editorLayer->SetDiffuseData(diffuseNode);
-		editorLayer->SetNormalsData(normalsNode);
-		editorLayer->SetMetallicData(metallicNode);
-		editorLayer->SetRoughnessData(roughnessNode);
+		//editorLayer->SetDiffuseData(diffuseNode);
+		//editorLayer->SetNormalsData(normalsNode);
+		//editorLayer->SetMetallicData(metallicNode);
+		//editorLayer->SetRoughnessData(roughnessNode);
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
@@ -579,6 +579,7 @@ namespace Zenit {
 			{
 				const auto inNode = (ComputeShaderNode*)startPin.node;
 				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
+				// If you want an inputTexture, just use a multiply node
 				if (endPin.node->type == NodeType::NORMAL_MAP)
 				{
 					const auto n = (NormalMapNode*)endPin.node;

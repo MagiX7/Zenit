@@ -18,7 +18,7 @@ void main()
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 	vec2 resolution = imageSize(imgOutput);
 	
-	vec2 uv = (pixelCoords - /*0.5 * */resolution.xy) / resolution.y;
+	vec2 uv = (pixelCoords - resolution.xy) / resolution.y;
 	uv *= zoom;
 
 	vec3 col = vec3(0);

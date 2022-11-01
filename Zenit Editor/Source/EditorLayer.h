@@ -19,10 +19,8 @@ namespace Zenit {
 
 	struct DirectionalLight
 	{
-		glm::vec3 dir = { 35, 30, -8 };
-		glm::vec3 ambient = { 0,0,0 };
-		glm::vec3 diffuse = { 1,1,1 };
-		glm::vec3 specular = { 1,1,1 };
+		glm::vec3 dir = { 1, 1, 1 };
+		glm::vec3 color = { 1,1,1 };
 		float intensity = 1.0f;
 	};
 

@@ -11,23 +11,25 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model;
 
-
 out vec3 vPosition;
 out vec2 vTexCoords;
 out vec3 vNormals;
-out mat3 tbnMatrix;
+out mat3 TBN;
 
 void main()
 {
 	gl_Position = projection * view * model * vec4(position, 1);
 	vTexCoords = texCoords;
 	vNormals = normalize((model * vec4(normals, 0.0)).xyz);
-	vPosition = vec3(model * vec4(position, 1));
+	//vPosition = vec3(model * vec4(position, 1));
+	vPosition = position;
 
-	vec3 T = normalize(tangents);
-	vec3 B = normalize(biTangents);
 	vec3 N = normalize(normals);
-	tbnMatrix = mat3(T, B, N);
+	vec3 T = tangents;
+	T = normalize(T - dot(T, N) * N);
+	//vec3 B = normalize(biTangents);
+	vec3 B = cross(T, N);
+	TBN = mat3(T, B, N);
 }
 
 #type fragment
@@ -40,32 +42,32 @@ layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
 layout(location = 5) uniform samplerCube skybox;
 
-uniform float metallic;
-uniform float roughness;
+//uniform float metallic;
+//uniform float roughness;
 
 uniform vec3 camPos;
 uniform float skyboxIntensity;
 uniform int skyboxReflectionEnabled;
 uniform int drawSkybox;
 
+uniform float roughnessValue;
+
 out vec4 fragColor;
 
 in vec3 vPosition;
 in vec2 vTexCoords;
 in vec3 vNormals;
-in mat3 tbnMatrix;
+in mat3 TBN;
 
 const float PI = 3.14159265359;
 
-struct Light
+struct DirLight
 {
 	vec3 direction;
-	vec3 ambient;
-	vec3 diffuse;
-	vec3 specular;
+	vec3 color;
 	float intensity;
 };
-uniform Light dirLight;
+uniform DirLight dirLight;
 
 vec3 GetSkyboxReflection(float ratio, vec3 normal)
 {
@@ -75,7 +77,8 @@ vec3 GetSkyboxReflection(float ratio, vec3 normal)
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
-	return F0 + (1.0 - F0) * pow(clamp(1.0 - min(cosTheta, 1.0), 0.0, 1.0), 5.0);
+	//return F0 + (1.0 - F0) * pow(clamp(1.0 - min(cosTheta, 1.0), 0.0, 1.0), 5.0);
+	return  F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -88,7 +91,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
 	denom = PI * denom * denom;
 
-	return a2 / denom;
+	return (a2 * a2) / denom;
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness)
@@ -109,9 +112,9 @@ float GeometrySmith(float NdotV, float NdotL, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir, vec3 albedo, float metalness, float roughness)
+vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 albedo, float metallic, float roughness)
 {
-	vec3 lightDir = normalize(-light.direction);
+	vec3 lightDir = normalize(light.direction);
 	vec3 halfway = normalize(viewDir + lightDir);
 
 	float NdotL = max(dot(normal, lightDir), 0.0);
@@ -120,40 +123,95 @@ vec3 CalculateDirLight(Light light, vec3 normal, vec3 viewDir, vec3 albedo, floa
 
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
-	
-	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
+
+	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0) , F0);
 	float NDF = DistributionGGX(normal, halfway, roughness);
 	float G = GeometrySmith(NdotV, NdotL, roughness);
-	
+
 	vec3 numerator = NDF * F * G;
-	float denominator = 4 * max(NdotV, 0.0) * max(NdotL, 0.0) + 0.0001;
+	float denominator = max(4 * NdotV * NdotL, 0.0001);
 	vec3 specular = numerator / denominator;
 
 	vec3 ks = F;
 	vec3 kd = vec3(1.0) - ks;
 	kd *= 1.0f - metallic;
 
-	return (kd * albedo / PI + specular) * light.intensity * light.ambient * NdotL;
+	vec3 result = (kd * albedo / PI + specular) * light.color * light.intensity * NdotL;
+	return result;
 }
+
+
+vec3 GetDirLight(DirLight light, vec3 normal, vec3 viewDir, float roughness)
+{
+	vec3 lightDir = normalize(light.direction);
+	float diff = max(dot(normal, lightDir), 0.0);
+
+	vec3 reflectDir = reflect(lightDir, normal);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), roughness);
+
+	vec3 diffuse = light.color * diff * texture2D(diffuseTexture, vTexCoords).rgb;
+	vec3 specular = vec3(spec);
+
+	return diffuse;
+}
+
 
 void main()
 {	
-	vec3 normal = normalize(2.0 * texture2D(normalsTexture, vTexCoords).xyz - 1.0);
-	//vec3 normal = texture2D(normalsTexture, vTexCoords).xyz;
-	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
+	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
+	float metallic = texture2D(metallicTexture, vTexCoords).r;
+	float roughness = texture2D(roughnessTexture, vTexCoords).r;
 	
+	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
+	
+	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
+	if (normal == vec3(1.0)) normal = vNormals;
+
+	//float roughness = roughnessValue;
+
+	
+	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
 	vec3 viewDir = normalize(camPos - vPosition);
 
-	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
-	float metalness = texture2D(metallicTexture, vTexCoords).r;
-	float roughness = texture2D(roughnessTexture, vTexCoords).r;
+	vec3 Lo = vec3(0);
+	
+		vec3 lightDir = normalize(dirLight.direction);
+		vec3 halfway = normalize(viewDir + lightDir);
 
-	vec3 color = albedo * dirLight.diffuse;
-	color += CalculateDirLight(dirLight, normal, viewDir, albedo, metalness, roughness);
+		float NdotL = max(dot(normal, lightDir), 0.0);
+		float NdotV = max(dot(normal, viewDir), 0.0);
+		float NdotH = max(dot(normal, halfway), 0.0);
+
+		vec3 F0 = vec3(0.04);
+		F0 = mix(F0, albedo, metallic);
+
+		float NDF = DistributionGGX(normal, halfway, roughness);
+		float G = GeometrySmith(NdotV, NdotL, roughness);
+		vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
+
+		vec3 numerator = NDF * F * G;
+		float denominator = max(4 * NdotV * NdotL, 0.0001);
+		vec3 specular = numerator / denominator;
+
+		// Lambert Diffuse ========
+		vec3 ks = F;
+		vec3 kd = vec3(1.0) - ks;
+		kd *= 1.0f - metallic;
+		// Lambert Diffuse ========
+
+		vec3 radiance = dirLight.color * dirLight.intensity;
+
+		Lo = (kd * albedo / PI + specular) * radiance * NdotL;
+		
+	vec3 color = vec3(0);
+	color += Lo;
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0 / 2.2));
 
 
-	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
-		fragColor = /*texture2D(diffuseTexture, vTexCoords) * */vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
-	else
-		fragColor =/* texture2D(diffuseTexture, vTexCoords) **/ vec4(color, 1);
+	//if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
+	//	fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
+	//else
+		fragColor = vec4(color, 1);
+	
 }
