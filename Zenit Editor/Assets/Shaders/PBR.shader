@@ -77,7 +77,6 @@ vec3 GetSkyboxReflection(float ratio, vec3 normal)
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
 {
-	//return F0 + (1.0 - F0) * pow(clamp(1.0 - min(cosTheta, 1.0), 0.0, 1.0), 5.0);
 	return  F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
@@ -112,9 +111,9 @@ float GeometrySmith(float NdotV, float NdotL, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 albedo, float metallic, float roughness)
+vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo, float metallic, float roughness)
 {
-	vec3 lightDir = normalize(light.direction);
+	vec3 lightDir = normalize(dirLight.direction);
 	vec3 halfway = normalize(viewDir + lightDir);
 
 	float NdotL = max(dot(normal, lightDir), 0.0);
@@ -124,35 +123,23 @@ vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 albedo, f
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
 
-	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0) , F0);
 	float NDF = DistributionGGX(normal, halfway, roughness);
 	float G = GeometrySmith(NdotV, NdotL, roughness);
+	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
 
 	vec3 numerator = NDF * F * G;
 	float denominator = max(4 * NdotV * NdotL, 0.0001);
 	vec3 specular = numerator / denominator;
 
+	// Lambert Diffuse ========
 	vec3 ks = F;
 	vec3 kd = vec3(1.0) - ks;
 	kd *= 1.0f - metallic;
+	// Lambert Diffuse ========
 
-	vec3 result = (kd * albedo / PI + specular) * light.color * light.intensity * NdotL;
-	return result;
-}
+	vec3 radiance = dirLight.color * dirLight.intensity;
 
-
-vec3 GetDirLight(DirLight light, vec3 normal, vec3 viewDir, float roughness)
-{
-	vec3 lightDir = normalize(light.direction);
-	float diff = max(dot(normal, lightDir), 0.0);
-
-	vec3 reflectDir = reflect(lightDir, normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), roughness);
-
-	vec3 diffuse = light.color * diff * texture2D(diffuseTexture, vTexCoords).rgb;
-	vec3 specular = vec3(spec);
-
-	return diffuse;
+	return (kd * albedo / PI + specular) * radiance * NdotL;
 }
 
 
@@ -167,51 +154,20 @@ void main()
 	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
 	if (normal == vec3(1.0)) normal = vNormals;
 
-	//float roughness = roughnessValue;
-
-	
 	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
 	vec3 viewDir = normalize(camPos - vPosition);
 
-	vec3 Lo = vec3(0);
-	
-		vec3 lightDir = normalize(dirLight.direction);
-		vec3 halfway = normalize(viewDir + lightDir);
 
-		float NdotL = max(dot(normal, lightDir), 0.0);
-		float NdotV = max(dot(normal, viewDir), 0.0);
-		float NdotH = max(dot(normal, halfway), 0.0);
-
-		vec3 F0 = vec3(0.04);
-		F0 = mix(F0, albedo, metallic);
-
-		float NDF = DistributionGGX(normal, halfway, roughness);
-		float G = GeometrySmith(NdotV, NdotL, roughness);
-		vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
-
-		vec3 numerator = NDF * F * G;
-		float denominator = max(4 * NdotV * NdotL, 0.0001);
-		vec3 specular = numerator / denominator;
-
-		// Lambert Diffuse ========
-		vec3 ks = F;
-		vec3 kd = vec3(1.0) - ks;
-		kd *= 1.0f - metallic;
-		// Lambert Diffuse ========
-
-		vec3 radiance = dirLight.color * dirLight.intensity;
-
-		Lo = (kd * albedo / PI + specular) * radiance * NdotL;
-		
 	vec3 color = vec3(0);
-	color += Lo;
+	color += CalculateDirLight(dirLight, normal, viewDir, albedo, metallic, roughness);
+	
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 
 
-	//if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
-	//	fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
-	//else
+	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
+		fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
+	else
 		fragColor = vec4(color, 1);
 	
 }

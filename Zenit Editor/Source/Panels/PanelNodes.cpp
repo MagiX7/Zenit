@@ -75,10 +75,10 @@ namespace Zenit {
 			node->Update(ts);
 		}
 
-		//editorLayer->SetDiffuseData(diffuseNode);
-		//editorLayer->SetNormalsData(normalsNode);
-		//editorLayer->SetMetallicData(metallicNode);
-		//editorLayer->SetRoughnessData(roughnessNode);
+		editorLayer->SetDiffuseData(diffuseNode);
+		editorLayer->SetNormalsData(normalsNode);
+		editorLayer->SetMetallicData(metallicNode);
+		editorLayer->SetRoughnessData(roughnessNode);
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
