@@ -654,14 +654,31 @@ namespace Zenit {
 			// Metallic
 			case OUTPUT_METALLIC_PIN_ID:
 			{
-
+				if (!resetData)
+				{
+					editorLayer->SetMetallicData(startPin.node);
+					metallicNode = startPin.node;
+				}
+				else
+				{
+					editorLayer->SetMetallicData(nullptr);
+					metallicNode = nullptr;
+				}
 				break;
 			}
 			// Roughness
 			case OUTPUT_ROUGHNESS_PIN_ID:
 			{
-				editorLayer->SetRoughnessData(startPin.node);
-				roughnessNode = startPin.node;
+				if (!resetData)
+				{
+					editorLayer->SetRoughnessData(startPin.node);
+					roughnessNode = startPin.node;
+				}
+				else
+				{
+					editorLayer->SetRoughnessData(nullptr);
+					roughnessNode = nullptr;
+				}
 				break;
 			}
 

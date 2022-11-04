@@ -186,7 +186,11 @@ namespace Zenit {
 	bool EditorLayer::SetMetallicData(Node* node)
 	{
 		if (!node)
+		{
+			if (metallic != white)
+				metallic = white;
 			return false;
+		}
 
 		const auto n = (ComputeShaderNode*)node;
 		metallic = n->texture.get();
@@ -196,7 +200,11 @@ namespace Zenit {
 	bool EditorLayer::SetRoughnessData(Node* node)
 	{
 		if (!node)
+		{
+			if (roughness != white)
+				roughness = white;
 			return false;
+		}
 
 		switch (node->outputType)
 		{
