@@ -12,6 +12,7 @@ namespace Zenit {
 
 	enum class PinType
 	{
+		None = -1,
 		Flow,
 		Bool,
 		Int,
@@ -31,7 +32,6 @@ namespace Zenit {
 	enum class NodeOutputType
 	{
 		NONE,
-		FLAT_COLOR,
 		TEXTURE,
 		VEC1,
 		VEC2,

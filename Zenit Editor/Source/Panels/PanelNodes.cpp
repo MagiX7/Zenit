@@ -183,8 +183,8 @@ namespace Zenit {
 					{
 						LinkInfo& link = links[i];
 
-						Pin inputPin = *FindPin(link.inputId);
-						Pin outputPin = *FindPin(link.outputId);
+						Pin inputPin = FindPin(link.inputId);
+						Pin outputPin = FindPin(link.outputId);
 						if (outputPin.node->id.Get() == OUTPUT_NODE_ID)
 						{
 							UpdateOutputNodeData(inputPin, outputPin, true);
@@ -215,8 +215,8 @@ namespace Zenit {
 
 				if (inputPinId && outputPinId)
 				{
-					Pin startPin = *FindPin(inputPinId);
-					Pin endPin = *FindPin(outputPinId);
+					Pin startPin = FindPin(inputPinId);
+					Pin endPin = FindPin(outputPinId);
 
 					if (startPin.kind == ed::PinKind::Input)
 					{
@@ -224,7 +224,7 @@ namespace Zenit {
 						std::swap(inputPinId, outputPinId);
 					}
 
-					if (!startPin.id.Invalid && !endPin.id.Invalid)
+					if (startPin.id.Get() > 0 && endPin.id.Get() > 0)
 					{
 						if (endPin.id == startPin.id)
 						{
@@ -244,7 +244,7 @@ namespace Zenit {
 							static int linkId = 100;
 							links.push_back({ ed::LinkId(linkId++), inputPinId, outputPinId });
 							
-							OnLinkCreation(startPin, endPin);
+							UpdateLink(startPin, endPin, false);
 							UpdateOutputNodeData(startPin, endPin, false);
 						}
 					}
@@ -265,14 +265,15 @@ namespace Zenit {
 						if (links[i].id == deletedLinkId)
 						{
 							LinkInfo link = links[i];
-							Pin inputPin = *FindPin(link.inputId);
-							Pin outputPin = *FindPin(link.outputId);
+							Pin inputPin = FindPin(link.inputId);
+							Pin outputPin = FindPin(link.outputId);
 							Node* inputNode = inputPin.node;
 							Node* outputNode = outputPin.node;
 
 							UpdateOutputNodeData(inputPin, outputPin, true);
 
 							// TODO: Handle links deletion between normal/current nodes
+							UpdateLink(inputPin, outputPin, true);
 
 							for (int j = 0; j < outputPin.links.size(); ++j)
 							{
@@ -281,7 +282,6 @@ namespace Zenit {
 									outputPin.links.erase(outputPin.links.begin() + j);
 								}
 							}
-
 							links.erase(links.begin() + i);
 
 							break;
@@ -380,34 +380,37 @@ namespace Zenit {
 		return nullptr;
 	}
 
-	Pin* PanelNodes::FindPin(ed::PinId id) const
+	Pin PanelNodes::FindPin(ed::PinId id) const
 	{
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			for (auto inputPin : nodes[i]->inputs)
 			{
 				if (inputPin.id == id)
-					return &inputPin;
+					return inputPin;
 			}
 
 			for (auto outputPin : nodes[i]->outputs)
 			{
 				if (outputPin.id == id)
-					return &outputPin;
+					return outputPin;
 			}
 		}
 
-		return nullptr;
+		return Pin(-1, "", PinType::None, ed::PinKind::None);
 	}
 
-	LinkInfo* PanelNodes::FindLink(const ed::LinkId& id) const
+	LinkInfo PanelNodes::FindLink(const ed::LinkId& id) const
 	{
 		for (auto link : links)
 		{
 			if (link.id == id)
-				return &link;
+				return link;
 		}
-		return nullptr;
+
+		LinkInfo link;
+		link.id = -1;
+		return link;
 	}
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
@@ -428,8 +431,8 @@ namespace Zenit {
 
 	void PanelNodes::DeleteLink(const ed::LinkId& id) const
 	{
-		const LinkInfo link = *FindLink(id);
-		const Pin output = *FindPin(link.outputId);
+		const LinkInfo link = FindLink(id);
+		const Pin output = FindPin(link.outputId);
 
 		Node* other = output.node;
 		if (other->outputType == NodeOutputType::TEXTURE)
@@ -571,7 +574,7 @@ namespace Zenit {
 		return nullptr;
 	}
 
-	void PanelNodes::OnLinkCreation(Pin& startPin, Pin& endPin)
+	void PanelNodes::UpdateLink(Pin& startPin, Pin& endPin, bool resetData)
 	{
 		if (endPin.node->outputType == NodeOutputType::TEXTURE)
 		{
@@ -580,20 +583,32 @@ namespace Zenit {
 				const auto inNode = (ComputeShaderNode*)startPin.node;
 				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
 				// If you want an inputTexture, just use a multiply node
-				if (endPin.node->type == NodeType::NORMAL_MAP)
+				switch (endPin.node->type)
 				{
-					const auto n = (NormalMapNode*)endPin.node;
-					*n->inputTexture = *inNode->texture;
-				}
-				else if (endPin.node->type == NodeType::BLEND)
-				{
-					const auto n = (BlendNode*)endPin.node;
-					n->inputs[0].id.Get() < endPin.id.Get() ? *n->tex2 = *inNode->texture : *n->tex1 = *inNode->texture;
-				}
-				else if (endPin.node->type == NodeType::CLAMP)
-				{
-					const auto n = (ClampNode*)endPin.node;
-					n->SetInputTexture(inNode->texture);
+					case NodeType::NORMAL_MAP:
+					{
+						const auto n = (NormalMapNode*)endPin.node;
+						resetData ? *n->inputTexture = *editorLayer->white : *n->inputTexture = *inNode->texture;
+						break;
+					}
+					case NodeType::BLEND:
+					{
+						const auto n = (BlendNode*)endPin.node;
+
+						Texture2D* tex = nullptr;
+						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+
+						n->inputs[0].id.Get() < endPin.id.Get() ? *n->tex2 = *tex : *n->tex1 = *tex;
+
+						break;
+					}
+					case NodeType::CLAMP:
+					{
+						const auto n = (ClampNode*)endPin.node;
+						resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+						break;
+					}
+
 				}
 			}
 		}

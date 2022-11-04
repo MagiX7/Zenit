@@ -15,6 +15,7 @@ namespace Zenit {
 		virtual void OnImGuiInspectorRender() override;
 
 		void SetInputTexture(const std::unique_ptr<Texture2D>& tex);
+		void SetInputTexture(Texture2D* tex);
 
 	public:
 		float min, max;

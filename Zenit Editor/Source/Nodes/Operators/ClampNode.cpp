@@ -51,4 +51,8 @@ namespace Zenit {
 	{
 		*inputTexture = *tex;
 	}
+	void ClampNode::SetInputTexture(Texture2D* tex)
+	{
+		*inputTexture = *tex;
+	}
 }

@@ -34,7 +34,7 @@ namespace Zenit {
 		faces.emplace_back("Assets/Skyboxes/Sea/back.jpg");
 		skybox = std::make_unique<Skybox>(faces);
 
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/cube_rounded.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
@@ -281,8 +281,8 @@ namespace Zenit {
 			pbrShader->SetUniform1i("skybox", 5);
 
 			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
-			//pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
-			pbrShader->SetUniform1i("skyboxReflectionEnabled", 0);
+			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
+			//pbrShader->SetUniform1i("skyboxReflectionEnabled", 0);
 		}
 	}
 

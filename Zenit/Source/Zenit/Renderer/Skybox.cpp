@@ -97,7 +97,7 @@ namespace Zenit {
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
         intensity = 1.0f;
-        enableReflection = true;
+        enableReflection = false;
 
         ZN_CORE_INFO("Skybox loaded successfully");
 	}
