@@ -83,14 +83,13 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
 	float a2 = roughness * roughness;
-	//float a2 = a * a;
 	float NdotH = max(dot(N, H), 0.0);
 	float NdotH2 = NdotH * NdotH;
 
 	float denom = (NdotH2 * (a2 - 1.0) + 1.0);
 	denom = PI * denom * denom;
 
-	return (a2 * a2) / denom;
+	return (a2) / denom;
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness)
