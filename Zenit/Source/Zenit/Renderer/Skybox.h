@@ -35,7 +35,7 @@ namespace Zenit {
 		inline bool& IsReflectionEnabled() { return enableReflection; }
 		inline void SetIsReflectionEnabled(bool value) { enableReflection = value; }
 
-		void BindPreComputedData();
+		void BindIrradianceMap(int slot);
 
 	private:
 		void SetUpCube();

@@ -36,7 +36,7 @@ namespace Zenit {
 
 		skybox = std::make_unique<Skybox>("Assets/Skyboxes/Alexs_Apt_Env.hdr");
 
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/cube_rounded.fbx");
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
 		//model2 = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
@@ -290,10 +290,7 @@ namespace Zenit {
 		pbrShader->SetUniformVec3f("dirLight.color", dirLight.color);
 		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
-		//diffuse->Bind();
-		//glActiveTexture(GL_TEXTURE0);
-		//int id = skybox->GetFBOID();
-		//glBindTexture(GL_TEXTURE_2D, id);
+		diffuse->Bind();
 		pbrShader->SetUniform1i("diffuseTexture", 0);
 
 		normals->Bind(1);
@@ -315,12 +312,14 @@ namespace Zenit {
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
 		if (skyboxProps.draw)
 		{
-			skybox->Bind(5);
-			pbrShader->SetUniform1i("skybox", 5);
+			//skybox->Bind(5);
+			//pbrShader->SetUniform1i("skybox", 5);
+
+			skybox->BindIrradianceMap(5);
+			pbrShader->SetUniform1i("irradianceMap", 5);
 
 			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
 			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
-			//pbrShader->SetUniform1i("skyboxReflectionEnabled", 0);
 		}
 	}
 

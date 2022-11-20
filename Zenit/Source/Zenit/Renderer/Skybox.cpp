@@ -187,45 +187,45 @@ namespace Zenit {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
-        //glGenTextures(1, &irradianceMapID);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
-        //for (unsigned int i = 0; i < 6; ++i)
-        //{
-        //    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
-        //}
-        //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        //glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //
-        //glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-        //glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+        glGenTextures(1, &irradianceMapID);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+        }
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-        //irradianceMapShader = std::make_shared<Shader>("Assets/Shaders/irradiance_skybox.shader");
-        //
-        //
-        //irradianceMapShader->Bind();
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
-        //irradianceMapShader->SetUniform1i("environmentMap", 0);
-        //irradianceMapShader->SetUniformMatrix4f("projection", captureProjection);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
-        //
-        //glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
-        //glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-        //for (unsigned int i = 0; i < 6; ++i)
-        //{
-        //    irradianceMapShader->SetUniformMatrix4f("view", captureViews[i]);
-        //    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-        //        irradianceMapID, 0);
-        //    
-        //    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //    Draw();
-        //}
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        irradianceMapShader = std::make_shared<Shader>("Assets/Shaders/irradiance_skybox.shader");
+        
+        
+        irradianceMapShader->Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
+        irradianceMapShader->SetUniform1i("environmentMap", 0);
+        irradianceMapShader->SetUniformMatrix4f("projection", captureProjection);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+        
+        glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+            irradianceMapShader->SetUniformMatrix4f("view", captureViews[i]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                irradianceMapID, 0);
+            
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            Draw();
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
@@ -263,9 +263,9 @@ namespace Zenit {
         vbo->Unbind();
     }
 
-    void Skybox::BindPreComputedData()
+    void Skybox::BindIrradianceMap(int slot)
     {
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0 + slot);
         glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
     }
 

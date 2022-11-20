@@ -40,7 +40,7 @@ layout(location = 1) uniform sampler2D normalsTexture;
 layout(location = 2) uniform sampler2D metallicTexture;
 layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
-layout(location = 5) uniform samplerCube skybox;
+layout(location = 5) uniform samplerCube irradianceMap;
 
 //uniform float metallic;
 //uniform float roughness;
@@ -73,6 +73,11 @@ vec3 GetSkyboxReflection(float ratio, vec3 normal)
 {
 	vec3 I = normalize(vPosition - camPos);
 	return reflect(I, normalize(normal));
+}
+
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 vec3 FresnelSchlick(float cosTheta, vec3 F0)
@@ -110,7 +115,7 @@ float GeometrySmith(float NdotV, float NdotL, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo, float metallic, float roughness)
+vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo, vec3 irradiance, float metallic, float roughness)
 {
 	vec3 lightDir = normalize(dirLight.direction);
 	vec3 halfway = normalize(viewDir + lightDir);
@@ -138,35 +143,50 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 
 	vec3 radiance = dirLight.color * dirLight.intensity;
 
-	return (kd * albedo / PI + specular) * radiance * NdotL;
+	vec3 Lo = (kd * albedo / PI + specular) * radiance * NdotL;
+
+
+	vec3 ambient = vec3(0);
+	{
+		vec3 ks = FresnelSchlick(max(dot(normal, viewDir), 0.0), F0);
+		vec3 kd = 1.0 - ks;
+		kd *= 1.0 - metallic;
+		vec3 diffuse = irradiance * albedo;
+		ambient = kd * diffuse; /* * ao; */
+	}
+
+	return Lo + ambient;
 }
 
 
 void main()
-{	
+{
+	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
+	if (normal == vec3(1.0)) normal = vNormals;
+
+
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
+	vec3 irradiance = texture(irradianceMap, normal).rgb;
 	float metallic = texture2D(metallicTexture, vTexCoords).r;
 	float roughness = texture2D(roughnessTexture, vTexCoords).r;
 	
 	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
 	
-	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
-	if (normal == vec3(1.0)) normal = vNormals;
-
+	
 	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
 	vec3 viewDir = normalize(camPos - vPosition);
 
 
 	vec3 color = vec3(0);
-	color += CalculateDirLight(dirLight, normal, viewDir, albedo, metallic, roughness);
+	color += CalculateDirLight(dirLight, normal, viewDir, albedo, irradiance, metallic, roughness);
 	
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 
 
-	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
-		fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
-	else
+	//if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
+	//	fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
+	//else
 		fragColor = vec4(color, 1);
 	
 }
