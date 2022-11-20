@@ -3,27 +3,38 @@
 
 layout(location = 0) in vec3 position;
 
-out vec3 vTexCoords;
+out vec3 localPosition;
 
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-	vec4 pos = projection * view * vec4(position, 1.0);
-	gl_Position = pos.xyww;
-	vTexCoords = position;
+	mat4 rotView = mat4(mat3(view)); // remove translation from the view matrix
+	vec4 clipPos = projection * rotView * vec4(position, 1.0);
+	gl_Position = clipPos.xyww;
+
+	//vec4 pos = projection * view * vec4(position, 1.0);
+	//gl_Position = pos.xyww;
+	
+	localPosition = position;
 }
 
 #type fragment
 #version 430 core
 
-in vec3 vTexCoords;
+in vec3 localPosition;
 out vec4 fragColor;
 
 uniform samplerCube skybox;
 
+const float PI = 3.14159265359;
+
 void main()
 {
-	fragColor = texture(skybox, vTexCoords);
+	vec3 color = texture(skybox, localPosition).rgb;
+	color = color / (color + vec3(1.0));
+	color = pow(color, vec3(1.0 / 2.2));
+
+	fragColor = vec4(color, 1);
 }
