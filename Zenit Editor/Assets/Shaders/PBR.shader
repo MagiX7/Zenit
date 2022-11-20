@@ -115,7 +115,7 @@ float GeometrySmith(float NdotV, float NdotL, float roughness)
 	return ggx1 * ggx2;
 }
 
-vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo, vec3 irradiance, float metallic, float roughness)
+vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo, float metallic, float roughness, out vec3 F0)
 {
 	vec3 lightDir = normalize(dirLight.direction);
 	vec3 halfway = normalize(viewDir + lightDir);
@@ -124,7 +124,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	float NdotV = max(dot(normal, viewDir), 0.0);
 	float NdotH = max(dot(normal, halfway), 0.0);
 
-	vec3 F0 = vec3(0.04);
+	F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
 
 	float NDF = DistributionGGX(normal, halfway, roughness);
@@ -146,16 +146,9 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	vec3 Lo = (kd * albedo / PI + specular) * radiance * NdotL;
 
 
-	vec3 ambient = vec3(0);
-	{
-		vec3 ks = FresnelSchlick(max(dot(normal, viewDir), 0.0), F0);
-		vec3 kd = 1.0 - ks;
-		kd *= 1.0 - metallic;
-		vec3 diffuse = irradiance * albedo;
-		ambient = kd * diffuse; /* * ao; */
-	}
+	
 
-	return Lo + ambient;
+	return Lo;
 }
 
 
@@ -178,8 +171,17 @@ void main()
 
 
 	vec3 color = vec3(0);
-	color += CalculateDirLight(dirLight, normal, viewDir, albedo, irradiance, metallic, roughness);
+	vec3 F0 = vec3(0);
+	color += CalculateDirLight(dirLight, normal, viewDir, albedo, metallic, roughness, F0);
 	
+	vec3 ks = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), F0, roughness);
+	vec3 kd = 1.0 - ks;
+	kd *= 1.0 - metallic;
+	vec3 diffuse = irradiance * albedo;
+	vec3 ambient = kd * diffuse; /* * ao; */
+	
+	color += ambient;
+
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 

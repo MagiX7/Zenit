@@ -25,19 +25,8 @@ namespace Zenit {
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
-		//std::vector<std::string> faces;
-		//faces.emplace_back("Assets/Skyboxes/Sea/right.jpg");
-		//faces.emplace_back("Assets/Skyboxes/Sea/left.jpg");
-		//faces.emplace_back("Assets/Skyboxes/Sea/top.jpg");
-		//faces.emplace_back("Assets/Skyboxes/Sea/bottom.jpg");
-		//faces.emplace_back("Assets/Skyboxes/Sea/front.jpg");
-		//faces.emplace_back("Assets/Skyboxes/Sea/back.jpg");
-		//skybox = std::make_unique<Skybox>(faces);
-
-		skybox = std::make_unique<Skybox>("Assets/Skyboxes/Alexs_Apt_Env.hdr");
-
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
-		//model2 = ModelImporter::ImportModel("Assets/Models/Primitives/Sphere.fbx");
+		skybox = std::make_unique<Skybox>("Assets/Skyboxes/loft.hdr");
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/Cube.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
@@ -80,7 +69,6 @@ namespace Zenit {
 		{
 			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
 			
-			//skybox->BindPreComputedData();
 			DrawSkybox();
 			
 			pbrShader->Bind();
@@ -237,11 +225,6 @@ namespace Zenit {
 		if (!skyboxProps.draw)
 			return;
 
-		//equirectShader->Bind();
-		//equirectShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
-		//equirectShader->SetUniformMatrix4f("projection", camera.GetProjection());
-		
-		glDisable(GL_CULL_FACE);
 		skyboxShader->Bind();
 
 		skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
@@ -254,28 +237,6 @@ namespace Zenit {
 		skybox->Draw();
 
 		skyboxShader->Unbind();
-		glEnable(GL_CULL_FACE);
-
-		//equirectShader->Unbind();
-
-		//glDisable(GL_CULL_FACE);
-		//glDepthFunc(GL_LEQUAL);
-		//
-		//skyboxShader->Bind();
-		//skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
-		//skyboxShader->SetUniformMatrix4f("projection", camera.GetProjection());
-		//
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->GetId());
-		//skyboxShader->SetUniform1i("skybox", 0);
-		//
-		//skybox->Draw();
-		//
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		//skyboxShader->Unbind();
-		//
-		////glDepthFunc(GL_LESS);
-		//glEnable(GL_CULL_FACE);
 	}
 
 	void EditorLayer::SetModelShaderData()
@@ -291,6 +252,8 @@ namespace Zenit {
 		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
 		diffuse->Bind();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, skybox->GetHDRId());
 		pbrShader->SetUniform1i("diffuseTexture", 0);
 
 		normals->Bind(1);

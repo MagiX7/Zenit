@@ -203,19 +203,22 @@ namespace Zenit {
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
+        
         irradianceMapShader = std::make_shared<Shader>("Assets/Shaders/irradiance_skybox.shader");
         
-        
+        // Generate the irradiance map
         irradianceMapShader->Bind();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
-        irradianceMapShader->SetUniform1i("environmentMap", 0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
         irradianceMapShader->SetUniformMatrix4f("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+        irradianceMapShader->SetUniform1i("environmentMap", 0);
         
+
         glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
         glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
         for (unsigned int i = 0; i < 6; ++i)
         {
             irradianceMapShader->SetUniformMatrix4f("view", captureViews[i]);
