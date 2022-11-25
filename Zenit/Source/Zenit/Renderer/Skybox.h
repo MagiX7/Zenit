@@ -37,13 +37,15 @@ namespace Zenit {
 		inline void SetIsReflectionEnabled(bool value) { enableReflection = value; }
 
 		void BindIrradianceMap(int slot);
+		void BindPrefilterMap(int slot);
+		void BindBRDF(int slot);
 
-		void DrawQuad();
 	private:
 		void SetUpCube();
 		void SetUpQuad();
 		
 		void DrawCube();
+		void DrawQuad();
 
 	private:
 		unsigned int captureFBO, captureRBO;

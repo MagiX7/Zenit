@@ -364,6 +364,18 @@ namespace Zenit {
         glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMapID);
     }
 
+    void Skybox::BindPrefilterMap(int slot)
+    {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+    }
+
+    void Skybox::BindBRDF(int slot)
+    {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        glBindTexture(GL_TEXTURE_2D, brdfTexture);
+    }
+
     void Skybox::SetUpCube()
     {
         float vertices[] =

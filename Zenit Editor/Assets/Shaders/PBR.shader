@@ -41,6 +41,9 @@ layout(location = 2) uniform sampler2D metallicTexture;
 layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
 layout(location = 5) uniform samplerCube irradianceMap;
+layout(location = 6) uniform samplerCube skyboxPrefilterMap;;
+layout(location = 7) uniform sampler2D skyboxBrdf;
+
 
 //uniform float metallic;
 //uniform float roughness;
@@ -51,6 +54,7 @@ uniform int skyboxReflectionEnabled;
 uniform int drawSkybox;
 
 uniform float roughnessValue;
+
 
 out vec4 fragColor;
 
@@ -69,11 +73,6 @@ struct DirLight
 };
 uniform DirLight dirLight;
 
-vec3 GetSkyboxReflection(float ratio, vec3 normal)
-{
-	vec3 I = normalize(vPosition - camPos);
-	return reflect(I, normalize(normal));
-}
 
 vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
 {
@@ -165,20 +164,26 @@ void main()
 	
 	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
 	
-	
-	vec3 R = GetSkyboxReflection(1.00 / 1.52, normal);
 	vec3 viewDir = normalize(camPos - vPosition);
-
-
+	
 	vec3 color = vec3(0);
 	vec3 F0 = vec3(0);
 	color += CalculateDirLight(dirLight, normal, viewDir, albedo, metallic, roughness, F0);
 	
-	vec3 ks = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), F0, roughness);
+	vec3 F = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), F0, roughness);
+	vec3 ks = F;
 	vec3 kd = 1.0 - ks;
 	kd *= 1.0 - metallic;
 	vec3 diffuse = irradiance * albedo;
-	vec3 ambient = kd * diffuse; /* * ao; */
+
+	// Potential uniform
+	const float maxReflectionLod = 2.0;
+	vec3 R = reflect(viewDir, normal);
+	vec3 prefilteredColor = textureLod(skyboxPrefilterMap, R, roughness * maxReflectionLod).rgb;
+	vec2 brdf = texture2D(skyboxBrdf, vec2(max(dot(normal, viewDir), 0.0)), roughness).rg;
+	vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+
+	vec3 ambient = kd * diffuse + specular; /* * ao; */
 	
 	color += ambient;
 

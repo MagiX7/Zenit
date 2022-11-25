@@ -256,6 +256,12 @@ namespace Zenit {
 			skybox->BindIrradianceMap(5);
 			pbrShader->SetUniform1i("irradianceMap", 5);
 
+			skybox->BindPrefilterMap(6);
+			pbrShader->SetUniform1i("skyboxPrefilterMap", 6);
+
+			skybox->BindBRDF(7);
+			pbrShader->SetUniform1i("skyboxBrdf", 7);
+
 			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
 			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
 		}
