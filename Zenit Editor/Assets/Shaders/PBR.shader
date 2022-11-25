@@ -154,8 +154,25 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 void main()
 {
 	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
-	if (normal == vec3(1.0)) normal = vNormals;
 
+	if (normal == vec3(1.0))
+	{
+		normal = vNormals;
+	}
+	else
+	{
+		vec3 Q1 = dFdx(vPosition);
+		vec3 Q2 = dFdy(vPosition);
+		vec2 st1 = dFdx(vTexCoords);
+		vec2 st2 = dFdy(vTexCoords);
+
+		vec3 N = normalize(vNormals);
+		vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
+		vec3 B = -normalize(cross(N, T));
+		mat3 TBN = mat3(T, B, N);
+
+		normal = normalize(TBN * normal);
+	}
 
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
 	vec3 irradiance = texture(irradianceMap, normal).rgb;
@@ -178,7 +195,7 @@ void main()
 
 	// Potential uniform
 	const float maxReflectionLod = 2.0;
-	vec3 R = reflect(viewDir, normal);
+	vec3 R = reflect(-viewDir, normal);
 	vec3 prefilteredColor = textureLod(skyboxPrefilterMap, R, roughness * maxReflectionLod).rgb;
 	vec2 brdf = texture2D(skyboxBrdf, vec2(max(dot(normal, viewDir), 0.0)), roughness).rg;
 	vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
