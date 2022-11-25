@@ -23,7 +23,7 @@ namespace Zenit {
 		void Bind(int slot = 0);
 		void Unbind();
 
-		void Draw();
+		void Draw(const glm::mat3& view, const glm::mat4& projection);
 
 		inline unsigned int GetId() { return cubemapID; }
 		inline unsigned int GetIrradianceMapId() { return irradianceMapID; }
@@ -39,17 +39,18 @@ namespace Zenit {
 
 	private:
 		void SetUpCube();
+		void DrawCube();
 
 	private:
 		unsigned int captureFBO, captureRBO;
 		unsigned int cubemapID, irradianceMapID;
 		unsigned int hdrTexture;
 
-		std::shared_ptr<VertexBuffer> vbo;
-		std::shared_ptr<VertexArray> vao;
-		Shader* skyboxShader;
-		std::shared_ptr<Shader> hdrToCubemapShader;
-		std::shared_ptr<Shader> irradianceMapShader;
+		std::unique_ptr<VertexBuffer> vbo;
+		std::unique_ptr<VertexArray> vao;
+		std::unique_ptr<Shader> skyboxShader;
+		std::unique_ptr<Shader> hdrToCubemapShader;
+		std::unique_ptr<Shader> irradianceMapShader;
 		
 		float intensity;
 		bool enableReflection;

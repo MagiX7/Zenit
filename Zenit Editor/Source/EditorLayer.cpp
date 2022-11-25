@@ -29,9 +29,7 @@ namespace Zenit {
 		model = ModelImporter::ImportModel("Assets/Models/Primitives/Cube.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
-		skyboxShader = std::make_unique<Shader>("Assets/Shaders/skybox.shader");
-		equirectShader = std::make_unique<Shader>("Assets/Shaders/hdr_to_cubemap.shader");
-
+		
 		uint32_t data = 0xffffffff;
 		diffuse = new Texture2D(&data, 1, 1);
 		normals = new Texture2D(&data, 1, 1);
@@ -69,7 +67,8 @@ namespace Zenit {
 		{
 			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
 			
-			DrawSkybox();
+			if (skyboxProps.draw)
+				skybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());
 			
 			pbrShader->Bind();
 			SetModelShaderData();
@@ -220,25 +219,6 @@ namespace Zenit {
 		return false;
 	}
 
-	void EditorLayer::DrawSkybox()
-	{
-		if (!skyboxProps.draw)
-			return;
-
-		skyboxShader->Bind();
-
-		skyboxShader->SetUniformMatrix4f("view", glm::mat3(camera.GetView()));
-		skyboxShader->SetUniformMatrix4f("projection", camera.GetProjection());
-		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->GetId());
-		skyboxShader->SetUniform1i("skybox", 0);
-
-		skybox->Draw();
-
-		skyboxShader->Unbind();
-	}
-
 	void EditorLayer::SetModelShaderData()
 	{
 		pbrShader->SetUniformMatrix4f("view", camera.GetView());
@@ -252,8 +232,8 @@ namespace Zenit {
 		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
 		diffuse->Bind();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, skybox->GetHDRId());
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, skybox->GetHDRId());
 		pbrShader->SetUniform1i("diffuseTexture", 0);
 
 		normals->Bind(1);

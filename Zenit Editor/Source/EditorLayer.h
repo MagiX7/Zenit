@@ -42,7 +42,6 @@ namespace Zenit {
 		bool SetRoughnessData(Node* node);
 
 	private:
-		void DrawSkybox();
 		void SetModelShaderData();
 		void ExportTextures();		
 
@@ -59,11 +58,8 @@ namespace Zenit {
 
 		PerspectiveCamera camera;
 		Model* model;
-		Model* model2;
 
 		std::unique_ptr<Shader> pbrShader;
-		std::unique_ptr<Shader> skyboxShader;
-		std::unique_ptr<Shader> equirectShader;
 		Texture2D* diffuse;
 		Texture2D* normals;
 		Texture2D* metallic;

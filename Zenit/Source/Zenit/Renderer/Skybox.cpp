@@ -88,12 +88,12 @@ namespace Zenit {
         };
 
 
-        vao = std::make_shared<VertexArray>();
-        vbo = std::make_shared<VertexBuffer>(vertices, 108);
+        vao = std::make_unique<VertexArray>();
+        vbo = std::make_unique<VertexBuffer>(vertices, 108);
         vbo->SetLayout({ {ShaderDataType::VEC3F, "position"} });
         vao->AddVertexBuffer(vbo.get());
 
-        skyboxShader = new Shader("Assets/Shaders/skybox.shader");
+        skyboxShader = std::make_unique<Shader>("Assets/Shaders/Skybox/skybox.shader");
 
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
@@ -164,7 +164,7 @@ namespace Zenit {
         };
 
         // Convert HDR image to Cubemap
-        hdrToCubemapShader = std::make_shared<Shader>("Assets/shaders/hdr_to_cubemap.shader");
+        hdrToCubemapShader = std::make_unique<Shader>("Assets/shaders/Skybox/hdr_to_cubemap.shader");
         hdrToCubemapShader->Bind();
         hdrToCubemapShader->SetUniformMatrix4f("projection", captureProjection);
         glActiveTexture(GL_TEXTURE0);
@@ -181,7 +181,7 @@ namespace Zenit {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemapID, 0);
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            Draw();
+            DrawCube();
         }
         hdrToCubemapShader->Unbind();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -204,7 +204,7 @@ namespace Zenit {
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
         
-        irradianceMapShader = std::make_shared<Shader>("Assets/Shaders/irradiance_skybox.shader");
+        irradianceMapShader = std::make_unique<Shader>("Assets/Shaders/Skybox/irradiance_skybox.shader");
         
         // Generate the irradiance map
         irradianceMapShader->Bind();
@@ -226,13 +226,15 @@ namespace Zenit {
                 irradianceMapID, 0);
             
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            Draw();
+            DrawCube();
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
 
-        //glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+        skyboxShader = std::make_unique<Shader>("Assets/Shaders/Skybox/skybox.shader");
 
         intensity = 1.0f;
         enableReflection = false;
@@ -257,8 +259,23 @@ namespace Zenit {
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
-    void Skybox::Draw()
-    {       
+    void Skybox::Draw(const glm::mat3& view, const glm::mat4& projection)
+    {
+        skyboxShader->Bind();
+        skyboxShader->SetUniformMatrix4f("view", view);
+        skyboxShader->SetUniformMatrix4f("projection", projection);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+        skyboxShader->SetUniform1i("skybox", 0);
+
+        DrawCube();
+
+        skyboxShader->Unbind();
+    }
+
+    void Skybox::DrawCube()
+    {
         vao->Bind();
         vbo->Bind();
         glDrawArrays(GL_TRIANGLES, 0, vbo->GetCount());
@@ -319,9 +336,10 @@ namespace Zenit {
              1.0f, -1.0f,  1.0f
         };
 
-        vao = std::make_shared<VertexArray>();
-        vbo = std::make_shared<VertexBuffer>(vertices, 108);
+        vao = std::make_unique<VertexArray>();
+        vbo = std::make_unique<VertexBuffer>(vertices, 108);
         vbo->SetLayout({ {ShaderDataType::VEC3F, "position"} });
         vao->AddVertexBuffer(vbo.get());
     }
+    
 }
