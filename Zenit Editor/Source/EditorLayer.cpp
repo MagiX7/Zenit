@@ -59,10 +59,6 @@ namespace Zenit {
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
-		camera.Update(ts);
-		panelViewport.OnUpdate(ts, model, camera);
-		panelNodes->Update(ts);
-
 		fbo->Bind();
 		{
 			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
@@ -75,9 +71,7 @@ namespace Zenit {
 
 			model->Draw();
 
-			skybox->Unbind();
 			pbrShader->Unbind();
-
 		}
 		fbo->Unbind();
 	}
@@ -125,7 +119,7 @@ namespace Zenit {
 		ImGui::End();
 
 		ImGui::Begin("PBR Settings");
-		{
+		{		
 			ImGui::Image((ImTextureID)diffuse->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
 			ImGui::Image((ImTextureID)normals->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
 			ImGui::Image((ImTextureID)metallic->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
@@ -232,8 +226,8 @@ namespace Zenit {
 		pbrShader->SetUniform1f("dirLight.intensity", dirLight.intensity);
 
 		diffuse->Bind();
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, skybox->GetHDRId());
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, skybox->GetPrefilterMapId());
 		pbrShader->SetUniform1i("diffuseTexture", 0);
 
 		normals->Bind(1);
