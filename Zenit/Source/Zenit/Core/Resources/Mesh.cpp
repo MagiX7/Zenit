@@ -30,7 +30,7 @@ namespace Zenit {
 
 		vbo = std::make_shared<VertexBuffer>(&vertices[0], vertices.size() * sizeof(Vertex));
 		vbo->SetLayout({
-			{ShaderDataType::VEC3F, "psoition"},
+			{ShaderDataType::VEC3F, "position"},
 			{ShaderDataType::VEC3F, "normals"},
 			{ShaderDataType::VEC2F, "texCoords"},
 			{ShaderDataType::VEC3F, "tangents"},

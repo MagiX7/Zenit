@@ -33,6 +33,7 @@ const float PI = 3.14159265359;
 void main()
 {
 	vec3 color = texture(skybox, localPosition).rgb;
+	//vec3 color = textureLod(skybox, localPosition, 1.2).rgb;
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 

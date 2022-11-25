@@ -26,6 +26,9 @@ namespace Zenit {
 		inline unsigned int GetIrradianceMapId() { return irradianceMapID; }
 		inline unsigned int GetHDRId() { return hdrTexture; }
 		inline unsigned int GetPrefilterMapId() { return prefilterMap; }
+		inline unsigned int GetBRDFId() { return brdfTexture; }
+		inline unsigned int GetFBO() { return captureFBO; }
+		inline unsigned int GetRBO() { return captureRBO; }
 
 		inline float& GetInstensity() { return intensity; }
 		inline float SetInstensity(float value) { intensity = value; }
@@ -35,22 +38,28 @@ namespace Zenit {
 
 		void BindIrradianceMap(int slot);
 
+		void DrawQuad();
 	private:
 		void SetUpCube();
+		void SetUpQuad();
+		
 		void DrawCube();
 
 	private:
 		unsigned int captureFBO, captureRBO;
 		unsigned int cubemapID, irradianceMapID;
-		unsigned int hdrTexture;
+		unsigned int hdrTexture, brdfTexture;
 		unsigned int prefilterMap;
 
-		std::unique_ptr<VertexBuffer> vbo;
-		std::unique_ptr<VertexArray> vao;
+		std::unique_ptr<VertexBuffer> cubeVbo;
+		std::unique_ptr<VertexArray> cubeVao;
+		std::unique_ptr<VertexBuffer> quadVbo;
+		std::unique_ptr<VertexArray> quadVao;
 		std::unique_ptr<Shader> skyboxShader;
 		std::unique_ptr<Shader> hdrToCubemapShader;
 		std::unique_ptr<Shader> irradianceMapShader;
 		std::unique_ptr<Shader> prefilterShader;
+		std::unique_ptr<Shader> brdfShader;
 		
 		float intensity;
 		bool enableReflection;

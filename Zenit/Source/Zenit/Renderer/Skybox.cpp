@@ -88,10 +88,10 @@ namespace Zenit {
         };
 
 
-        vao = std::make_unique<VertexArray>();
-        vbo = std::make_unique<VertexBuffer>(vertices, 108);
-        vbo->SetLayout({ {ShaderDataType::VEC3F, "position"} });
-        vao->AddVertexBuffer(vbo.get());
+        cubeVao = std::make_unique<VertexArray>();
+        cubeVbo = std::make_unique<VertexBuffer>(vertices, 108);
+        cubeVbo->SetLayout({ {ShaderDataType::VEC3F, "position"} });
+        cubeVao->AddVertexBuffer(cubeVbo.get());
 
         skyboxShader = std::make_unique<Shader>("Assets/Shaders/Skybox/skybox.shader");
 
@@ -105,8 +105,6 @@ namespace Zenit {
 
     Skybox::Skybox(std::string path)
     {
-        SetUpCube();
-
         glGenFramebuffers(1, &captureFBO);
         glGenRenderbuffers(1, &captureRBO);
 
@@ -124,6 +122,10 @@ namespace Zenit {
             ZN_CORE_ERROR("Failed to load HDR image");
             return;
         }
+
+        SetUpCube();
+        SetUpQuad();
+
         glGenTextures(1, &hdrTexture);
         glBindTexture(GL_TEXTURE_2D, hdrTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
@@ -185,6 +187,11 @@ namespace Zenit {
         }
         hdrToCubemapShader->Unbind();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
 
         // Generate irradiance map
         glGenTextures(1, &irradianceMapID);
@@ -252,7 +259,6 @@ namespace Zenit {
         unsigned int maxMipLevels = 5;
         for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
         {
-            // reisze framebuffer according to mip-level size.
             unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
             unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
             glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
@@ -273,6 +279,28 @@ namespace Zenit {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+        // Generate the BRDF texture
+        glGenTextures(1, &brdfTexture);
+        glBindTexture(GL_TEXTURE_2D, brdfTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfTexture, 0);
+        
+        brdfShader = std::make_unique<Shader>("Assets/Shaders/Skybox/brdf.shader");
+        brdfShader->Bind();
+        glViewport(0, 0, 512, 512);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        DrawQuad();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
         skyboxShader = std::make_unique<Shader>("Assets/Shaders/Skybox/skybox.shader");
 
@@ -286,6 +314,13 @@ namespace Zenit {
 	Skybox::~Skybox()
 	{
         glDeleteTextures(1, &cubemapID);
+        glDeleteTextures(1, &irradianceMapID);
+        glDeleteTextures(1, &hdrTexture);
+        glDeleteTextures(1, &brdfTexture);
+        glDeleteTextures(1, &prefilterMap);
+
+        glDeleteFramebuffers(1, &captureFBO);
+        glDeleteRenderbuffers(1, &captureRBO);
 	}
 
     void Skybox::Draw(const glm::mat3& view, const glm::mat4& projection)
@@ -295,7 +330,7 @@ namespace Zenit {
         skyboxShader->SetUniformMatrix4f("projection", projection);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapID);
         skyboxShader->SetUniform1i("skybox", 0);
 
         DrawCube();
@@ -305,11 +340,22 @@ namespace Zenit {
 
     void Skybox::DrawCube()
     {
-        vao->Bind();
-        vbo->Bind();
-        glDrawArrays(GL_TRIANGLES, 0, vbo->GetCount());
-        vao->Unbind();
-        vbo->Unbind();
+        cubeVao->Bind();
+        cubeVbo->Bind();
+        // Count / 3 because there are 3 positions for the same vertex
+        // You are drawing vertex, not positions of each vertex
+        glDrawArrays(GL_TRIANGLES, 0, cubeVbo->GetCount() / 3);
+        cubeVao->Unbind();
+        cubeVbo->Unbind();
+    }
+
+    void Skybox::DrawQuad()
+    {
+        quadVao->Bind();
+        quadVbo->Bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        quadVao->Unbind();
+        quadVbo->Unbind();
     }
 
     void Skybox::BindIrradianceMap(int slot)
@@ -328,35 +374,35 @@ namespace Zenit {
              1.0f, -1.0f, -1.0f,
              1.0f,  1.0f, -1.0f,
             -1.0f,  1.0f, -1.0f,
-
+        
             -1.0f, -1.0f,  1.0f,
             -1.0f, -1.0f, -1.0f,
             -1.0f,  1.0f, -1.0f,
             -1.0f,  1.0f, -1.0f,
             -1.0f,  1.0f,  1.0f,
             -1.0f, -1.0f,  1.0f,
-
+        
              1.0f, -1.0f, -1.0f,
              1.0f, -1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,
              1.0f,  1.0f, -1.0f,
              1.0f, -1.0f, -1.0f,
-
+        
             -1.0f, -1.0f,  1.0f,
             -1.0f,  1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,
              1.0f, -1.0f,  1.0f,
             -1.0f, -1.0f,  1.0f,
-
+        
             -1.0f,  1.0f, -1.0f,
              1.0f,  1.0f, -1.0f,
              1.0f,  1.0f,  1.0f,
              1.0f,  1.0f,  1.0f,
             -1.0f,  1.0f,  1.0f,
             -1.0f,  1.0f, -1.0f,
-
+        
             -1.0f, -1.0f, -1.0f,
             -1.0f, -1.0f,  1.0f,
              1.0f, -1.0f, -1.0f,
@@ -365,10 +411,26 @@ namespace Zenit {
              1.0f, -1.0f,  1.0f
         };
 
-        vao = std::make_unique<VertexArray>();
-        vbo = std::make_unique<VertexBuffer>(vertices, 108);
-        vbo->SetLayout({ {ShaderDataType::VEC3F, "position"} });
-        vao->AddVertexBuffer(vbo.get());
+        cubeVao = std::make_unique<VertexArray>();
+        cubeVbo = std::make_unique<VertexBuffer>(vertices, 108);
+        cubeVbo->SetLayout({ {ShaderDataType::VEC3F, "position"}});
+        cubeVao->AddVertexBuffer(cubeVbo.get());
+    }
+
+    void Skybox::SetUpQuad()
+    {
+        float vertices[] = {
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+
+        quadVao = std::make_unique<VertexArray>();
+        quadVbo = std::make_unique<VertexBuffer>(vertices, 20);
+        quadVbo->SetLayout({ {ShaderDataType::VEC3F, "position"},
+                             {ShaderDataType::VEC2F, "texCoords"} });
+        quadVao->AddVertexBuffer(quadVbo.get());
     }
     
 }
