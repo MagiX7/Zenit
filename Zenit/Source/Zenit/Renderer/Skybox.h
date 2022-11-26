@@ -30,8 +30,8 @@ namespace Zenit {
 		inline unsigned int GetFBO() { return captureFBO; }
 		inline unsigned int GetRBO() { return captureRBO; }
 
-		inline float& GetInstensity() { return intensity; }
-		inline float SetInstensity(float value) { intensity = value; }
+		inline float& GetReflectionLod() { return reflectionLod; }
+		inline float SetReflectionLod(float value) { reflectionLod = value; }
 
 		inline bool& IsReflectionEnabled() { return enableReflection; }
 		inline void SetIsReflectionEnabled(bool value) { enableReflection = value; }
@@ -63,7 +63,7 @@ namespace Zenit {
 		std::unique_ptr<Shader> prefilterShader;
 		std::unique_ptr<Shader> brdfShader;
 		
-		float intensity;
+		float reflectionLod;
 		bool enableReflection;
 	};
 

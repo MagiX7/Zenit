@@ -97,7 +97,7 @@ namespace Zenit {
 
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-        intensity = 1.0f;
+        reflectionLod = 1.0f;
         enableReflection = false;
 
         ZN_CORE_INFO("Skybox loaded successfully");
@@ -304,8 +304,8 @@ namespace Zenit {
 
         skyboxShader = std::make_unique<Shader>("Assets/Shaders/Skybox/skybox.shader");
 
-        intensity = 1.0f;
-        enableReflection = false;
+        reflectionLod = 2.0f;
+        enableReflection = true;
 
         ZN_CORE_INFO("Skybox with HDR texture loaded successfully");
 

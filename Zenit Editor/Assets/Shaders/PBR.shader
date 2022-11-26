@@ -49,7 +49,7 @@ layout(location = 7) uniform sampler2D skyboxBrdf;
 //uniform float roughness;
 
 uniform vec3 camPos;
-uniform float skyboxIntensity;
+uniform float reflectionLod;
 uniform int skyboxReflectionEnabled;
 uniform int drawSkybox;
 
@@ -193,14 +193,16 @@ void main()
 	kd *= 1.0 - metallic;
 	vec3 diffuse = irradiance * albedo;
 
-	// Potential uniform
-	const float maxReflectionLod = 2.0;
-	vec3 R = reflect(-viewDir, normal);
-	vec3 prefilteredColor = textureLod(skyboxPrefilterMap, R, roughness * maxReflectionLod).rgb;
-	vec2 brdf = texture2D(skyboxBrdf, vec2(max(dot(normal, viewDir), 0.0)), roughness).rg;
-	vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
+	vec3 ambient = kd * diffuse;
+	if (bool(skyboxReflectionEnabled))
+	{
+		vec3 R = reflect(-viewDir, normal);
+		vec3 prefilteredColor = textureLod(skyboxPrefilterMap, R, roughness * reflectionLod).rgb;
+		vec2 brdf = texture2D(skyboxBrdf, vec2(max(dot(normal, viewDir), 0.0)), roughness).rg;
+		vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-	vec3 ambient = kd * diffuse + specular; /* * ao; */
+		ambient = kd * diffuse + specular; /* * ao; */
+	}
 	
 	color += ambient;
 

@@ -262,7 +262,7 @@ namespace Zenit {
 			skybox->BindBRDF(7);
 			pbrShader->SetUniform1i("skyboxBrdf", 7);
 
-			pbrShader->SetUniform1f("skyboxIntensity", skybox->GetInstensity());
+			pbrShader->SetUniform1f("reflectionLod", skybox->GetReflectionLod());
 			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
 		}
 	}

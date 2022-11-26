@@ -18,7 +18,7 @@ namespace Zenit {
 			ImGui::Checkbox("Enable Reflection", &skybox->IsReflectionEnabled());
 			if (skybox->IsReflectionEnabled())
 			{
-				ImGui::DragFloat("Intensity", &skybox->GetInstensity(), 0.05f, 0);
+				ImGui::DragFloat("Reflection Blur", &skybox->GetReflectionLod(), 0.05f, 0.0f, 4.5f);
 			}
 
 			ImGui::Checkbox("Enable blur", &props.blurEnabled);
