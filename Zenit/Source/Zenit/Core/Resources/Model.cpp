@@ -24,6 +24,10 @@ namespace Zenit {
 	{
 		rotation = glm::quat(0, 0, 0, 1);
 		transform = glm::translate(glm::mat4(1.0), { 0,0,0 }) * glm::toMat4(rotation);
+
+		int start = path.find_last_of("\\") + 1;
+		int end = path.find_last_of(".");
+		name = path.substr(start, end - start);
 	}
 
 	Model::~Model()

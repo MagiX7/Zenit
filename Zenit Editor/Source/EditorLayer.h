@@ -13,6 +13,8 @@
 
 #include <memory>
 #include <stack>
+#include <future>
+#include <mutex>
 
 namespace Zenit {
 
@@ -42,10 +44,16 @@ namespace Zenit {
 
 	private:
 		void SetModelShaderData();
-		void ExportTextures();		
+		void ExportTextures();
+
 		void LoadSkyboxes();
+		void ReloadSkyboxes();
+
+		void LoadModels();
+		void ReloadModels();
 
 	private:
+		bool finished = false;
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelLayerStack panelLayerStack;
@@ -53,11 +61,14 @@ namespace Zenit {
 
 		std::unique_ptr<FrameBuffer> fbo;
 
-		std::shared_ptr<Skybox> currentSkybox;
-		std::vector<std::shared_ptr<Skybox>> skyboxes;
+		Skybox* currentSkybox;
+		std::vector<Skybox*> skyboxes;
+		std::vector<std::future<void>> futures;
+		bool reloadSkyboxes = false;
 
 		PerspectiveCamera camera;
-		Model* model;
+		std::vector<Model*> models;
+		Model* currentModel;
 
 		std::unique_ptr<Shader> pbrShader;
 		Texture2D* diffuse;

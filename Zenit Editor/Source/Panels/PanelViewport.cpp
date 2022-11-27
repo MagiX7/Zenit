@@ -21,7 +21,7 @@ namespace Zenit {
 
 	void PanelViewport::OnUpdate(TimeStep ts, Model* model, PerspectiveCamera& camera)
 	{
-		if (!allowModelRotation)
+		if (!allowModelRotation || !model)
 			return;
 
 		camera.Scroll(ts);

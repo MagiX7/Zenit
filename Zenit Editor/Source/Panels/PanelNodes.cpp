@@ -85,7 +85,7 @@ namespace Zenit {
 	{
 		ed::NodeId selectedId;
 		ed::GetSelectedNodes(&selectedId, 1);
-		panelInspector->OnImGuiRender(editorLayer->model, editorLayer->dirLight, FindNode(selectedId));
+		panelInspector->OnImGuiRender(editorLayer->currentModel, editorLayer->dirLight, FindNode(selectedId));
 
 		ImGui::Begin("Node editor");
 

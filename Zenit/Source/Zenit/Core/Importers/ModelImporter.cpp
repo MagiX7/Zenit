@@ -6,6 +6,36 @@ namespace Zenit {
     Model* ModelImporter::ImportModel(std::string path)
     {
         Assimp::Importer importer;
+        std::string exts;
+        importer.GetExtensionList(exts);
+        std::vector<std::string> extensions;
+        std::string currentExtension;
+        
+        for (int i = 0; i < exts.size(); ++i)
+        {
+            char currentChar = exts[i];
+            if (currentChar == '*')
+                continue;
+
+            if (currentChar == ';' || i == exts.size() - 1)
+            {
+                extensions.push_back(currentExtension);
+                currentExtension.clear();
+            }
+            else
+            {
+                currentExtension += exts[i];
+            }
+        }
+
+        std::string fileExtension = path.substr(path.find_last_of("."));
+
+        if (std::find(extensions.begin(), extensions.end(), fileExtension) == extensions.end())
+        {
+            ZN_CORE_ERROR("Model Format {0} from {1} not supported", fileExtension, path.c_str());
+            return nullptr;
+        }
+
         const aiScene* scene = importer.ReadFile(path, aiProcess_CalcTangentSpace | aiProcess_Triangulate | aiProcess_FlipUVs);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)

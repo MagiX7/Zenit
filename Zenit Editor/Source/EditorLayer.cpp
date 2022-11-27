@@ -12,9 +12,21 @@
 
 #include <filesystem>
 
+
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
+#define MODELS_PATH "\\Assets\\Models\\"
 
 namespace Zenit {
+
+	static std::mutex skyboxesMutex;
+
+	static void LoadMeshes(std::vector<Model*>* models, std::string path)
+	{
+		std::lock_guard<std::mutex> lock(skyboxesMutex);
+		models->push_back(ModelImporter::ImportModel(path));
+		ZN_INFO("Model loaded");
+	}
+
 
 	EditorLayer::EditorLayer()
 		: camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
@@ -31,7 +43,8 @@ namespace Zenit {
 
 		LoadSkyboxes();
 		
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/cube_rounded.fbx");
+		LoadModels();
+		//currentModel = ModelImporter::ImportModel("Assets/Models/Primitives/cubo.obj");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		
@@ -48,6 +61,7 @@ namespace Zenit {
 		skyboxProps = SkyboxProperties();
 
 		panelNodes = new PanelNodes(this);
+
 	}
 
 	void EditorLayer::OnDetach()
@@ -60,13 +74,18 @@ namespace Zenit {
 		delete white;
 
 		delete panelNodes;
+
+		for (int i = 0; i < skyboxes.size(); ++i)
+		{
+			delete skyboxes[i];
+		}
 		skyboxes.clear();
 	}
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
 		camera.Update(ts);
-		panelViewport.OnUpdate(ts, model, camera);
+		panelViewport.OnUpdate(ts, currentModel, camera);
 		panelNodes->Update(ts);
 
 		fbo->Bind();
@@ -76,11 +95,13 @@ namespace Zenit {
 			if (skyboxProps.draw)
 				currentSkybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());
 
-			pbrShader->Bind();
-			SetModelShaderData();
-			model->Draw();
-
-			pbrShader->Unbind();
+			if (currentModel)
+			{
+				pbrShader->Bind();
+				SetModelShaderData();
+				currentModel->Draw();
+				pbrShader->Unbind();
+			}
 		}
 		fbo->Unbind();
 	}
@@ -104,14 +125,40 @@ namespace Zenit {
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("3D Model"))
+		{
+			for (const auto& model : models)
+			{
+				if (ImGui::MenuItem(model->GetName().c_str()))
+				{
+					currentModel = model;
+				}
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::MenuItem("Refresh"))
+			{
+				ReloadModels();
+			}
+
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("Skybox"))
 		{
-			for (auto skybox : skyboxes)
+			for (const auto& skybox : skyboxes)
 			{
 				if (ImGui::MenuItem(skybox->GetName().c_str()))
 				{
 					currentSkybox = skybox;
 				}
+			}
+
+			ImGui::Separator();
+			
+			if (ImGui::MenuItem("Refresh"))
+			{
+				ReloadSkyboxes();
 			}
 			ImGui::EndMenu();
 		}
@@ -255,7 +302,7 @@ namespace Zenit {
 		pbrShader->SetUniformMatrix4f("view", camera.GetView());
 		pbrShader->SetUniformMatrix4f("projection", camera.GetProjection());
 
-		pbrShader->SetUniformMatrix4f("model", model->GetTransform());
+		pbrShader->SetUniformMatrix4f("model", currentModel->GetTransform());
 		pbrShader->SetUniformVec3f("camPos", camera.GetPosition());
 
 		pbrShader->SetUniformVec3f("dirLight.direction", glm::normalize(dirLight.dir));
@@ -368,6 +415,8 @@ namespace Zenit {
 		delete[] data;
 	}
 
+	
+	
 	void EditorLayer::LoadSkyboxes()
 	{
 		std::filesystem::path cp = std::filesystem::current_path();
@@ -384,11 +433,58 @@ namespace Zenit {
 			if (!std::filesystem::is_directory(it->path()))
 			{
 				std::string path = it->path().string();
-				skyboxes.emplace_back(std::make_shared<Skybox>(path));
+				//futures.push_back(std::async(std::launch::async, LoadMeshes, &skyboxes, path));
+				skyboxes.push_back(new Skybox(path));
 			}
 		}
 		currentSkybox = skyboxes[0];
 
+	}
+
+	void EditorLayer::ReloadSkyboxes()
+	{
+		for (int i = 0; i < skyboxes.size(); ++i)
+		{
+			delete skyboxes[i];
+		}
+		skyboxes.clear();
+
+		LoadSkyboxes();
+	}
+
+	void EditorLayer::LoadModels()
+	{
+		std::filesystem::path cp = std::filesystem::current_path();
+		if (std::filesystem::exists(MODELS_PATH))
+		{
+			ZN_ERROR("3D Models Folder couldn't be located");
+			return;
+		}
+
+		std::filesystem::path absolutePath = std::filesystem::current_path().string() + MODELS_PATH;
+
+		for (std::filesystem::recursive_directory_iterator it(absolutePath), end; it != end; ++it)
+		{
+			if (!std::filesystem::is_directory(it->path()))
+			{
+				std::string path = it->path().string();
+				//futures.push_back(std::async(std::launch::async, LoadMeshes, &skyboxes, path));
+				if (Model* model = ModelImporter::ImportModel(path))
+					models.push_back(model);
+			}
+		}
+		currentModel = models[3];
+	}
+
+	void EditorLayer::ReloadModels()
+	{
+		for (int i = 0; i < models.size(); ++i)
+		{
+			delete models[i];
+		}
+		models.clear();
+
+		LoadModels();
 	}
 
 }
