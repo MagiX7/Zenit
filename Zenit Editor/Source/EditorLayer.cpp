@@ -243,16 +243,10 @@ namespace Zenit {
 		ambientOcclusion->Bind(4);
 		pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
 
-		//pbrShader->SetUniform1f("metallic", metallicValue);
-		pbrShader->SetUniform1f("roughnessValue", roughnessValue);
-
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
 		if (skyboxProps.draw)
 		{
-			//skybox->Bind(5);
-			//pbrShader->SetUniform1i("skybox", 5);
-
 			skybox->BindIrradianceMap(5);
 			pbrShader->SetUniform1i("irradianceMap", 5);
 

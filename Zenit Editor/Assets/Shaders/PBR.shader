@@ -201,7 +201,7 @@ void main()
 		vec2 brdf = texture2D(skyboxBrdf, vec2(max(dot(normal, viewDir), 0.0)), roughness).rg;
 		vec3 specular = prefilteredColor * (F * brdf.x + brdf.y);
 
-		ambient = kd * diffuse + specular; /* * ao; */
+		ambient += specular;
 	}
 	
 	color += ambient;
@@ -209,10 +209,5 @@ void main()
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 
-
-	//if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
-	//	fragColor = vec4(texture(skybox, R).rgb * skyboxIntensity, 1) * vec4(color, 1);
-	//else
-		fragColor = vec4(color, 1);
-	
+	fragColor = vec4(color, 1);	
 }
