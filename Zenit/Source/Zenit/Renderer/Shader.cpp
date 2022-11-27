@@ -256,10 +256,6 @@ namespace Zenit {
 			glGetProgramInfoLog(rendererID, 512, NULL, infoLog);
 			ZN_CORE_ERROR("{0} shader linking failed {1}", name, infoLog);
 		}
-		else
-		{
-			ZN_CORE_INFO("{0} shader linked successfully!", name);
-		}
 
 		glDetachShader(rendererID, vs);
 		glDeleteShader(vs);
@@ -290,8 +286,7 @@ namespace Zenit {
 		}
 		else
 		{
-			std::cout << "[INFO] Shader: Could not locate the shader" << std::endl;
-			ZN_CORE_ERROR("{0} Could not locate the shader", name);
+			ZN_CORE_ERROR("Could not locate the shader: {0}", name);
 		}
 
 		return ret;

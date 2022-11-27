@@ -103,8 +103,12 @@ namespace Zenit {
         ZN_CORE_INFO("Skybox loaded successfully");
 	}
 
-    Skybox::Skybox(std::string path)
+    Skybox::Skybox(std::string path) : path(path)
     {
+        int start = path.find_last_of("\\") + 1;
+        int end = path.find_last_of(".");
+        name = path.substr(start, end - start);
+
         glGenFramebuffers(1, &captureFBO);
         glGenRenderbuffers(1, &captureRBO);
 
@@ -307,7 +311,7 @@ namespace Zenit {
         reflectionLod = 2.0f;
         enableReflection = true;
 
-        ZN_CORE_INFO("Skybox with HDR texture loaded successfully");
+        ZN_CORE_INFO("[INFO] Skybox {0} loaded successfully", name.c_str());
 
     }
 

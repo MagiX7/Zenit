@@ -22,6 +22,8 @@ namespace Zenit {
 
 		void Draw(const glm::mat3& view, const glm::mat4& projection);
 
+		inline const std::string& GetName() { return name; }
+		inline const std::string& GetPath() { return path; }
 		inline unsigned int GetId() { return cubemapID; }
 		inline unsigned int GetIrradianceMapId() { return irradianceMapID; }
 		inline unsigned int GetHDRId() { return hdrTexture; }
@@ -48,6 +50,8 @@ namespace Zenit {
 		void DrawQuad();
 
 	private:
+		std::string name;
+		std::string path;
 		unsigned int captureFBO, captureRBO;
 		unsigned int cubemapID, irradianceMapID;
 		unsigned int hdrTexture, brdfTexture;

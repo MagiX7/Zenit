@@ -17,7 +17,7 @@ namespace Zenit {
         Model* model = new Model(path);
         ProcessNode(scene->mRootNode, scene, *model);
 
-        ZN_CORE_TRACE("Model {0} loaded", path.c_str());
+        ZN_CORE_INFO("[INFO] Model {0} loaded", path.c_str());
 
         return model;
     }

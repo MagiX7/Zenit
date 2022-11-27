@@ -51,7 +51,7 @@ namespace Zenit {
 
 		if (!storageFormat || !dataFormat)
 		{
-			std::cout << "[INFO]: Texture format not supported" << std::endl;
+			std::cout << "[INFO] Texture format not supported" << std::endl;
 			return;
 		}
 

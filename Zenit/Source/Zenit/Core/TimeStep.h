@@ -5,15 +5,15 @@ namespace Zenit {
 	class TimeStep
 	{
 	public:
-		TimeStep(float time = 0.0f) : dt(time) {};
+		TimeStep(float time = 0.0f) : time(time) {};
 
-		float GetSeconds() { return dt; }
-		float GetMilliseconds() { return (dt * 1000); }
+		float GetSeconds() { return time; }
+		float GetMilliseconds() { return (time * 1000); }
 		
-		operator float() { return dt; }
+		operator float() { return time; }
 
 	private:
-		float dt;
+		float time;
 	};
 
 }

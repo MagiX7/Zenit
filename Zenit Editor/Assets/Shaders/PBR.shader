@@ -142,12 +142,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 
 	vec3 radiance = dirLight.color * dirLight.intensity;
 
-	vec3 Lo = (kd * albedo / PI + specular) * radiance * NdotL;
-
-
-	
-
-	return Lo;
+	return (kd * albedo / PI + specular) * radiance * NdotL;
 }
 
 
@@ -194,7 +189,7 @@ void main()
 	vec3 diffuse = irradiance * albedo;
 
 	vec3 ambient = kd * diffuse;
-	if (bool(skyboxReflectionEnabled))
+	if (bool(skyboxReflectionEnabled) && bool(drawSkybox))
 	{
 		vec3 R = reflect(-viewDir, normal);
 		vec3 prefilteredColor = textureLod(skyboxPrefilterMap, R, roughness * reflectionLod).rgb;

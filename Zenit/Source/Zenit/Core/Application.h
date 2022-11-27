@@ -28,12 +28,11 @@ namespace Zenit {
 		void PopOverlay(EngineLayer* overlay);
 
 		inline Window& GetWindow() { return *window; }
-
+		inline float GetTimeStep() { return timestep; }
 
 	private:
 		Application(const Application&);
 		Application& operator=(Application&) {}
-
 		
 		bool OnWindowClose(WindowCloseEvent& e);
 		bool OnWindowResize(WindowResizeEvent& e);
@@ -42,7 +41,9 @@ namespace Zenit {
 		static Application* instance;
 		bool isRunning;
 		bool minimized;
-		float lastFrameDt;
+
+		TimeStep timestep = 0;
+		float lastFrameTime = 0;
 		
 		std::unique_ptr<Window> window;
 

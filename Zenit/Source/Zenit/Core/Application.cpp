@@ -20,7 +20,7 @@ namespace Zenit {
 		instance = this;
 		
 		Log::Init();
-		ZN_CORE_INFO("Logging system initialized");
+		ZN_CORE_INFO("[INFO] Logging system initialized");
 		
 		window = std::make_unique<Window>(1720, 920);
 		window->SetEventCallback(ZN_BIND_EVENT_FN(Application::OnEvent));
@@ -42,20 +42,15 @@ namespace Zenit {
 	{
 		while (isRunning)
 		{
-			//GLenum er;
-			//er = glGetError();
-			//if (er)
-			//	ZN_CORE_ERROR("OpenGL error {0}", glGetString(er));
-			//	//std::cout << "OpenGL error " << std::endl;
 			Renderer3D::Clear({ 0.2f,0.2f,0.2f,1.0f });
 
 			float t = glfwGetTime();
-			TimeStep dt = t - lastFrameDt;
-			lastFrameDt = t;
+			timestep = t - lastFrameTime;
+			lastFrameTime = t;
 
 			if (!minimized)
 				for (auto& l : layerStack)
-					l->OnUpdate(lastFrameDt);
+					l->OnUpdate(timestep);
 
 			imguiLayer->Begin();
 			for (auto& l : layerStack)

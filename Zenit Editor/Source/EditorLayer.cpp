@@ -10,6 +10,10 @@
 #include <ImGui/imgui.h>
 #include <stb_image/stb_image_write.h>
 
+#include <filesystem>
+
+#define SKYBOX_PATH "\\Assets\\Skybox\\"
+
 namespace Zenit {
 
 	EditorLayer::EditorLayer()
@@ -25,8 +29,9 @@ namespace Zenit {
 	{
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
-		skybox = std::make_unique<Skybox>("Assets/Skyboxes/loft.hdr");
-		model = ModelImporter::ImportModel("Assets/Models/Primitives/Cube.fbx");
+		LoadSkyboxes();
+		
+		model = ModelImporter::ImportModel("Assets/Models/Primitives/cube_rounded.fbx");
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		
@@ -55,6 +60,7 @@ namespace Zenit {
 		delete white;
 
 		delete panelNodes;
+		skyboxes.clear();
 	}
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
@@ -68,7 +74,7 @@ namespace Zenit {
 			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
 			
 			if (skyboxProps.draw)
-				skybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());
+				currentSkybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());
 
 			pbrShader->Bind();
 			SetModelShaderData();
@@ -98,11 +104,23 @@ namespace Zenit {
 
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Skybox"))
+		{
+			for (auto skybox : skyboxes)
+			{
+				if (ImGui::MenuItem(skybox->GetName().c_str()))
+				{
+					currentSkybox = skybox;
+				}
+			}
+			ImGui::EndMenu();
+		}
 		ImGui::EndMainMenuBar();
 
 
 		ImGui::Begin("Lightning Settings");
 		{
+			ImGui::Text("Directional Light");
 			ImGui::Text("Direction");
 			ImGui::SameLine();
 			ImGui::DragFloat3("##Direction", glm::value_ptr(dirLight.dir), 0.1f);
@@ -110,18 +128,29 @@ namespace Zenit {
 			ImGui::Text("Intensity");
 			ImGui::SameLine();
 			ImGui::DragFloat("##Intensity", &dirLight.intensity, 0.05f, 0.0f);
-			
-			ImGui::Separator();
 
 			ImGui::SetNextItemWidth(200);
 			ImGui::ColorEdit3("Color", glm::value_ptr(dirLight.color));
-			
-			ImGui::DragFloat("Roughness", &roughnessValue, 0.025);
 
+			ImGui::Dummy({ 0,10 });
+			ImGui::Separator();
+			ImGui::Dummy({ 0,10 });
+
+			ImGui::Text("Skybox");
+			ImGui::Checkbox("Draw Skybox", &skyboxProps.draw);
+
+			if (skyboxProps.draw)
+			{
+				ImGui::Checkbox("Enable Reflection", &currentSkybox->IsReflectionEnabled());
+				if (currentSkybox->IsReflectionEnabled())
+				{
+					ImGui::DragFloat("Reflection Blur", &currentSkybox->GetReflectionLod(), 0.05f, 0.0f, 4.5f);
+				}
+			}
 		}
 		ImGui::End();
 
-		ImGui::Begin("PBR Settings");
+		ImGui::Begin("Final Textures");
 		{			
 			ImGui::Image((ImTextureID)diffuse->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
 			ImGui::Image((ImTextureID)normals->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
@@ -130,9 +159,14 @@ namespace Zenit {
 		}
 		ImGui::End();
 
+		ImGui::Begin("Performance");
+		{
+			ImGui::Text(std::to_string(Application::GetInstance().GetTimeStep()).c_str());
+		}
+		ImGui::End();
+
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
-		panelSkybox.OnImGuiRender(skybox, skyboxProps);
 		//panelLayerStack.OnImGuiRender(layers);
 		panelNodes->OnImGuiRender(&panelInspector);
 
@@ -247,17 +281,17 @@ namespace Zenit {
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
 		if (skyboxProps.draw)
 		{
-			skybox->BindIrradianceMap(5);
+			currentSkybox->BindIrradianceMap(5);
 			pbrShader->SetUniform1i("irradianceMap", 5);
-
-			skybox->BindPrefilterMap(6);
+		
+			currentSkybox->BindPrefilterMap(6);
 			pbrShader->SetUniform1i("skyboxPrefilterMap", 6);
-
-			skybox->BindBRDF(7);
+		
+			currentSkybox->BindBRDF(7);
 			pbrShader->SetUniform1i("skyboxBrdf", 7);
-
-			pbrShader->SetUniform1f("reflectionLod", skybox->GetReflectionLod());
-			pbrShader->SetUniform1i("skyboxReflectionEnabled", skybox->IsReflectionEnabled());
+		
+			pbrShader->SetUniform1f("reflectionLod", currentSkybox->GetReflectionLod());
+			pbrShader->SetUniform1i("skyboxReflectionEnabled", currentSkybox->IsReflectionEnabled());
 		}
 	}
 
@@ -332,6 +366,29 @@ namespace Zenit {
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_ambientOcclusion.png").c_str(), w, h, channels, data, w * channels);
 		delete[] data;
+	}
+
+	void EditorLayer::LoadSkyboxes()
+	{
+		std::filesystem::path cp = std::filesystem::current_path();
+		if (std::filesystem::exists(SKYBOX_PATH))
+		{
+			ZN_ERROR("Skybox Folder couldn't be located");
+			return;
+		}
+
+		std::filesystem::path absolutePath = std::filesystem::current_path().string() + SKYBOX_PATH;
+		
+		for (std::filesystem::recursive_directory_iterator it(absolutePath), end; it != end; ++it)
+		{
+			if (!std::filesystem::is_directory(it->path()))
+			{
+				std::string path = it->path().string();
+				skyboxes.emplace_back(std::make_shared<Skybox>(path));
+			}
+		}
+		currentSkybox = skyboxes[0];
+
 	}
 
 }

@@ -11,9 +11,9 @@ namespace Zenit {
     {
         spdlog::set_pattern("%^[%T] %n: %v%$");
 
-        coreLogger = spdlog::stdout_color_mt("ZENIT");
+        coreLogger = spdlog::stdout_color_mt("Zenit");
         coreLogger->set_level(spdlog::level::trace);
-        clientLogger = spdlog::stdout_color_mt("APP");
+        clientLogger = spdlog::stdout_color_mt("Editor");
         coreLogger->set_level(spdlog::level::trace);
 
     }

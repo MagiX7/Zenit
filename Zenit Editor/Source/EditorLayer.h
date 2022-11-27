@@ -3,7 +3,6 @@
 #include "Zenit.h"
 #include "Panels/PanelInspector.h"
 #include "Panels/PanelViewport.h"
-#include "Panels/PanelSkybox.h"
 #include "Panels/PanelLayerStack.h"
 #include "Panels/PanelNodes.h"
 
@@ -44,17 +43,18 @@ namespace Zenit {
 	private:
 		void SetModelShaderData();
 		void ExportTextures();		
+		void LoadSkyboxes();
 
 	private:
 		PanelInspector panelInspector;
 		PanelViewport panelViewport;
-		PanelSkybox panelSkybox;
 		PanelLayerStack panelLayerStack;
 		PanelNodes* panelNodes;
 
 		std::unique_ptr<FrameBuffer> fbo;
 
-		std::unique_ptr<Skybox> skybox;
+		std::shared_ptr<Skybox> currentSkybox;
+		std::vector<std::shared_ptr<Skybox>> skyboxes;
 
 		PerspectiveCamera camera;
 		Model* model;

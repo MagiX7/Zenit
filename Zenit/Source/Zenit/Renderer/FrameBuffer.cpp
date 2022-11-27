@@ -88,8 +88,6 @@ namespace Zenit {
 		GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 		if (err != GL_FRAMEBUFFER_COMPLETE)
 			ZN_CORE_ERROR("Framebuffer is Incomplete. Error {0}", glGetString(err));
-		else
-			ZN_CORE_INFO("Framebuffer is Complete");
 
 	}
 

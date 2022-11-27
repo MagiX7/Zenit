@@ -14,7 +14,8 @@ namespace Zenit {
 
 	static void GLFWErrorCallback(int err, const char* msg)
 	{
-		std::cout << "[ERROR]: " << "(" << std::to_string(err) << ")" << msg << std::endl;
+		std::string error = "[ERROR]: (" + std::to_string(err) + ")" + msg;
+		ZN_CORE_ERROR(error);
 	}
 
 	// TODO: Add window flags
@@ -41,33 +42,33 @@ namespace Zenit {
 
 		if (!glfwInit())
 		{
-			ZN_CORE_INFO("[INFO]: GLFW Initialization Failed.");
+			ZN_CORE_INFO("[INFO] GLFW Initialization Failed.");
 			ret = false;
 			return false;
 		}
 		else
 		{
-			ZN_CORE_INFO("[INFO]: GLFW Initialization Correct.");
+			ZN_CORE_INFO("[INFO] GLFW Initialization Correct.");
 		}
 
 		glfwSetErrorCallback(GLFWErrorCallback);
 
 		window = glfwCreateWindow(props.width, props.height, props.title.c_str(), 0, 0);
 			
-		if (window) ZN_CORE_INFO("[INFO]: Window Initialization...");
+		if (window) ZN_CORE_INFO("[INFO] Window Initialization...");
 
 		glfwMakeContextCurrent(window);
 
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (status == 0)
 		{
-			ZN_CORE_INFO("[INFO]: GLAD Loader Failed.");
+			ZN_CORE_INFO("[INFO] GLAD Loader Failed.");
 			return false;
 		}
 		else
 		{
-			ZN_CORE_INFO("[INFO]: GLAD Loader Correct.");
-			ZN_CORE_INFO("[INFO]: OpenGL Version: {0}", glGetString(GL_VERSION));
+			ZN_CORE_INFO("[INFO] GLAD Loader Correct.");
+			ZN_CORE_INFO("[INFO] OpenGL Version: {0}", glGetString(GL_VERSION));
 		}
 
 		glfwSetWindowUserPointer(window, &props);

@@ -3,8 +3,9 @@
 
 #include "PanelViewport.h"
 
-
 #include <ImGui/imgui.h>
+
+#define ROTATION_MULTIPLIER 200
 
 namespace Zenit {
 
@@ -32,7 +33,7 @@ namespace Zenit {
 		const float dy = Input::GetInstance()->GetMouseMotionY();
 		
 		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
-			model->Update(ts, dx, dy);
+			model->Update(ts, dx * ROTATION_MULTIPLIER, dy * ROTATION_MULTIPLIER);
 	}
 
 	void PanelViewport::OnImGuiRender(FrameBuffer* fbo, PerspectiveCamera& camera)
@@ -48,7 +49,7 @@ namespace Zenit {
 			fbo->Resize(dimensions.x, dimensions.y);
 			Renderer3D::OnResize(dimensions.x, dimensions.y);
 			camera.SetApsectRatio(dimensions.x / dimensions.y);
-			ZN_CORE_TRACE("Viewport Resized");
+			ZN_TRACE("Viewport Resized");
 			viewportSize = { dimensions.x, dimensions.y };
 		}
 		
