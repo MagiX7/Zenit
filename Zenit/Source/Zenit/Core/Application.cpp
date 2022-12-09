@@ -83,6 +83,11 @@ namespace Zenit {
 		layerStack.PopOverlay(overlay);
 	}
 
+	float Application::GetTotalExecutionTime()
+	{
+		return glfwGetTime();
+	}
+
 	void Application::OnEvent(Event& e)
 	{
 		EventDispatcher dispatcher(e);

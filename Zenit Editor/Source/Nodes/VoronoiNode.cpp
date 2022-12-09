@@ -11,8 +11,10 @@ namespace Zenit {
 		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
 
 		BindCoreData();
-		//computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
 		DispatchCompute(1, 1);
+
+		latestSeed = 1.54;
+		zoom = 5;
 	}
 
 	VoronoiNode::~VoronoiNode()
@@ -23,9 +25,11 @@ namespace Zenit {
 	{
 		BindCoreData();
 		computeShader->SetUniform1f("brightness", brightness);
+		computeShader->SetUniform1f("zoom", zoom);
 		if (regenerate)
 		{
-			computeShader->SetUniform1f("seed", ts);
+			computeShader->SetUniform1f("seed", latestSeed);
+			latestSeed += Application::GetInstance().GetTotalExecutionTime();
 			regenerate = false;
 		}
 		DispatchCompute(1, 1);
@@ -44,7 +48,8 @@ namespace Zenit {
 		if (ImGui::Button("Regenerate"))
 			regenerate = true;
 
-		ImGui::DragFloat("Brightness", &brightness, 0.1f, 0.0f);
+		ImGui::DragFloat("Brightness", &brightness, 0.01f, 0.0f, 1.0f);
+		ImGui::DragFloat("Zoom", &zoom, 0.1f, 0.0f);
 		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0, 1 }, { 1,0 });
 	}
 }

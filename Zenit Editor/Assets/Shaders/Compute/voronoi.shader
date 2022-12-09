@@ -5,12 +5,17 @@ layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 uniform float brightness;
 uniform float seed;
+uniform float zoom;
 
 vec2 Noise(vec2 p)
 {
 	vec3 a = fract(p.xyx * vec3(123.34, 234.45, 345.56));
 	a += dot(a, a);
 	return fract(vec2(a.x * a.y, a.y * a.z));
+
+	//p = vec2(dot(p, vec2(127.1, 311.7)),
+	//	dot(p, vec2(269.5, 183.3)));
+	//return fract(sin(p) * 18.5453);
 }
 
 void main()
@@ -22,11 +27,11 @@ void main()
 
 	vec4 color = vec4(0, 0, 0, 1);
 
-	uv *= 7.0;
+	uv *= zoom;
 	vec2 gv = fract(uv) - 0.5; // Grid
 	vec2 id = floor(uv); // Id of each quad of the grid
 
-	float minDist = 5000;
+	float minDist = 100;
 	vec2 cell = vec2(-1);
 	for (int y = -1; y <= 1; ++y)
 	{

@@ -29,6 +29,7 @@ namespace Zenit {
 
 		inline Window& GetWindow() { return *window; }
 		inline float GetTimeStep() { return timestep; }
+		float GetTotalExecutionTime();
 
 	private:
 		Application(const Application&);

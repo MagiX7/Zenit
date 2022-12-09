@@ -21,7 +21,7 @@ namespace Zenit {
 
 		enum class BlendMode
 		{
-			LINEAR, BURN, DARKEN, DIFFERENCE, DODGE, DIVIDE, MULTIPLY, NEGATION, SUBTRACT
+			BURN, DARKEN, DIFFERENCE, DODGE, DIVIDE, MULTIPLY, NEGATION, SUBTRACT
 		} blendMode;
 
 		int comboCurrentIndex = 0;

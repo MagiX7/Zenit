@@ -47,7 +47,7 @@ namespace Zenit {
 		ImGui::Separator();
 		ImGui::DragFloat("Distribution", &contribution, 0.01f, 0.0f, 1.0f);
 
-		const char* labels[] = { "Linear", "Burn", "Darken", "Difference", "Dodge", "Divide", "Multiply", "Negation", "Subtract"};
+		const char* labels[] = { "Burn", "Darken", "Difference", "Dodge", "Divide", "Multiply", "Negation", "Subtract"};
 		const char* previewValue = labels[comboCurrentIndex];
 		if (ImGui::BeginCombo("Mode", previewValue))
 		{

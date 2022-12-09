@@ -16,6 +16,8 @@ namespace Zenit {
 
 	public:
 		float brightness;
+		float latestSeed;
+		float zoom;
 	};
 
 }
