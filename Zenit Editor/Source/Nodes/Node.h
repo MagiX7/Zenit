@@ -55,6 +55,10 @@ namespace Zenit {
 
 	struct LinkInfo
 	{
+		LinkInfo(ed::LinkId id, ed::PinId inputId, ed::PinId  outputId)
+			: id(id), inputId(inputId), outputId(outputId)
+		{
+		}
 		ed::LinkId id;
 		ed::PinId  inputId;
 		ed::PinId  outputId;
@@ -70,7 +74,7 @@ namespace Zenit {
 		PinType type;
 		ed::PinKind kind;
 
-		std::vector<LinkInfo> links;
+		//std::vector<LinkInfo> links;
 
 		Pin(int pinId, const char* pinName, PinType type, ed::PinKind kind)
 			: id(pinId), node(nullptr), name(pinName), type(type), kind(kind)
@@ -87,6 +91,7 @@ namespace Zenit {
 		virtual ~Node();
 
 		virtual void Update(TimeStep ts) {};
+		virtual void ResetDefaultState() {};
 		virtual void OnImGuiNodeRender() {};
 		virtual void OnImGuiInspectorRender() {};
 

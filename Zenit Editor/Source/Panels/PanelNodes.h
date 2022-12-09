@@ -31,11 +31,11 @@ namespace Zenit {
 		void ShowNodeCreationPopup();
 
 		Node* FindNode(ed::NodeId id) const;
-		Pin FindPin(ed::PinId id) const;
-		LinkInfo FindLink(const ed::LinkId& id) const;
+		Pin* FindPin(ed::PinId id);
+		LinkInfo* FindLink(const ed::LinkId& id);
 
 		void DeleteNode(ed::NodeId id);
-		void DeleteLink(const ed::LinkId& id) const;
+		void DeleteLink(const ed::LinkId& id);
 
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		// Generators
@@ -54,7 +54,7 @@ namespace Zenit {
 		Node* CreateClampNode(const char* name);
 		// Operators
 
-		void UpdateLink(Pin& startPin, Pin& endPin, bool resetData);
+		void UpdateLink(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
 	private:
@@ -63,9 +63,12 @@ namespace Zenit {
 		std::vector<Node*> nodes;
 		std::vector<LinkInfo> links;
 		int creationId = 1;
+		int linkCreationId = 1000;
 
 		ed::EditorContext* context;
 		ed::Config config;
+		Pin incorrectPin = Pin(-1, "", PinType::None, ed::PinKind::None);
+		LinkInfo incorrectLink = LinkInfo(-1, -1, -1);
 
 		ed::NodeId rightClickedNodeId = 0;
 
