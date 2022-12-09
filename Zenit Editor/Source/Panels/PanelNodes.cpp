@@ -12,6 +12,7 @@
 
 #include "Nodes/Operators/BlendNode.h"
 #include "Nodes/Operators/ClampNode.h"
+#include "Nodes/Operators/MaxMinNode.h"
 
 #include "EditorLayer.h"
 
@@ -363,13 +364,22 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Blend"))
 				{
-					// TODO: Handle blending between two colors
 					CreateBlendNode("Blend");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Clamp"))
 				{
 					CreateClampNode("Clamp");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Max"))
+				{
+					CreateMaxNode("Max");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Min"))
+				{
+					CreateMinNode("Min");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -579,14 +589,57 @@ namespace Zenit {
 		output.node = node;
 		node->outputs.emplace_back(output);
 
-		return nullptr;
+		return node;
+	}
+
+	Node* PanelNodes::CreateMinNode(const char* name)
+	{
+		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, false);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input2.node = node;
+		node->inputs.emplace_back(input2);
+
+		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+
+		return node;
+	}
+
+	Node* PanelNodes::CreateMaxNode(const char* name)
+	{
+		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, true);
+		node->size = { 5,5 };
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input2.node = node;
+		node->inputs.emplace_back(input2);
+
+		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
 	}
 
 	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
 	{
-		if (endPin->node->outputType == NodeOutputType::TEXTURE)
+		//if (endPin->node->outputType == NodeOutputType::TEXTURE)
 		{
-			if (startPin->node->outputType == NodeOutputType::TEXTURE)
+			//if (startPin->node->outputType == NodeOutputType::TEXTURE)
 			{
 				const auto inNode = (ComputeShaderNode*)startPin->node;
 				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
@@ -616,6 +669,29 @@ namespace Zenit {
 						resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
 						break;
 					}
+					case NodeType::MAX:
+					{
+						const auto n = (MaxMinNode*)endPin->node;
+
+						Texture2D* tex = nullptr;
+						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+
+						n->inputs[0].id.Get() < endPin->id.Get() ? *n->inputTexture2 = *tex : *n->inputTexture1 = *tex;
+
+						break;
+					}
+					case NodeType::MIN:
+					{					
+						const auto n = (MaxMinNode*)endPin->node;
+
+						Texture2D* tex = nullptr;
+						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+
+						n->inputs[0].id.Get() < endPin->id.Get() ? *n->inputTexture2 = *tex : *n->inputTexture1 = *tex;
+
+						break;
+					}
+					
 
 				}
 			}

@@ -21,8 +21,15 @@ void main()
 
 	switch (mode)
 	{
-		// Burn
+		// Linear
 		case 0:
+		{
+			color = mix(base, color, contribution);
+			break;
+		}
+
+		// Burn
+		case 1:
 		{
 			color = 1.0 - (1.0 - blend) / base;
 			color = mix(base, color, contribution);
@@ -30,7 +37,7 @@ void main()
 		}
 
 		// Darken
-		case 1:
+		case 2:
 		{
 			color = min(blend, base);
 			color = mix(base, color, contribution);
@@ -38,7 +45,7 @@ void main()
 		}
 
 		// Difference
-		case 2:
+		case 3:
 		{
 			color = abs(blend - base);
 			color = mix(base, color, contribution);
@@ -46,7 +53,7 @@ void main()
 		}
 
 		// Dodge
-		case 3:
+		case 4:
 		{
 			color = base / (1.0 - blend);
 			color = mix(base, color, contribution);
@@ -54,7 +61,7 @@ void main()
 		}
 
 		// Divide
-		case 4:
+		case 5:
 		{
 			color = base / (max(blend, 0.0000001));
 			color = mix(base, color, contribution);
@@ -62,7 +69,7 @@ void main()
 		}
 
 		// Multiply
-		case 5:
+		case 6:
 		{
 			color = base * blend;
 			color = mix(base, color, contribution);
@@ -70,7 +77,7 @@ void main()
 		}
 
 		// Negation
-		case 6:
+		case 7:
 		{
 			color = 1.0 - abs(1.0 - blend - base);
 			color = mix(base, color, contribution);
@@ -78,7 +85,7 @@ void main()
 		}
 
 		// Subtract
-		case 7:
+		case 8:
 		{
 			color = base - blend;
 			color = mix(base, color, contribution);
