@@ -12,10 +12,6 @@ vec2 Noise(vec2 p)
 	vec3 a = fract(p.xyx * vec3(123.34, 234.45, 345.56));
 	a += dot(a, a);
 	return fract(vec2(a.x * a.y, a.y * a.z));
-
-	//p = vec2(dot(p, vec2(127.1, 311.7)),
-	//	dot(p, vec2(269.5, 183.3)));
-	//return fract(sin(p) * 18.5453);
 }
 
 void main()

@@ -77,6 +77,6 @@ namespace Zenit {
 			ImGui::DragInt("Resolution", &res, 1.0f, 0, 10);
 		}
 
-		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
+		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 }

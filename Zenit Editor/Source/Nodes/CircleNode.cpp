@@ -39,6 +39,6 @@ namespace Zenit {
 		ImGui::DragFloat2("Offset", glm::value_ptr(offset), 0.01);
 		ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f, 1.0f);
 		ImGui::DragFloat("Blur", &blur, 0.01f, 0.0f, 1.0f);
-		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
+		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 }

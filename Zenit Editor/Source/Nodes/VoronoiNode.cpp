@@ -50,6 +50,6 @@ namespace Zenit {
 
 		ImGui::DragFloat("Brightness", &brightness, 0.01f, 0.0f, 1.0f);
 		ImGui::DragFloat("Zoom", &zoom, 0.1f, 0.0f);
-		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0, 1 }, { 1,0 });
+		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0, 1 }, { 1,0 });
 	}
 }

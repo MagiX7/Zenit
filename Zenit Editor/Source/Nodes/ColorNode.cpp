@@ -23,7 +23,7 @@ namespace Zenit {
 
 	void ColorNode::OnImGuiInspectorRender()
 	{
-		ImGui::SetNextItemWidth(300);
+		ImGui::SetNextItemWidth(256);
 		ImGui::ColorPicker3("Color", glm::value_ptr(color));
 	}
 }
