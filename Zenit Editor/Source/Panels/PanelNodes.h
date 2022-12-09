@@ -54,7 +54,7 @@ namespace Zenit {
 		Node* CreateClampNode(const char* name);
 		// Operators
 
-		void UpdateLink(Pin* startPin, Pin* endPin, bool resetData);
+		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
 	private:

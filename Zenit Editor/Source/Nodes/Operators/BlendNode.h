@@ -18,6 +18,14 @@ namespace Zenit {
 		float contribution;
 		std::unique_ptr<Texture2D> tex1;
 		std::unique_ptr<Texture2D> tex2;
+
+		enum class BlendMode
+		{
+			Burn, Darken, Difference, Dodge, Divide, Multiply, Negation, Subtract
+		} blendMode;
+
+		int comboCurrentIndex = 0;
+
 	};
 
 }

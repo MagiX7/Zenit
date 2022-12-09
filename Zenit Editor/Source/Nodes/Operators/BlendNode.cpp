@@ -16,6 +16,7 @@ namespace Zenit {
 
 		tex1 = std::make_unique<Texture2D>("Settings/white.png");
 		tex2 = std::make_unique<Texture2D>("Settings/white.png");
+		blendMode = (BlendMode)0;
 	}
 
 	BlendNode::~BlendNode()
@@ -27,6 +28,7 @@ namespace Zenit {
 		BindCoreData();
 
 		computeShader->SetUniform1f("contribution", contribution);
+		computeShader->SetUniform1i("mode", (int)blendMode);
 		tex1->Bind(1);
 		computeShader->SetUniform1i("tex1", 1);
 		tex2->Bind(2);
@@ -44,7 +46,30 @@ namespace Zenit {
 	{
 		ImGui::Separator();
 		ImGui::DragFloat("Distribution", &contribution, 0.01f, 0.0f, 1.0f);
-		ImGui::Image((void*)texture->GetId(), { 512,512 }, { 0,1 }, { 1,0 });
+
+		const char* labels[] = { "Burn", "Darken", "Difference", "Dodge", "Divide", "Multiply", "Negation", "Subtract"};
+		const char* previewValue = labels[comboCurrentIndex];
+		if (ImGui::BeginCombo("Mode", previewValue))
+		{
+			for (int i = 0; i < IM_ARRAYSIZE(labels); ++i)
+			{
+				const bool isSelected = (comboCurrentIndex == i);
+				if (ImGui::Selectable(labels[i], isSelected))
+				{
+					blendMode = (BlendMode)i;
+					comboCurrentIndex = i;
+				}
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+
+		}
+
+		//ImGui::BeginCombo();
+		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
 }

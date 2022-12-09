@@ -195,7 +195,7 @@ namespace Zenit {
 
 						if (inputPin->node == deletedNode)
 						{
-							UpdateLink(inputPin, outputPin, true);
+							UpdateNode(inputPin, outputPin, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
 						}
@@ -261,7 +261,7 @@ namespace Zenit {
 						//startPin->links.push_back(link);
 						//endPin->links.push_back(link);
 
-						UpdateLink(startPin, endPin, false);
+						UpdateNode(startPin, endPin, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
 					}
 					
@@ -290,7 +290,7 @@ namespace Zenit {
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 
 							// TODO: Handle links deletion between normal/current nodes
-							UpdateLink(inputPin, outputPin, true);
+							UpdateNode(inputPin, outputPin, true);
 
 							links.erase(links.begin() + i);
 
@@ -582,7 +582,7 @@ namespace Zenit {
 		return nullptr;
 	}
 
-	void PanelNodes::UpdateLink(Pin* startPin, Pin* endPin, bool resetData)
+	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
 	{
 		if (endPin->node->outputType == NodeOutputType::TEXTURE)
 		{
