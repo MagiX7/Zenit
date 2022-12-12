@@ -8,6 +8,7 @@ namespace Zenit {
 	{
 	public:
 		ComputeShaderNode(int id, const char* name, NodeOutputType outputType);
+		virtual ~ComputeShaderNode() {};
 		
 		void BindCoreData() const;
 		void DispatchCompute(int xPixels, int yPixels) const;

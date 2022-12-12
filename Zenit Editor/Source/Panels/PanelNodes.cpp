@@ -16,6 +16,8 @@
 
 #include "EditorLayer.h"
 
+#include <ImGui/imgui_internal.h>
+
 #define OUTPUT_NODE_ID 1
 #define OUTPUT_ALBEDO_PIN_ID 2
 #define OUTPUT_NORMALS_PIN_ID 3
@@ -76,10 +78,10 @@ namespace Zenit {
 			node->Update(ts);
 		}
 
-		editorLayer->SetDiffuseData(diffuseNode);
-		editorLayer->SetNormalsData(normalsNode);
-		editorLayer->SetMetallicData(metallicNode);
-		editorLayer->SetRoughnessData(roughnessNode);
+		//editorLayer->SetDiffuseData(diffuseNode);
+		//editorLayer->SetNormalsData(normalsNode);
+		//editorLayer->SetMetallicData(metallicNode);
+		//editorLayer->SetRoughnessData(roughnessNode);
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
@@ -174,6 +176,13 @@ namespace Zenit {
 	{
 		if (ed::BeginDelete())
 		{
+			// Avoid undesired deletes
+			if (GImGui->ActiveId != 0)
+			{
+				ed::EndDelete();
+				return;
+			}
+
 			ed::NodeId id;
 			if (ed::QueryDeletedNode(&id))
 			{
@@ -186,6 +195,10 @@ namespace Zenit {
 					}
 
 					Node* deletedNode = FindNode(id);
+					std::vector<int> toErase;
+					toErase.resize(links.size());
+					toErase = { -1 };
+
 					auto& it = links.begin();
 					while (it != links.end())
 					{
@@ -194,7 +207,15 @@ namespace Zenit {
 						Pin* inputPin = FindPin(currentLink.inputId);
 						Pin* outputPin = FindPin(currentLink.outputId);
 
-						if (inputPin->node == deletedNode)
+						// TODO: Removing here leads to problems!!!
+						if (outputPin->node == deletedNode)
+						{
+							UpdateNode(inputPin, outputPin, true);
+							UpdateOutputNodeData(*inputPin, *outputPin, true);
+							it = links.erase(it);
+
+						}
+						else if (inputPin->node == deletedNode)
 						{
 							UpdateNode(inputPin, outputPin, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
@@ -433,8 +454,17 @@ namespace Zenit {
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
-		int i = 0;
-		for (auto& node : nodes)
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			if (id == nodes[i]->id)
+			{
+				delete nodes[i];
+				nodes[i] = nullptr;
+				nodes.erase(nodes.begin() + i);
+				break;
+			}
+		}
+		/*for (auto& node : nodes)
 		{
 			if (id == node->id)
 			{
@@ -444,7 +474,7 @@ namespace Zenit {
 				break;
 			}
 			i++;
-		}
+		}*/
 	}
 
 	void PanelNodes::DeleteLink(const ed::LinkId& id)
