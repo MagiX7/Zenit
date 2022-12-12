@@ -45,8 +45,12 @@ namespace Zenit {
 		PERLIN_NOISE,
 		DERIVATIVE_NOISE,
 		VORONOI,
-		NORMAL_MAP,
 
+		// Filters
+		NORMAL_MAP,
+		TWIRL,
+
+		// Operators
 		BLEND,
 		CLAMP,
 		MAX,
