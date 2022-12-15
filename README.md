@@ -9,6 +9,9 @@ This tool is centered in the PBR metallic workflow, allowing to create each diff
 
 Zenit also supports custom FBX model loading.
 
+The very core engine was made following [TheCherno Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT)
+to explore new and different workarounds that I have learnt during the course.
+
 ## Files generation
 
 All what is needed to get the files is:
