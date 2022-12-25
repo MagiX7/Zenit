@@ -55,7 +55,7 @@ namespace Zenit {
 		roughness = new Texture2D(&data, 1, 1);
 		ambientOcclusion = new Texture2D(&data, 1, 1);
 		
-		white = new Texture2D("Settings/white.png");
+		white = std::make_shared<Texture2D>("Settings/white.png");
 
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
@@ -71,7 +71,6 @@ namespace Zenit {
 		delete metallic;
 		delete roughness;
 		delete ambientOcclusion;
-		delete white;
 
 		delete panelNodes;
 
@@ -230,8 +229,8 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (diffuse != white)
-				diffuse = white;
+			if (diffuse != white.get())
+				diffuse = white.get();
 			return false;
 		}
 
@@ -244,8 +243,8 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (normals != white)
-				normals = white;
+			if (normals != white.get())
+				normals = white.get();
 			return false;
 		}
 
@@ -258,8 +257,8 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (metallic != white)
-				metallic = white;
+			if (metallic != white.get())
+				metallic = white.get();
 			return false;
 		}
 
@@ -272,8 +271,8 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (roughness != white)
-				roughness = white;
+			if (roughness != white.get())
+				roughness = white.get();
 			return false;
 		}
 
@@ -470,10 +469,18 @@ namespace Zenit {
 				std::string path = it->path().string();
 				//futures.push_back(std::async(std::launch::async, LoadMeshes, &skyboxes, path));
 				if (Model* model = ModelImporter::ImportModel(path))
+				{
 					models.push_back(model);
+					if (model->GetName() == "Sphere")
+					{
+						currentModel = model;
+					}
+				}
 			}
 		}
-		currentModel = models[3];
+		
+		if (!currentModel)
+			currentModel = models[0];
 	}
 
 	void EditorLayer::ReloadModels()

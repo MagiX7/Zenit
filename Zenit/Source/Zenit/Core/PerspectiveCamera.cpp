@@ -48,7 +48,7 @@ namespace Zenit {
 	{
 		if (float dy = Input::GetInstance()->GetMouseScrolDy())
 		{
-			position += dy * ts * 0.05f * forward;
+			position += dy * ts * 10 * forward;
 			RecalculateMatrices();
 		}
 		/*if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))

@@ -8,6 +8,5 @@ uniform vec3 color;
 void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-	vec3 col = color;
-	imageStore(imgOutput, pixelCoords, vec4(col, 1));
+	imageStore(imgOutput, pixelCoords, vec4(color, 1));
 }

@@ -6,11 +6,14 @@ namespace Zenit {
 	{
 		type = NodeType::COLOR;
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/color.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 	}
 
 	void ColorNode::Update(TimeStep)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 		computeShader->SetUniformVec3f("color", color);
 		DispatchCompute(1, 1);
@@ -24,6 +27,7 @@ namespace Zenit {
 	void ColorNode::OnImGuiInspectorRender()
 	{
 		ImGui::SetNextItemWidth(256);
-		ImGui::ColorPicker3("Color", glm::value_ptr(color));
+		if (ImGui::ColorPicker3("Color", glm::value_ptr(color)))
+			regenerate = true;
 	}
 }

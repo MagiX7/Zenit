@@ -22,11 +22,11 @@ namespace Zenit {
 			}
 		}
 
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 
 		BindCoreData();
 		computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-		DispatchCompute(8, 4);
+		DispatchCompute(1, 1);
 
 	}
 
@@ -36,12 +36,12 @@ namespace Zenit {
 
 	void NoiseNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
-		if (regenerate)
-		{
-			computeShader->SetUniform1f("seed", ts);
-			regenerate = false;
-		}
+		computeShader->SetUniform1f("seed", ts);
+		regenerate = false;
 
 		switch (noiseType)
 		{
@@ -56,7 +56,7 @@ namespace Zenit {
 			}
 		}
 
-		DispatchCompute(8, 4);
+		DispatchCompute(1, 1);
 	}
 
 	void NoiseNode::OnImGuiNodeRender()

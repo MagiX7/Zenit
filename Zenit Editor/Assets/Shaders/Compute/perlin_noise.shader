@@ -52,14 +52,26 @@ float perlinNoise(vec2 p, int res)
 	return nf * nf * nf * nf;
 }
 
+vec4 gradient(vec2 tex_coords) {
+	float s = tex_coords[0];
+	float t = tex_coords[1];
+	vec3 red = vec3(1.0, 0.0, 0.0);
+	float percent;
+
+	percent = s;
+	return vec4(red * percent, 1.0);
+}
+
 void main()
 {
     ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
-	vec2 uv = vec2(pixelCoords * 2.0);
+	vec2 uv = vec2(pixelCoords);
+	//uv = gradient(uv).xy;
 
 	float n = perlinNoise(uv, resolution);
 
 	vec4 color = vec4(vec3(n), 1) * vec4(inputColor, 1);
+	//vec4 color = vec4(uv, 0, 1);
 
     imageStore(imgOutput, pixelCoords, color);
 }

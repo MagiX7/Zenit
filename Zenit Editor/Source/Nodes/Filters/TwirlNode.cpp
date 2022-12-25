@@ -9,7 +9,7 @@ namespace Zenit {
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/twirl.shader");
 
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
 
 		center = { -0.5f,-0.5f };
@@ -23,6 +23,9 @@ namespace Zenit {
 
 	void TwirlNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 		
 		inputTexture->Bind(1);
@@ -42,12 +45,21 @@ namespace Zenit {
 
 	void TwirlNode::OnImGuiInspectorRender()
 	{
-		ImGui::DragFloat2("Center", glm::value_ptr(center), 0.01f, -1.0f, 1.0f);
-		ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f);
-		ImGui::DragFloat("Angle", &angle, 0.01f);
+		bool changedCenter = ImGui::DragFloat2("Center", glm::value_ptr(center), 0.01f, -1.0f, 1.0f);
+		bool changedRadius = ImGui::DragFloat("Radius", &radius, 0.01f, 0.0f);
+		bool changedAngle = ImGui::DragFloat("Angle", &angle, 0.01f);
+
+		if (changedCenter || changedRadius || changedAngle)
+			regenerate = true;
 
 		ImGui::Separator();
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
+	}
+
+	void TwirlNode::SetTexture(Texture2D* texture)
+	{
+		inputTexture.reset(texture);
+		regenerate = true;
 	}
 
 }

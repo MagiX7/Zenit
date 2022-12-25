@@ -6,7 +6,7 @@ namespace Zenit {
 		: ComputeShaderNode(id, name, outputType)
 	{
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/maxmin.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
 		BindCoreData();
 		DispatchCompute(1, 1);
@@ -24,6 +24,9 @@ namespace Zenit {
 
 	void MaxMinNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 		computeShader->SetUniform1f("type", (int)maxMinType);
 		
@@ -46,5 +49,17 @@ namespace Zenit {
 
 		ImGui::Image((ImTextureID*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 
+	}
+
+	void MaxMinNode::SetFirstTexture(Texture2D* texture)
+	{
+		inputTexture1.reset(texture);
+		regenerate = true;
+	}
+
+	void MaxMinNode::SetSecondTexture(Texture2D* texture)
+	{
+		inputTexture2.reset(texture);
+		regenerate = true;
 	}
 }

@@ -14,10 +14,10 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-	public:
-		std::unique_ptr<Texture2D> inputTexture;
+		void SetTexture(Texture2D* texture);
 
 	private:
+		std::unique_ptr<Texture2D> inputTexture;
 		glm::vec2 center;
 		float radius;
 		float angle;

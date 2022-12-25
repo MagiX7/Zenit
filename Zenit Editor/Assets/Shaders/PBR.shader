@@ -145,7 +145,6 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	return (kd * albedo / PI + specular) * radiance * NdotL;
 }
 
-
 void main()
 {
 	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
@@ -203,6 +202,7 @@ void main()
 
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
+
 
 	fragColor = vec4(color, 1);	
 }

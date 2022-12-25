@@ -471,17 +471,6 @@ namespace Zenit {
 				break;
 			}
 		}
-		/*for (auto& node : nodes)
-		{
-			if (id == node->id)
-			{
-				delete node;
-				node = nullptr;
-				nodes.erase(nodes.begin() + i);
-				break;
-			}
-			i++;
-		}*/
 	}
 
 	void PanelNodes::DeleteLink(const ed::LinkId& id)
@@ -495,7 +484,7 @@ namespace Zenit {
 			const auto node = (ComputeShaderNode*)other;
 			node->BindCoreData();
 			node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-			node->DispatchCompute(8, 4);
+			node->DispatchCompute(1, 1);
 		}
 
 		ed::DeleteLink(id);
@@ -703,13 +692,13 @@ namespace Zenit {
 					case NodeType::NORMAL_MAP:
 					{
 						const auto n = (NormalMapNode*)endPin->node;
-						resetData ? *n->inputTexture = *editorLayer->white : *n->inputTexture = *inNode->texture;
+						resetData ? n->SetTexture(editorLayer->white) : n->SetTexture(inNode->texture);
 						break;
 					}
 					case NodeType::TWIRL:
 					{
 						const auto n = (TwirlNode*)endPin->node;
-						resetData ? *n->inputTexture = *editorLayer->white : *n->inputTexture = *inNode->texture;
+						resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
 						break;
 					}
 					case NodeType::BLEND:
@@ -717,16 +706,16 @@ namespace Zenit {
 						const auto n = (BlendNode*)endPin->node;
 
 						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? *n->tex2 = *tex : *n->tex1 = *tex;
+						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 						break;
 					}
 					case NodeType::CLAMP:
 					{
 						const auto n = (ClampNode*)endPin->node;
-						resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+						resetData ? n->SetInputTexture(editorLayer->white.get()) : n->SetInputTexture(inNode->texture.get());
 						break;
 					}
 					case NodeType::MAX:
@@ -734,20 +723,20 @@ namespace Zenit {
 						const auto n = (MaxMinNode*)endPin->node;
 
 						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? *n->inputTexture2 = *tex : *n->inputTexture1 = *tex;
+						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 						break;
 					}
 					case NodeType::MIN:
-					{					
+					{
 						const auto n = (MaxMinNode*)endPin->node;
 
 						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white : tex = inNode->texture.get();
+						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? *n->inputTexture2 = *tex : *n->inputTexture1 = *tex;
+						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 						break;
 					}

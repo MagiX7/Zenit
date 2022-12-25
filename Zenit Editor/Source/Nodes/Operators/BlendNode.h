@@ -14,7 +14,10 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-	public:
+		void SetFirstTexture(Texture2D* texture);
+		void SetSecondTexture(Texture2D* texture);
+
+	private:
 		float contribution;
 		std::unique_ptr<Texture2D> tex1;
 		std::unique_ptr<Texture2D> tex2;

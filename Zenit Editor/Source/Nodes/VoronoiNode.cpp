@@ -8,10 +8,7 @@ namespace Zenit {
 		type = NodeType::VORONOI;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/voronoi.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
-
-		BindCoreData();
-		DispatchCompute(1, 1);
+		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 
 		latestSeed = 1.54;
 		zoom = 5;
@@ -23,15 +20,15 @@ namespace Zenit {
 
 	void VoronoiNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 		computeShader->SetUniform1f("brightness", brightness);
 		computeShader->SetUniform1f("zoom", zoom);
-		if (regenerate)
-		{
-			computeShader->SetUniform1f("seed", latestSeed);
-			latestSeed += Application::GetInstance().GetTotalExecutionTime();
-			regenerate = false;
-		}
+		computeShader->SetUniform1f("seed", latestSeed);
+		latestSeed += Application::GetInstance().GetTotalExecutionTime();
+		regenerate = false;
 		DispatchCompute(1, 1);
 	}
 

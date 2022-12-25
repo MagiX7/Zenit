@@ -14,7 +14,9 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-	public:
+		void SetTexture(std::shared_ptr<Texture2D> texture);
+
+	private:
 		std::shared_ptr<Texture2D> inputTexture;
 		float zoom = 1.0f;
 		float bumpness = 1.0f;

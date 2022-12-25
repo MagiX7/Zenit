@@ -17,12 +17,12 @@ namespace Zenit {
 		//inline void SetInputTexture(std::shared_ptr<Texture2D> texture) { inputTexture = texture; }
 		//inline std::shared_ptr<Texture2D> GetInputTexture() { return inputTexture; }
 
-	public:
+		void SetFirstTexture(Texture2D* texture);
+		void SetSecondTexture(Texture2D* texture);
+	
+	private:
 		std::shared_ptr<Texture2D> inputTexture1;
 		std::shared_ptr<Texture2D> inputTexture2;
-
-
-	private:
 		enum class Type { MIN, MAX };
 		Type maxMinType;
 	};

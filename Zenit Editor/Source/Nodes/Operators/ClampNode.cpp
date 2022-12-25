@@ -9,7 +9,7 @@ namespace Zenit {
 		type = NodeType::CLAMP;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/clamp.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
 
@@ -23,6 +23,9 @@ namespace Zenit {
 
 	void ClampNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("tex", 1);

@@ -8,7 +8,7 @@ namespace Zenit {
 		type = NodeType::BLEND;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/blend.shader");
-		texture = std::make_unique<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
 		BindCoreData();
 		computeShader->SetUniform1f("contribution", contribution);
@@ -25,6 +25,9 @@ namespace Zenit {
 
 	void BlendNode::Update(TimeStep ts)
 	{
+		if (!regenerate)
+			return;
+
 		BindCoreData();
 
 		computeShader->SetUniform1f("contribution", contribution);
@@ -57,10 +60,10 @@ namespace Zenit {
 				if (ImGui::Selectable(labels[i], isSelected))
 				{
 					blendMode = (BlendMode)i;
+					regenerate = true;
 					comboCurrentIndex = i;
 				}
 
-				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
 				if (isSelected)
 					ImGui::SetItemDefaultFocus();
 			}
@@ -68,8 +71,19 @@ namespace Zenit {
 
 		}
 
-		//ImGui::BeginCombo();
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
+	}
+
+	void BlendNode::SetFirstTexture(Texture2D* texture)
+	{
+		tex1.reset(texture);
+		regenerate = true;
+	}
+
+	void BlendNode::SetSecondTexture(Texture2D* texture)
+	{
+		tex2.reset(texture);
+		regenerate = true;
 	}
 
 }
