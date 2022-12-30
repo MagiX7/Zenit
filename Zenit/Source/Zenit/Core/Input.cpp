@@ -58,7 +58,7 @@ namespace Zenit {
 		return (lastMousePosY - GetMouseY()) / Application::GetInstance().GetWindow().GetHeight();
 	}
 
-	std::pair<float, float> Input::GetMousePosition()
+	glm::vec2 Input::GetMousePosition()
 	{
 		GLFWwindow* window = Application::GetInstance().GetWindow().GetNativeWindow();
 
@@ -67,7 +67,7 @@ namespace Zenit {
 		lastMousePosY = y;
 		glfwGetCursorPos(window, &x, &y);
 
-		return std::pair(x, y);
+		return glm::vec2(x, y);
 	}
 
 	void Input::OnEvent(Event& e)

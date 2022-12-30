@@ -55,6 +55,9 @@ namespace Zenit {
 		CLAMP,
 		MAX,
 		MIN,
+
+		// Helpers
+		COMMENT,
 	};
 
 	struct Pin;
@@ -110,6 +113,7 @@ namespace Zenit {
 	public:
 		ed::NodeId id;
 		std::string name;
+		bool changeName = false;
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
 

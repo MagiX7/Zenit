@@ -5,6 +5,7 @@
 #include "Zenit/Core/Window.h"
 #include "Zenit/Core/Input.h"
 #include "Zenit/Core/KeyCodes.h"
+#include "Zenit/Core/Log.h"
 #include "Zenit/ImGui/ImGuiLayer.h"
 
 // Rendering

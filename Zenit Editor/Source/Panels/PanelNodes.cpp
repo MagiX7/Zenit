@@ -1,3 +1,5 @@
+#include "Zenit.h"
+
 #include "PanelNodes.h"
 #include "PanelInspector.h"
 
@@ -19,6 +21,7 @@
 #include "EditorLayer.h"
 
 #include <ImGui/imgui_internal.h>
+#include <ImGui/misc/cpp/imgui_stdlib.h>
 
 #define OUTPUT_NODE_ID 1
 #define OUTPUT_ALBEDO_PIN_ID 2
@@ -33,8 +36,8 @@ namespace Zenit {
 		config = ed::Config();
 		config.SettingsFile = "Settings/NodeEditor.json";
 		config.NavigateButtonIndex = 2;
-		context = ed::CreateEditor(&config);
-		ed::SetCurrentEditor(context);
+		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
+		ed::SetCurrentEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
 
 
 		Node* node = new Node(OUTPUT_NODE_ID, "PBR", NodeOutputType::NONE);
@@ -62,7 +65,7 @@ namespace Zenit {
 
 	PanelNodes::~PanelNodes()
 	{
-		ed::DestroyEditor(context);
+		ed::DestroyEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
 
 		for (auto n : nodes)
 		{
@@ -80,6 +83,24 @@ namespace Zenit {
 			node->Update(ts);
 		}
 
+		if (!hovered)
+			return;
+
+		//static bool startedDragging = false;
+		//if (!startedDragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+		//{
+		//	startedDragging = true;
+		//}
+		//if (startedDragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+		{
+			ImVec4 bounds = context->GetSelectionBounds().ToVec4();/* + context->GetViewRect().ToVec4()*/;
+			lastSelectionBounds = { bounds.x, bounds.y, bounds.z, bounds.w };
+			ZN_CORE_TRACE("{0}, {1}, {2}, {3}", lastSelectionBounds.Min.x, lastSelectionBounds.Min.y, lastSelectionBounds.Max.x, lastSelectionBounds.Max.y);
+			//startedDragging = false;
+		}
+		
+		
+
 		//editorLayer->SetDiffuseData(diffuseNode);
 		//editorLayer->SetNormalsData(normalsNode);
 		//editorLayer->SetMetallicData(metallicNode);
@@ -93,24 +114,52 @@ namespace Zenit {
 		panelInspector->OnImGuiRender(editorLayer->currentModel, editorLayer->dirLight, FindNode(selectedId));
 
 		ImGui::Begin("Node editor");
+		
+		panelSize = ImGui::GetWindowSize();
+		hovered = ImGui::IsWindowHovered();
 
 		if (ImGui::IsWindowHovered())
 		{
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
 			{
-				rightClickedNodeId = ed::GetHoveredNode();
-				rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
+				if (ed::GetSelectedObjectCount() > 0)
+				{
+					showGroupPopup = true;
+				}
+				else
+				{
+					rightClickedNodeId = ed::GetHoveredNode();
+					rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
+				}
+			}
+			else if (ed::GetSelectedObjectCount() > 0 && Input::GetInstance()->IsKeyPressed(KEY_SPACE))
+			{
+				showGroupPopup = true;
 			}
 			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 			{
 				showCreationPopup = false;
-				showNodePopup = false;
+				showGroupPopup = false;
 			}
 		}
 
 		if (showCreationPopup)
 		{
 			ShowNodeCreationPopup();
+		}
+		else if (showGroupPopup)
+		{
+			ImGui::OpenPopup("GroupPopup");
+			if (ImGui::BeginPopup("GroupPopup"))
+			{
+				if (ImGui::MenuItem("Group"))
+				{
+					CreateGroupNode("Group");
+					showGroupPopup = false;
+				}
+				ImGui::EndPopup();
+			}
+			ImGui::CloseCurrentPopup();
 		}
 
 		// NODES WORKSPACE =======================================================
@@ -127,42 +176,81 @@ namespace Zenit {
 	{
 		HandleNodes(nodes);
 
-		for (const auto& n : nodes)
+		for (auto n : nodes)
 		{
-			ed::BeginNode(n->id);
-			ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
-			ImGui::Text(n->name.c_str());
-			ImGui::NewLine();
-
-			ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
-			if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
+			if (n->type == NodeType::COMMENT)
 			{
-				ImGui::TableNextColumn();
-
-				for (const auto& input : n->inputs)
-				{
-					ed::BeginPin(input.id, input.kind);
-					ImGui::Text(input.name.c_str());
-					ed::EndPin();
-				}
-
-				ImGui::TableNextColumn();
-
-				n->OnImGuiNodeRender();
-
-				ImGui::TableNextColumn();
-				for (const auto& output : n->outputs)
-				{
-					ed::BeginPin(output.id, output.kind);
-					ImGui::Text(output.name.c_str());
-					ed::EndPin();
-					ImGui::Dummy({ 0,10 });
-				}
-
-				ImGui::EndTable();
-				ed::PopStyleColor();
+				DrawGroupNode(n);
 			}
-			ed::EndNode();
+			else
+			{
+				ed::BeginNode(n->id);
+				ImGui::PushID(n->id.AsPointer());
+				ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
+				
+				int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
+
+				ImGui::PushItemWidth(width);
+
+				ed::NodeId selectedNodeId;
+				ed::GetSelectedNodes(&selectedNodeId, 1);
+				if (selectedNodeId == n->id && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				{
+					n->changeName = true;
+				}
+				else if (selectedNodeId != n->id)
+				{
+					n->changeName = false;
+				}
+
+				if (n->changeName)
+				{
+					ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+					if (ImGui::InputText("", &n->name, flags))
+					{
+						n->changeName = false;
+					}
+				}
+				else
+				{
+					ImGui::TextUnformatted(n->name.c_str());
+				}
+				ImGui::PopItemWidth();
+
+				ImGui::NewLine();
+
+				ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
+				if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
+				{
+					ImGui::TableNextColumn();
+
+					for (const auto& input : n->inputs)
+					{
+						ed::BeginPin(input.id, input.kind);
+						ImGui::Text(input.name.c_str());
+						ed::EndPin();
+					}
+
+					ImGui::TableNextColumn();
+
+					n->OnImGuiNodeRender();
+
+					ImGui::TableNextColumn();
+					for (const auto& output : n->outputs)
+					{
+						ed::BeginPin(output.id, output.kind);
+						ImGui::Text(output.name.c_str());
+						ed::EndPin();
+						ImGui::Dummy({ 0,10 });
+					}
+
+					ImGui::EndTable();
+					ed::PopStyleColor();
+				}
+				ImGui::PopID();
+				ed::EndNode();
+			}
+
 		}
 
 		// Links creation
@@ -172,6 +260,84 @@ namespace Zenit {
 		for (const auto& link : links)
 			ed::Link(link.id, link.inputId, link.outputId);
 
+	}
+
+	void PanelNodes::DrawGroupNode(Node* node)
+	{		
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.75f);
+		ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
+		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+		
+		ed::BeginNode(node->id);
+		ImGui::PushID(node->id.AsPointer());
+
+		ImGui::PushItemWidth(node->size.x);
+		//static bool changeName = false;
+		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+		{
+			node->changeName = true;
+		}
+
+		if (node->changeName)
+		{
+			ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+			if (ImGui::InputText("", &node->name, flags))
+			{
+				node->changeName = false;
+			}
+		}
+		else
+		{
+			ImGui::TextUnformatted(node->name.c_str());
+		}
+		ImGui::PopItemWidth();
+		
+		ed::Group(node->size);
+
+		ImGui::PopID();
+		ed::EndNode();
+		ed::PopStyleColor(2);
+		ImGui::PopStyleVar();
+
+		if (ed::BeginGroupHint(node->id))
+		{
+			ImVec2 min = ed::GetGroupMin();
+			auto bgAlpha = static_cast<int>(ImGui::GetStyle().Alpha * 255);
+
+			glm::vec2 glmMin = { min.x, min.y };
+			glm::vec2 glmPos = glmMin - glm::vec2(-8, ImGui::GetTextLineHeightWithSpacing() + 4);
+			ImVec2 pos = { glmPos.x, glmPos.y };
+
+			//ed::PushStyleColor(ed::StyleColor_NodeBg, node->nodeColor);
+			ImGui::SetCursorScreenPos(pos);
+			ImGui::BeginGroup();
+			ImGui::TextUnformatted(node->name.c_str());
+			ImGui::EndGroup();
+
+			auto drawList = ed::GetHintBackgroundDrawList();
+
+			ImRect hintBounds = { ImGui::GetItemRectMin(), ImGui::GetItemRectMax() };
+			ImRect hintFrameBounds = hintBounds;
+			int x = 8;
+			int y = 4;
+			hintFrameBounds.Min.x -= x;
+			hintFrameBounds.Min.y -= y;
+			hintFrameBounds.Max.x += x;
+			hintFrameBounds.Max.y += y;
+
+
+			drawList->AddRectFilled(
+				hintFrameBounds.GetTL(),
+				hintFrameBounds.GetBR(),
+				IM_COL32(180, 180, 180, 10), 1.0f);
+
+			drawList->AddRect(
+				hintFrameBounds.GetTL(),
+				hintFrameBounds.GetBR(),
+				IM_COL32(180, 180, 180, 20), 1.0f);
+
+		}
+		ed::EndGroupHint();
 	}
 
 	void PanelNodes::HandleNodes(std::vector<Node*>& nodes)
@@ -279,11 +445,7 @@ namespace Zenit {
 					else if (ed::AcceptNewItem(ImColor(128, 255,128)))
 					{
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
-
-						// TODO: Wrong push_back to the pins. Pushes 3 ints which is the number of parameters
 						links.push_back(link);
-						//startPin->links.push_back(link);
-						//endPin->links.push_back(link);
 
 						UpdateNode(startPin, endPin, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
@@ -478,14 +640,13 @@ namespace Zenit {
 		const LinkInfo* link = FindLink(id);
 		const Pin* output = FindPin(link->outputId);
 
-		Node* other = output->node;
-		if (other->outputType == NodeOutputType::TEXTURE)
-		{
-			const auto node = (ComputeShaderNode*)other;
-			node->BindCoreData();
-			node->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-			node->DispatchCompute(1, 1);
-		}
+		ComputeShaderNode* other = (ComputeShaderNode*)output->node;
+		//if (other->outputType == NodeOutputType::TEXTURE)
+		//{
+			other->BindCoreData();
+			other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+			other->DispatchCompute(1, 1);
+		//}
 
 		ed::DeleteLink(id);
 	}
@@ -586,10 +747,6 @@ namespace Zenit {
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
-		//Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		//input.node = node;
-		//node->inputs.emplace_back(input);
-
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
@@ -661,6 +818,9 @@ namespace Zenit {
 	{
 		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, true);
 		node->size = { 5,5 };
+		//node->pos = ImGui::GetMousePos();
+		//ed::SetNodePosition(node->id, node->pos);
+		//ImGui::SetCursorPos();
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
@@ -676,6 +836,22 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		return node;
+	}
+
+	void PanelNodes::CreateGroupNode(const char* name)
+	{
+		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
+		node->type = NodeType::COMMENT;
+
+		ImVec2 padding = { 16, 35 };
+		node->pos = lastSelectionBounds.GetTL() - padding;
+		ed::SetNodePosition(node->id, node->pos);
+
+		node->size = lastSelectionBounds.GetSize() + padding;
+		nodes.emplace_back(node);
+
+		lastSelectionBounds = { 0,0,0,0 };
+		ed::ClearSelection();
 	}
 
 	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)

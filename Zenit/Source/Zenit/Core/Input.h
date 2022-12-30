@@ -4,6 +4,8 @@
 #include "Zenit/Events/Event.h"
 #include "Zenit/Events/MouseEvent.h"
 
+#include <glm/vec2.hpp>
+
 #include <utility>
 
 namespace Zenit {
@@ -20,7 +22,7 @@ namespace Zenit {
 		float GetMouseY();
 		float GetMouseMotionX();
 		float GetMouseMotionY();
-		std::pair<float, float> GetMousePosition();
+		glm::vec2 GetMousePosition();
 		inline float GetMouseScrolDx() { return deltaXScroll; }
 		inline float GetMouseScrolDy() { return deltaYScroll; }
 

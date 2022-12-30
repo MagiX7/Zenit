@@ -3,6 +3,7 @@
 #include "Nodes/Node.h"
 
 #include <imgui_node_editor.h>
+#include <imgui_node_editor_internal.h>
 
 #include <vector>
 
@@ -26,6 +27,7 @@ namespace Zenit {
 
 	private:
 		void DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links);
+		void DrawGroupNode(Node* node);
 		void HandleNodes(std::vector<Node*>& nodes);
 		void HandleLinks(std::vector<LinkInfo>& links);
 		void ShowNodeCreationPopup();
@@ -58,6 +60,10 @@ namespace Zenit {
 		Node* CreateMaxNode(const char* name);
 		// Operators
 
+		// Helpers
+		void CreateGroupNode(const char* name);
+		// Helpers
+
 		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
@@ -69,7 +75,7 @@ namespace Zenit {
 		int creationId = 1;
 		int linkCreationId = 1000;
 
-		ed::EditorContext* context;
+		ed::Detail::EditorContext* context;
 		ed::Config config;
 		Pin incorrectPin = Pin(-1, "", PinType::None, ed::PinKind::None);
 		LinkInfo incorrectLink = LinkInfo(-1, -1, -1);
@@ -77,13 +83,16 @@ namespace Zenit {
 		ed::NodeId rightClickedNodeId = 0;
 
 		bool showCreationPopup = false;
-		bool showNodePopup = false;
+		bool showGroupPopup = false;
 
 		Node* diffuseNode = nullptr;
 		Node* normalsNode = nullptr;
 		Node* metallicNode = nullptr;
 		Node* roughnessNode = nullptr;
 
+		ImRect lastSelectionBounds = { 0,0,0,0 };
+		bool hovered = false;
+		ImVec2 panelSize;
 
 	};
 
