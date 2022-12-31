@@ -1,0 +1,38 @@
+{
+    "App": {
+        "diffuse": "white",
+        "normals": "Normal Map_6",
+        "metallic": "white",
+        "roughness": "white",
+        "nodes": [
+            {
+                "id": 6,
+                "type": 5,
+                "color": 1,
+                "bumpness": 1,
+                "inputTexture": "white.png",
+                "inputPins": [
+                    {
+                        "id": 7,
+                        "name": "Input",
+                        "inputNodeId": 6
+                    }
+                ],
+                "outputPins": [
+                    {
+                        "id": 8,
+                        "name": "Output",
+                        "outputNodeId": 6
+                    }
+                ]
+            }
+        ],
+        "links": [
+            {
+                "id": 1000,
+                "inputPinId": 8,
+                "outputPinId": 3
+            }
+        ]
+    }
+}

@@ -53,8 +53,23 @@ namespace Zenit {
 	{
 		*inputTexture = *tex;
 	}
+	
 	void ClampNode::SetInputTexture(Texture2D* tex)
 	{
 		*inputTexture = *tex;
+	}
+
+	SerializerValue ClampNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetString(object, "inputTexture", inputTexture->GetName().c_str());
+		JSONSerializer::SetNumber(object, "max", max);
+		JSONSerializer::SetNumber(object, "min", min);
+
+		return value;
 	}
 }

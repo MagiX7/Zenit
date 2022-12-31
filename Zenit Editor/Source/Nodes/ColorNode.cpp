@@ -30,4 +30,16 @@ namespace Zenit {
 		if (ImGui::ColorPicker3("Color", glm::value_ptr(color)))
 			regenerate = true;
 	}
+
+	SerializerValue ColorNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetVector3f(object, "color", color);
+
+		return value;
+	}
 }

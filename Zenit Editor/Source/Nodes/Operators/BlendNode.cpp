@@ -86,4 +86,19 @@ namespace Zenit {
 		regenerate = true;
 	}
 
+	SerializerValue BlendNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetString(object, "firstTexture", tex1->GetName().c_str());
+		JSONSerializer::SetString(object, "secondTexture", tex2->GetName().c_str());
+		JSONSerializer::SetNumber(object, "blendMode", (int)blendMode);
+		JSONSerializer::SetNumber(object, "contribution", contribution);
+
+		return value;
+	}
+
 }

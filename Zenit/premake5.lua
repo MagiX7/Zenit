@@ -18,6 +18,9 @@ project "Zenit"
         "%{prj.location}/Dependencies/stb_image/**.cpp",
         "%{prj.location}/Dependencies/spdlog/src/**.h",
         "%{prj.location}/Dependencies/spdlog/src/**.cpp",
+        "%{prj.location}/Dependencies/spdlog/src/**.cpp",
+        "%{prj.location}/Dependencies/parson/parson.h",
+        "%{prj.location}/Dependencies/parson/parson.c",
 
         "%{prj.location}/Dependencies/imgui-node-editor/crude_json.h",
         "%{prj.location}/Dependencies/imgui-node-editor/crude_json.cpp",
@@ -51,6 +54,7 @@ project "Zenit"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.node_editor}",
+        "%{IncludeDir.parson}",
     }
 
     links

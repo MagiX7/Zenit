@@ -14,6 +14,8 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
+		virtual SerializerValue Save() override;
+
 	public:
 		float brightness;
 		float latestSeed;

@@ -35,6 +35,32 @@ namespace Zenit {
 	{
 		config = ed::Config();
 		config.SettingsFile = "Settings/NodeEditor.json";
+		config.UserPointer = this;
+
+		/*config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t
+		{
+			auto self = static_cast<PanelNodes*>(userPointer);
+
+			auto node = self->FindNode(nodeId);
+			if (!node)
+				return 0;
+
+			if (data != nullptr)
+				memcpy(data, node->state.data(), node->state.size());
+			return node->state.size();
+		};
+
+		config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool
+		{
+			auto self = static_cast<PanelNodes*>(userPointer);
+
+			Node* node = self->FindNode(nodeId);
+			if (!node)
+				return false;
+
+			node->state.assign(data, size);
+		};*/
+
 		config.NavigateButtonIndex = 2;
 		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
 		ed::SetCurrentEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
@@ -86,25 +112,7 @@ namespace Zenit {
 		if (!hovered)
 			return;
 
-		//static bool startedDragging = false;
-		//if (!startedDragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-		//{
-		//	startedDragging = true;
-		//}
-		//if (startedDragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			ImVec4 bounds = context->GetSelectionBounds().ToVec4();/* + context->GetViewRect().ToVec4()*/;
-			lastSelectionBounds = { bounds.x, bounds.y, bounds.z, bounds.w };
-			ZN_CORE_TRACE("{0}, {1}, {2}, {3}", lastSelectionBounds.Min.x, lastSelectionBounds.Min.y, lastSelectionBounds.Max.x, lastSelectionBounds.Max.y);
-			//startedDragging = false;
-		}
-		
-		
-
-		//editorLayer->SetDiffuseData(diffuseNode);
-		//editorLayer->SetNormalsData(normalsNode);
-		//editorLayer->SetMetallicData(metallicNode);
-		//editorLayer->SetRoughnessData(roughnessNode);
+		lastSelectionBounds = context->GetSelectionBounds();		
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
@@ -215,6 +223,8 @@ namespace Zenit {
 				{
 					ImGui::TextUnformatted(n->name.c_str());
 				}
+				if (ImGui::IsItemHovered() && !n->state.empty())
+					ImGui::SetTooltip("State: %s", n->state.c_str());
 				ImGui::PopItemWidth();
 
 				ImGui::NewLine();
@@ -696,7 +706,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateVector1Node(const char* name)
 	{
-		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1	);
+		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
@@ -995,5 +1005,91 @@ namespace Zenit {
 				break;
 
 		}
+	}
+
+	void PanelNodes::SaveNodes(SerializerObject appObject)
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
+
+		//JSONSerializer::SetObjectValue(rootObject, "panelNodes", value);
+
+		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray nodesArray = JSONSerializer::CreateArrayFromValue(nodesArrayValue);
+
+		JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
+		//JSONSerializer::DotSetValue(panelNodesObject, "nodes", nodesArrayValue);
+
+		for (int i = 1; i < nodes.size(); ++i)
+		{
+			Node* node = nodes[i];
+			SerializerValue nodeValue = node->Save();
+			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
+			JSONSerializer::AppendValueToArray(nodesArray, nodeValue);
+
+			SerializerValue inputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray inputPinsArray = JSONSerializer::CreateArrayFromValue(inputPinsArrayValue);
+
+			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
+			for (const auto& pin : node->inputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::SetNumber(object, "inputNodeId", pin.node->id.Get());
+				JSONSerializer::AppendValueToArray(inputPinsArray, value);
+			}
+
+			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray outputPinsArray = JSONSerializer::CreateArrayFromValue(outputPinsArrayValue);
+			JSONSerializer::SetObjectValue(nodeObject, "outputPins", outputPinsArrayValue);
+			for (const auto& pin : node->outputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::SetNumber(object, "outputNodeId", pin.node->id.Get());
+				JSONSerializer::AppendValueToArray(outputPinsArray, value);
+			}
+
+		}
+
+		SerializerValue linksArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray linksArray = JSONSerializer::CreateArrayFromValue(linksArrayValue);
+		JSONSerializer::SetObjectValue(appObject, "links", linksArrayValue);
+
+		for (int i = 0; i < links.size(); ++i)
+		{
+			LinkInfo& link = links[i];
+			SerializerValue value = JSONSerializer::CreateValue();
+			SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+			
+			JSONSerializer::SetNumber(object, "id", link.id.Get());
+			JSONSerializer::SetNumber(object, "inputPinId", link.inputId.Get());
+			JSONSerializer::SetNumber(object, "outputPinId", link.outputId.Get());
+			JSONSerializer::AppendValueToArray(linksArray, value);
+		}
+
+	}
+
+	void PanelNodes::LoadData()
+	{
+		config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t
+		{
+			auto self = static_cast<PanelNodes*>(userPointer);
+
+			auto node = self->FindNode(nodeId);
+			if (!node)
+				return 0;
+
+			if (data != nullptr)
+				memcpy(data, node->state.data(), node->state.size());
+			return node->state.size();
+		};
+
 	}
 }

@@ -23,9 +23,12 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
+		virtual SerializerValue Save() override;
+
 	private:
 		NoiseType noiseType;
 		int res = 10;
+		float latestSeed = 0;
 	};
 
 }

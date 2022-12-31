@@ -15,6 +15,8 @@ namespace Zenit {
 
 		virtual void Update(TimeStep ts) override;
 
+		//virtual SerializerValue Save() {}
+
 	public:
 		std::shared_ptr<Texture2D> texture;
 		std::unique_ptr<ComputeShader> computeShader;

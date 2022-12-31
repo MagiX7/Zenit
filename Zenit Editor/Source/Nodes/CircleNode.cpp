@@ -48,4 +48,18 @@ namespace Zenit {
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
+
+	SerializerValue CircleNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetVector2f(object, "offset", offset);
+		JSONSerializer::SetNumber(object, "radius", radius);
+		JSONSerializer::SetNumber(object, "blur", blur);
+
+		return value;
+	}
 }

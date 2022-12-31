@@ -45,6 +45,7 @@ namespace Zenit {
 	private:
 		void SetModelShaderData();
 		void ExportTextures();
+		void SerializeScene();
 
 		void LoadSkyboxes();
 		void ReloadSkyboxes();
@@ -91,6 +92,8 @@ namespace Zenit {
 		Node* aoOutput = nullptr;
 
 		std::stack<Layer*> layers;
+
+		SerializerValue serializerRootValue;
 
 
 		friend class PanelNodes;

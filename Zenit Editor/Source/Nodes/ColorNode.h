@@ -15,6 +15,8 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
+		virtual SerializerValue Save() override;
+
 	public:
 		glm::vec3 color;
 	};

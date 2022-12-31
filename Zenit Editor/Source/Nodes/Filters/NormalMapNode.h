@@ -16,6 +16,8 @@ namespace Zenit {
 
 		void SetTexture(std::shared_ptr<Texture2D> texture);
 
+		virtual SerializerValue Save() override;
+
 	private:
 		std::shared_ptr<Texture2D> inputTexture;
 		float zoom = 1.0f;

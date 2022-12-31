@@ -20,10 +20,12 @@ namespace Zenit {
 		void SetFirstTexture(Texture2D* texture);
 		void SetSecondTexture(Texture2D* texture);
 	
+		virtual SerializerValue Save() override;
+
 	private:
 		std::shared_ptr<Texture2D> inputTexture1;
 		std::shared_ptr<Texture2D> inputTexture2;
-		enum class Type { MIN, MAX };
-		Type maxMinType;
+		//enum class Type { MIN, MAX };
+		//Type maxMinType;
 	};
 }

@@ -53,4 +53,18 @@ namespace Zenit {
 		inputTexture = texture;
 		regenerate = true;
 	}
+
+	SerializerValue NormalMapNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "color", zoom);
+		JSONSerializer::SetNumber(object, "bumpness", bumpness);
+		JSONSerializer::SetString(object, "inputTexture", inputTexture->GetName().c_str());
+
+		return value;
+	}
 }

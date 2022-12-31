@@ -62,4 +62,18 @@ namespace Zenit {
 		regenerate = true;
 	}
 
+	SerializerValue TwirlNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetVector2f(object, "center", center);
+		JSONSerializer::SetNumber(object, "radius", radius);
+		JSONSerializer::SetNumber(object, "angle", angle);
+
+		return value;
+	}
+
 }

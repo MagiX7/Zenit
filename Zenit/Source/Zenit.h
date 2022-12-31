@@ -27,3 +27,4 @@
 
 // Utils
 #include "Zenit/Utils/FileDialog.h"
+#include "Zenit/Utils/JSONSerializer.h"

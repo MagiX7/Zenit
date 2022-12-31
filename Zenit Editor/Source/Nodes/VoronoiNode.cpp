@@ -49,4 +49,18 @@ namespace Zenit {
 		ImGui::DragFloat("Zoom", &zoom, 0.1f, 0.0f);
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0, 1 }, { 1,0 });
 	}
+
+	SerializerValue VoronoiNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "brightness", brightness);
+		JSONSerializer::SetNumber(object, "zoom", zoom);
+		JSONSerializer::SetNumber(object, "seed", latestSeed);
+
+		return value;
+	}
 }

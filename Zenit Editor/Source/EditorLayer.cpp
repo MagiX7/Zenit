@@ -15,6 +15,7 @@
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
 #define MODELS_PATH "\\Assets\\Models\\"
+#define SAVE_PATH   "Settings/SavedData.json"
 
 namespace Zenit {
 
@@ -50,9 +51,13 @@ namespace Zenit {
 		
 		uint32_t data = 0xffffffff;
 		diffuse = new Texture2D(&data, 1, 1);
+		diffuse->SetName("white");
 		normals = new Texture2D(&data, 1, 1);
+		normals->SetName("white");
 		metallic = new Texture2D(&data, 1, 1);
+		metallic->SetName("white");
 		roughness = new Texture2D(&data, 1, 1);
+		roughness->SetName("white");
 		ambientOcclusion = new Texture2D(&data, 1, 1);
 		
 		white = std::make_shared<Texture2D>("Settings/white.png");
@@ -114,6 +119,10 @@ namespace Zenit {
 			if (ImGui::MenuItem("Export"))
 			{
 				ExportTextures();
+			}
+			else if (ImGui::MenuItem("Save"))
+			{
+				SerializeScene();
 			}
 			ImGui::EndMenu();
 		}
@@ -236,6 +245,7 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		diffuse = n->texture.get();
+		diffuse->SetName(n->name + "_" + std::to_string(n->id.Get()));
 		return true;
 	}
 
@@ -250,6 +260,8 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		normals = n->texture.get();
+		normals->SetName(n->name + "_" + std::to_string(n->id.Get()));
+
 		return true;
 	}
 
@@ -264,6 +276,8 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		metallic = n->texture.get();
+		metallic->SetName(n->name + "_" + std::to_string(n->id.Get()));
+
 		return true;
 	}
 
@@ -283,14 +297,15 @@ namespace Zenit {
 				const auto n = (ComputeShaderNode*)node;
 				roughness = n->texture.get();
 				return true;
+				roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
 			}
-			case NodeOutputType::VEC1:
-			{
-				const auto n = (Vec1Node*)node;
-				roughnessValue = n->value;
-				return true;
-				break;
-			}
+			//case NodeOutputType::VEC1:
+			//{
+			//	const auto n = (Vec1Node*)node;
+			//	roughnessValue = n->value;
+			//	return true;
+			//	break;
+			//}
 		}
 
 		return false;
@@ -414,8 +429,25 @@ namespace Zenit {
 		delete[] data;
 	}
 
-	
-	
+	void EditorLayer::SerializeScene()
+	{
+		serializerRootValue = JSONSerializer::CreateValue();
+		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
+
+		JSONSerializer::SetObjectValue(rootObj, "App", JSONSerializer::CreateValue());
+		SerializerObject appObj = JSONSerializer::GetObjectWithName(rootObj, "App");
+		
+		JSONSerializer::SetString(appObj, "diffuse", diffuse->GetName().c_str());
+		JSONSerializer::SetString(appObj, "normals", normals->GetName().c_str());
+		JSONSerializer::SetString(appObj, "metallic", metallic->GetName().c_str());
+		JSONSerializer::SetString(appObj, "roughness", roughness->GetName().c_str());
+		
+		panelNodes->SaveNodes(appObj);
+		
+		JSONSerializer::DumpFile(serializerRootValue, SAVE_PATH);
+		JSONSerializer::FreeValue(serializerRootValue);
+	}
+		
 	void EditorLayer::LoadSkyboxes()
 	{
 		std::filesystem::path cp = std::filesystem::current_path();

@@ -104,6 +104,8 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() {};
 		virtual void OnImGuiInspectorRender() {};
 
+		virtual SerializerValue Save() { return SerializerValue(); }
+
 		bool operator==(const Node& other) const
 		{
 			return id == other.id;
