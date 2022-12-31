@@ -17,6 +17,7 @@ namespace Zenit {
 		void SetTexture(std::shared_ptr<Texture2D> texture);
 
 		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
 		std::shared_ptr<Texture2D> inputTexture;

@@ -15,6 +15,7 @@ namespace Zenit {
 		virtual void OnImGuiInspectorRender() override;
 		
 		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
 		glm::vec2 offset;

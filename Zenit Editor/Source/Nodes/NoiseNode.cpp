@@ -87,12 +87,20 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 
+		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "noiseType", (int)noiseType);
 
 		if (noiseType == NoiseType::PERLIN)
 			JSONSerializer::SetNumber(object, "resolution", res);
 
 		return value;
+	}
+
+	void NoiseNode::Load(SerializerObject& obj)
+	{
+		noiseType = (NoiseType)JSONSerializer::GetNumberFromObject(obj, "noiseType");
+		res = JSONSerializer::GetNumberFromObject(obj, "resolution");
 	}
 }

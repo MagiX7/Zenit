@@ -5,6 +5,8 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 
+#include <string>
+
 namespace Zenit {
 
 	struct SerializerObject
@@ -58,10 +60,20 @@ namespace Zenit {
 
 		static SerializerObject GetObjectWithName(SerializerObject& object, const char* name);
 		static SerializerObject GetObjectWithValue(SerializerValue& value);
+		static SerializerObject GetObjectFromArray(SerializerArray& array, size_t index);
+
+		static SerializerValue GetValueFromObject(SerializerObject& object, const char* name);
+		static float GetNumberFromObject(SerializerObject& object, const char* name);
+		static glm::vec2 GetVector2fFromObject(SerializerObject& object, const char* name);
+		static glm::vec3 GetVector3fFromObject(SerializerObject& object, const char* name);
+		static glm::vec4 GetVector4fFromObject(SerializerObject& object, const char* name);
+		static const char* GetStringFromObject(SerializerObject& object, const char* name);
+		static SerializerArray GetArrayFromObject(SerializerObject& object, const char* name);
+		static size_t GetArraySize(SerializerArray& array);
 
 		static void FreeValue(SerializerValue& value);
 		static void DumpFile(SerializerValue& value, const char* pathWithFileName);
-
+		static SerializerValue ReadFile(const char* pathWithFileName);
 	};
 
 }

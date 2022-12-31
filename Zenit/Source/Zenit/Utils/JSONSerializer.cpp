@@ -128,12 +128,72 @@ namespace Zenit {
 		ret.value = json_object_get_object(object, name);
 		return ret;
 	}
+
+	SerializerValue JSONSerializer::GetValueFromObject(SerializerObject& object, const char* name)
+	{
+		SerializerValue value = SerializerValue();
+		value.value = json_object_get_value(object, name);
+		return value;
+	}
 	
 	SerializerObject JSONSerializer::GetObjectWithValue(SerializerValue& value)
 	{
 		SerializerObject ret = SerializerObject();
 		ret.value = json_value_get_object(value);
 		return ret;
+	}
+
+	SerializerObject JSONSerializer::GetObjectFromArray(SerializerArray& array, size_t index)
+	{
+		SerializerObject ret = SerializerObject();
+		ret.value = json_array_get_object(array, index);
+		return ret;
+	}
+
+	float JSONSerializer::GetNumberFromObject(SerializerObject& object, const char* name)
+	{
+		return json_object_get_number(object, name);
+	}
+
+	glm::vec2 JSONSerializer::GetVector2fFromObject(SerializerObject& object, const char* name)
+	{
+		float x = json_object_get_number(object, std::string(name).append(" x").c_str());
+		float y = json_object_get_number(object, std::string(name).append(" y").c_str());
+		return { x,y };
+	}
+
+	glm::vec3 JSONSerializer::GetVector3fFromObject(SerializerObject& object, const char* name)
+	{
+		float x = json_object_get_number(object, std::string(name).append(" x").c_str());
+		float y = json_object_get_number(object, std::string(name).append(" y").c_str());
+		float z = json_object_get_number(object, std::string(name).append(" z").c_str());
+		return { x,y,z };
+	}
+
+	glm::vec4 JSONSerializer::GetVector4fFromObject(SerializerObject& object, const char* name)
+	{
+		float x = json_object_get_number(object, std::string(name).append(" x").c_str());
+		float y = json_object_get_number(object, std::string(name).append(" y").c_str());
+		float z = json_object_get_number(object, std::string(name).append(" z").c_str());
+		float w = json_object_get_number(object, std::string(name).append(" w").c_str());
+		return { x,y,z,w };
+	}
+
+	const char* JSONSerializer::GetStringFromObject(SerializerObject& object, const char* name)
+	{
+		return json_object_get_string(object, name);
+	}
+
+	SerializerArray JSONSerializer::GetArrayFromObject(SerializerObject& object, const char* name)
+	{
+		SerializerArray array = SerializerArray();
+		array.value = json_object_get_array(object, name);
+		return array;
+	}
+
+	size_t JSONSerializer::GetArraySize(SerializerArray& array)
+	{
+		return json_array_get_count(array);
 	}
 
 	void JSONSerializer::FreeValue(SerializerValue& value)
@@ -149,6 +209,13 @@ namespace Zenit {
 		{
 			ZN_CORE_ERROR("Saving File failed");
 		}
+	}
+
+	SerializerValue JSONSerializer::ReadFile(const char* pathWithFileName)
+	{
+		SerializerValue value = SerializerValue();
+		value.value = json_parse_file(pathWithFileName);
+		return value;
 	}
 
 

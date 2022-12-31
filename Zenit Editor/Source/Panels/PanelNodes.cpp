@@ -574,12 +574,12 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Max"))
 				{
-					CreateMaxNode("Max");
+					CreateMaxMinNode("Max", true);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Min"))
 				{
-					CreateMinNode("Min");
+					CreateMaxMinNode("Min", false);
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -802,7 +802,7 @@ namespace Zenit {
 		return node;
 	}
 
-	Node* PanelNodes::CreateMinNode(const char* name)
+	/*Node* PanelNodes::CreateMinNode(const char* name)
 	{
 		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, false);
 		node->size = { 5,5 };
@@ -822,11 +822,11 @@ namespace Zenit {
 
 
 		return node;
-	}
+	}*/
 
-	Node* PanelNodes::CreateMaxNode(const char* name)
+	Node* PanelNodes::CreateMaxMinNode(const char* name, bool isMax)
 	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, true);
+		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, isMax);
 		node->size = { 5,5 };
 		//node->pos = ImGui::GetMousePos();
 		//ed::SetNodePosition(node->id, node->pos);
@@ -848,7 +848,7 @@ namespace Zenit {
 		return node;
 	}
 
-	void PanelNodes::CreateGroupNode(const char* name)
+	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
 		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
 		node->type = NodeType::COMMENT;
@@ -862,6 +862,7 @@ namespace Zenit {
 
 		lastSelectionBounds = { 0,0,0,0 };
 		ed::ClearSelection();
+		return node;
 	}
 
 	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
@@ -1007,7 +1008,7 @@ namespace Zenit {
 		}
 	}
 
-	void PanelNodes::SaveNodes(SerializerObject appObject)
+	void PanelNodes::SaveNodes(SerializerObject& appObject)
 	{
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
@@ -1073,6 +1074,111 @@ namespace Zenit {
 			JSONSerializer::SetNumber(object, "outputPinId", link.outputId.Get());
 			JSONSerializer::AppendValueToArray(linksArray, value);
 		}
+	}
+
+	void PanelNodes::LoadNodes(SerializerObject& appObject)
+	{
+		//SerializerObject panelNodesObject = JSONSerializer::GetObjectWithName(appObject, "nodes");
+		
+		SerializerArray nodesArray = JSONSerializer::GetArrayFromObject(appObject, "nodes");
+		size_t size = JSONSerializer::GetArraySize(nodesArray);
+
+		for (int i = 0; i < size; ++i)
+		{
+			SerializerObject object = JSONSerializer::GetObjectFromArray(nodesArray, i);
+
+			const char* name = JSONSerializer::GetStringFromObject(object, "name");
+			int id = JSONSerializer::GetNumberFromObject(object, "id");
+			NodeType type = (NodeType)JSONSerializer::GetNumberFromObject(object, "type");
+
+			switch (type)
+			{
+				case NodeType::COLOR:
+				{
+					ColorNode* node = (ColorNode*)CreateFlatColorNode(name, {});
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::NORMAL);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::PERLIN_NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::PERLIN);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::DERIVATIVE_NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::DERIVATIVE);
+					node->Load(object);
+					break;
+				}
+				case NodeType::VORONOI:
+				{
+					VoronoiNode* node = (VoronoiNode*)CreateVoronoiNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::NORMAL_MAP:
+				{
+					NormalMapNode* node = (NormalMapNode*)CreateNormalMapNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::TWIRL:
+				{
+					TwirlNode* node = (TwirlNode*)CreateTwirlNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::BLEND:
+				{
+					BlendNode* node = (BlendNode*)CreateBlendNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CLAMP:
+				{
+					ClampNode* node = (ClampNode*)CreateClampNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MAX:
+				{
+					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, true);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MIN:
+				{
+					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, false);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::COMMENT:
+				{
+					Node* node = CreateGroupNode(name);
+					node->id = id;
+					//node->Load(object);
+					break;
+				}
+			}
+		}
+
 
 	}
 

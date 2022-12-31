@@ -36,10 +36,16 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 
+		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
 		JSONSerializer::SetVector3f(object, "color", color);
 
 		return value;
+	}
+
+	void ColorNode::Load(SerializerObject& obj)
+	{
+		color = JSONSerializer::GetVector3fFromObject(obj, "color");
 	}
 }

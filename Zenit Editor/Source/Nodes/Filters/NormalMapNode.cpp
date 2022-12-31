@@ -58,7 +58,8 @@ namespace Zenit {
 	{
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
-
+		
+		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
 		JSONSerializer::SetNumber(object, "color", zoom);
@@ -67,4 +68,11 @@ namespace Zenit {
 
 		return value;
 	}
+
+	void NormalMapNode::Load(SerializerObject& obj)
+	{
+
+
+	}
+
 }

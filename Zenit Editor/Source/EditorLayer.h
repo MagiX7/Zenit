@@ -45,7 +45,8 @@ namespace Zenit {
 	private:
 		void SetModelShaderData();
 		void ExportTextures();
-		void SerializeScene();
+		void Save();
+		bool Load();
 
 		void LoadSkyboxes();
 		void ReloadSkyboxes();

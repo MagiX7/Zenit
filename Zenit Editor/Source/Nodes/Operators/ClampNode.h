@@ -18,6 +18,7 @@ namespace Zenit {
 		void SetInputTexture(Texture2D* tex);
 
 		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	public:
 		float min, max;
