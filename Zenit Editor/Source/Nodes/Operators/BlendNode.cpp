@@ -16,6 +16,10 @@ namespace Zenit {
 
 		tex1 = std::make_unique<Texture2D>("Settings/white.png");
 		tex2 = std::make_unique<Texture2D>("Settings/white.png");
+		tex1->SetName(name + '_' + id);
+		tex2->SetName(name + '_' + id);
+
+
 		blendMode = (BlendMode)0;
 	}
 
@@ -84,6 +88,28 @@ namespace Zenit {
 	{
 		tex2.reset(texture);
 		regenerate = true;
+	}
+
+	SerializerValue BlendNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetString(object, "name", name.c_str());
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetString(object, "firstTexture", tex1->GetName().c_str());
+		JSONSerializer::SetString(object, "secondTexture", tex2->GetName().c_str());
+		JSONSerializer::SetNumber(object, "blendMode", (int)blendMode);
+		JSONSerializer::SetNumber(object, "contribution", contribution);
+
+		return value;
+	}
+
+	void BlendNode::Load(SerializerObject& obj)
+	{
+		blendMode = (BlendMode)JSONSerializer::GetNumberFromObject(obj, "blendMode");
+		contribution = JSONSerializer::GetNumberFromObject(obj, "contribution");	
 	}
 
 }

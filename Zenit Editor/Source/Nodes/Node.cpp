@@ -1,5 +1,5 @@
 #include "Node.h"
-
+#include "Panels/PanelNodes.h"
 
 namespace Zenit {
 
@@ -15,8 +15,6 @@ namespace Zenit {
 		outputs.clear();
 
 		name.clear();
-		state.clear();
-		savedState.clear();
 	}
 
 }

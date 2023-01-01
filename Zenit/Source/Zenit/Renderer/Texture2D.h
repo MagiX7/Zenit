@@ -27,6 +27,8 @@ namespace Zenit {
 
 		inline const std::string& GetName() { return name; }
 
+		inline void SetName(std::string value) { name = value; }
+
 	private:
 		uint32_t rendererId;
 

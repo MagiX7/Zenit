@@ -17,6 +17,9 @@ namespace Zenit {
 		void SetInputTexture(const std::unique_ptr<Texture2D>& tex);
 		void SetInputTexture(Texture2D* tex);
 
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
+
 	public:
 		float min, max;
 		std::unique_ptr<Texture2D> inputTexture;

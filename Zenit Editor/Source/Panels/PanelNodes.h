@@ -25,6 +25,13 @@ namespace Zenit {
 		void Update(TimeStep ts);
 		void OnImGuiRender(PanelInspector* panelInspector);
 
+		Node* FindNode(ed::NodeId id) const;
+		Pin* FindPin(ed::PinId id);
+		LinkInfo* FindLink(const ed::LinkId& id);
+
+		void SaveNodes(SerializerObject& appObject);
+		void LoadNodes(SerializerObject& appObject);
+
 	private:
 		void DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links);
 		void DrawGroupNode(Node* node);
@@ -32,9 +39,6 @@ namespace Zenit {
 		void HandleLinks(std::vector<LinkInfo>& links);
 		void ShowNodeCreationPopup();
 
-		Node* FindNode(ed::NodeId id) const;
-		Pin* FindPin(ed::PinId id);
-		LinkInfo* FindLink(const ed::LinkId& id);
 
 		void DeleteNode(ed::NodeId id);
 		void DeleteLink(const ed::LinkId& id);
@@ -56,16 +60,17 @@ namespace Zenit {
 		// Operators
 		Node* CreateBlendNode(const char* name);
 		Node* CreateClampNode(const char* name);
-		Node* CreateMinNode(const char* name);
-		Node* CreateMaxNode(const char* name);
+		Node* CreateMaxMinNode(const char* name, bool isMax);
 		// Operators
 
 		// Helpers
-		void CreateGroupNode(const char* name);
+		Node* CreateGroupNode(const char* name);
 		// Helpers
 
 		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
+
+		void LoadData();
 
 	private:
 		EditorLayer* editorLayer;

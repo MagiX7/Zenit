@@ -35,6 +35,32 @@ namespace Zenit {
 	{
 		config = ed::Config();
 		config.SettingsFile = "Settings/NodeEditor.json";
+		config.UserPointer = this;
+
+		/*config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t
+		{
+			auto self = static_cast<PanelNodes*>(userPointer);
+
+			auto node = self->FindNode(nodeId);
+			if (!node)
+				return 0;
+
+			if (data != nullptr)
+				memcpy(data, node->state.data(), node->state.size());
+			return node->state.size();
+		};
+
+		config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool
+		{
+			auto self = static_cast<PanelNodes*>(userPointer);
+
+			Node* node = self->FindNode(nodeId);
+			if (!node)
+				return false;
+
+			node->state.assign(data, size);
+		};*/
+
 		config.NavigateButtonIndex = 2;
 		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
 		ed::SetCurrentEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
@@ -86,25 +112,7 @@ namespace Zenit {
 		if (!hovered)
 			return;
 
-		//static bool startedDragging = false;
-		//if (!startedDragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-		//{
-		//	startedDragging = true;
-		//}
-		//if (startedDragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			ImVec4 bounds = context->GetSelectionBounds().ToVec4();/* + context->GetViewRect().ToVec4()*/;
-			lastSelectionBounds = { bounds.x, bounds.y, bounds.z, bounds.w };
-			ZN_CORE_TRACE("{0}, {1}, {2}, {3}", lastSelectionBounds.Min.x, lastSelectionBounds.Min.y, lastSelectionBounds.Max.x, lastSelectionBounds.Max.y);
-			//startedDragging = false;
-		}
-		
-		
-
-		//editorLayer->SetDiffuseData(diffuseNode);
-		//editorLayer->SetNormalsData(normalsNode);
-		//editorLayer->SetMetallicData(metallicNode);
-		//editorLayer->SetRoughnessData(roughnessNode);
+		lastSelectionBounds = context->GetSelectionBounds();		
 	}
 
 	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
@@ -564,12 +572,12 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Max"))
 				{
-					CreateMaxNode("Max");
+					CreateMaxMinNode("Max", true);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Min"))
 				{
-					CreateMinNode("Min");
+					CreateMaxMinNode("Min", false);
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -696,7 +704,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateVector1Node(const char* name)
 	{
-		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1	);
+		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 
@@ -792,7 +800,7 @@ namespace Zenit {
 		return node;
 	}
 
-	Node* PanelNodes::CreateMinNode(const char* name)
+	/*Node* PanelNodes::CreateMinNode(const char* name)
 	{
 		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, false);
 		node->size = { 5,5 };
@@ -812,11 +820,11 @@ namespace Zenit {
 
 
 		return node;
-	}
+	}*/
 
-	Node* PanelNodes::CreateMaxNode(const char* name)
+	Node* PanelNodes::CreateMaxMinNode(const char* name, bool isMax)
 	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, true);
+		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, isMax);
 		node->size = { 5,5 };
 		//node->pos = ImGui::GetMousePos();
 		//ed::SetNodePosition(node->id, node->pos);
@@ -838,7 +846,7 @@ namespace Zenit {
 		return node;
 	}
 
-	void PanelNodes::CreateGroupNode(const char* name)
+	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
 		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
 		node->type = NodeType::COMMENT;
@@ -852,75 +860,69 @@ namespace Zenit {
 
 		lastSelectionBounds = { 0,0,0,0 };
 		ed::ClearSelection();
+		return node;
 	}
 
 	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
 	{
-		//if (endPin->node->outputType == NodeOutputType::TEXTURE)
+		const auto inNode = (ComputeShaderNode*)startPin->node;
+
+		switch (endPin->node->type)
 		{
-			//if (startPin->node->outputType == NodeOutputType::TEXTURE)
+			case NodeType::NORMAL_MAP:
 			{
-				const auto inNode = (ComputeShaderNode*)startPin->node;
-				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
-				// If you want an inputTexture, just use a multiply node
-				switch (endPin->node->type)
-				{
-					case NodeType::NORMAL_MAP:
-					{
-						const auto n = (NormalMapNode*)endPin->node;
-						resetData ? n->SetTexture(editorLayer->white) : n->SetTexture(inNode->texture);
-						break;
-					}
-					case NodeType::TWIRL:
-					{
-						const auto n = (TwirlNode*)endPin->node;
-						resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
-						break;
-					}
-					case NodeType::BLEND:
-					{
-						const auto n = (BlendNode*)endPin->node;
-
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
-
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
-
-						break;
-					}
-					case NodeType::CLAMP:
-					{
-						const auto n = (ClampNode*)endPin->node;
-						resetData ? n->SetInputTexture(editorLayer->white.get()) : n->SetInputTexture(inNode->texture.get());
-						break;
-					}
-					case NodeType::MAX:
-					{
-						const auto n = (MaxMinNode*)endPin->node;
-
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
-
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
-
-						break;
-					}
-					case NodeType::MIN:
-					{
-						const auto n = (MaxMinNode*)endPin->node;
-
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
-
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
-
-						break;
-					}
-					
-
-				}
+				const auto n = (NormalMapNode*)endPin->node;
+				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				break;
 			}
+			case NodeType::TWIRL:
+			{
+				const auto n = (TwirlNode*)endPin->node;
+				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
+				break;
+			}
+			case NodeType::BLEND:
+			{
+				const auto n = (BlendNode*)endPin->node;
+
+				Texture2D* tex = nullptr;
+				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+
+				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+
+				break;
+			}
+			case NodeType::CLAMP:
+			{
+				const auto n = (ClampNode*)endPin->node;
+				resetData ? n->SetInputTexture(editorLayer->white.get()) : n->SetInputTexture(inNode->texture.get());
+				break;
+			}
+			case NodeType::MAX:
+			{
+				const auto n = (MaxMinNode*)endPin->node;
+
+				Texture2D* tex = nullptr;
+				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+
+				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+
+				break;
+			}
+			case NodeType::MIN:
+			{
+				const auto n = (MaxMinNode*)endPin->node;
+
+				Texture2D* tex = nullptr;
+				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+
+				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+
+				break;
+			}
+
 		}
+
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
@@ -996,4 +998,204 @@ namespace Zenit {
 
 		}
 	}
+
+	void PanelNodes::SaveNodes(SerializerObject& appObject)
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
+
+		//JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
+		JSONSerializer::SetNumber(appObject, "creationId", creationId);
+
+		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray nodesArray = JSONSerializer::CreateArrayFromValue(nodesArrayValue);
+
+		JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
+
+		for (int i = 1; i < nodes.size(); ++i)
+		{
+			Node* node = nodes[i];
+			SerializerValue nodeValue = node->Save();
+			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
+			JSONSerializer::AppendValueToArray(nodesArray, nodeValue);
+
+			SerializerValue inputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray inputPinsArray = JSONSerializer::CreateArrayFromValue(inputPinsArrayValue);
+
+			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
+			for (const auto& pin : node->inputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::AppendValueToArray(inputPinsArray, value);
+			}
+
+			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray outputPinsArray = JSONSerializer::CreateArrayFromValue(outputPinsArrayValue);
+			JSONSerializer::SetObjectValue(nodeObject, "outputPins", outputPinsArrayValue);
+			for (const auto& pin : node->outputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::AppendValueToArray(outputPinsArray, value);
+			}
+
+		}
+
+		SerializerValue linksArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray linksArray = JSONSerializer::CreateArrayFromValue(linksArrayValue);
+		JSONSerializer::SetNumber(appObject, "linkCreationId", linkCreationId);
+		JSONSerializer::SetObjectValue(appObject, "links", linksArrayValue);
+
+		for (int i = 0; i < links.size(); ++i)
+		{
+			LinkInfo& link = links[i];
+			SerializerValue value = JSONSerializer::CreateValue();
+			SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+			
+			JSONSerializer::SetNumber(object, "id", link.id.Get());
+			JSONSerializer::SetNumber(object, "inputPinId", link.inputId.Get());
+			JSONSerializer::SetNumber(object, "outputPinId", link.outputId.Get());
+			JSONSerializer::AppendValueToArray(linksArray, value);
+		}
+	}
+
+	void PanelNodes::LoadNodes(SerializerObject& appObject)
+	{
+		//SerializerObject panelNodesObject = JSONSerializer::GetObjectWithName(appObject, "nodes");
+		//creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
+		SerializerArray nodesArray = JSONSerializer::GetArrayFromObject(appObject, "nodes");
+		size_t size = JSONSerializer::GetArraySize(nodesArray);
+
+		for (size_t i = 0; i < size; ++i)
+		{
+			SerializerObject object = JSONSerializer::GetObjectFromArray(nodesArray, i);
+
+			const char* name = JSONSerializer::GetStringFromObject(object, "name");
+			int id = JSONSerializer::GetNumberFromObject(object, "id");
+			NodeType type = (NodeType)JSONSerializer::GetNumberFromObject(object, "type");
+
+			switch (type)
+			{
+				case NodeType::COLOR:
+				{
+					ColorNode* node = (ColorNode*)CreateFlatColorNode(name, {});
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::NORMAL);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::PERLIN_NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::PERLIN);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::DERIVATIVE_NOISE:
+				{
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::DERIVATIVE);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::VORONOI:
+				{
+					VoronoiNode* node = (VoronoiNode*)CreateVoronoiNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CIRCLE:
+				{
+					CircleNode* node = (CircleNode*)CreateCircleNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::NORMAL_MAP:
+				{
+					NormalMapNode* node = (NormalMapNode*)CreateNormalMapNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::TWIRL:
+				{
+					TwirlNode* node = (TwirlNode*)CreateTwirlNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::BLEND:
+				{
+					BlendNode* node = (BlendNode*)CreateBlendNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CLAMP:
+				{
+					ClampNode* node = (ClampNode*)CreateClampNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MAX:
+				{
+					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, true);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MIN:
+				{
+					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, false);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::COMMENT:
+				{
+					Node* node = CreateGroupNode(name);
+					node->id = id;
+					//node->Load(object);
+					break;
+				}
+			}
+		}
+		creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
+
+		SerializerArray linksArray = JSONSerializer::GetArrayFromObject(appObject, "links");
+		size = JSONSerializer::GetArraySize(linksArray);
+		
+		for (size_t i = 0; i < size; ++i)
+		{
+			SerializerObject object = JSONSerializer::GetObjectFromArray(linksArray, i);
+			int id = JSONSerializer::GetNumberFromObject(object, "id");
+			int inputPinId = JSONSerializer::GetNumberFromObject(object, "inputPinId");
+			int outputPinId = JSONSerializer::GetNumberFromObject(object, "outputPinId");
+
+			LinkInfo link = LinkInfo(id, inputPinId, outputPinId);
+			links.push_back(link);
+			UpdateNode(FindPin(inputPinId), FindPin(outputPinId), false);
+		}
+
+		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
+
+	}
+
+
 }

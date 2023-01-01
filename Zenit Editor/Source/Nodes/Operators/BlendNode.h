@@ -16,6 +16,9 @@ namespace Zenit {
 
 		void SetFirstTexture(Texture2D* texture);
 		void SetSecondTexture(Texture2D* texture);
+		
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
 		float contribution;

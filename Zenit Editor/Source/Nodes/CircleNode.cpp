@@ -5,6 +5,7 @@ namespace Zenit {
 	CircleNode::CircleNode(int id, const char* name, NodeOutputType outputType)
 		: ComputeShaderNode(id, name, outputType), radius(0.3), blur(0.001)
 	{
+		type = NodeType::CIRCLE;
 		offset = { 0,0 };
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/circle.shader");
@@ -47,5 +48,27 @@ namespace Zenit {
 			regenerate = true;
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
+	}
+
+	SerializerValue CircleNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetString(object, "name", name.c_str());
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetVector2f(object, "offset", offset);
+		JSONSerializer::SetNumber(object, "radius", radius);
+		JSONSerializer::SetNumber(object, "blur", blur);
+
+		return value;
+	}
+
+	void CircleNode::Load(SerializerObject& obj)
+	{
+		offset = JSONSerializer::GetVector2fFromObject(obj, "offset");
+		radius = JSONSerializer::GetNumberFromObject(obj, "radius");
+		blur = JSONSerializer::GetNumberFromObject(obj, "blur");
 	}
 }

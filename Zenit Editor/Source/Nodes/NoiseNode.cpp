@@ -39,8 +39,10 @@ namespace Zenit {
 		if (!regenerate)
 			return;
 
+		latestSeed += Application::GetInstance().GetTotalExecutionTime();
+
 		BindCoreData();
-		computeShader->SetUniform1f("seed", ts);
+		computeShader->SetUniform1f("seed", latestSeed);
 		regenerate = false;
 
 		switch (noiseType)
@@ -78,5 +80,28 @@ namespace Zenit {
 		}
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
+	}
+
+	SerializerValue NoiseNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetString(object, "name", name.c_str());
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "noiseType", (int)noiseType);
+
+		if (noiseType == NoiseType::PERLIN)
+			JSONSerializer::SetNumber(object, "resolution", res);
+
+		return value;
+	}
+
+	void NoiseNode::Load(SerializerObject& obj)
+	{
+		noiseType = (NoiseType)JSONSerializer::GetNumberFromObject(obj, "noiseType");
+		if (noiseType == NoiseType::PERLIN)
+			res = JSONSerializer::GetNumberFromObject(obj, "resolution");
 	}
 }

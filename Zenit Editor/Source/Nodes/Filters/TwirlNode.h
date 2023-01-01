@@ -15,6 +15,9 @@ namespace Zenit {
 		virtual void OnImGuiInspectorRender() override;
 
 		void SetTexture(Texture2D* texture);
+		
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
 		std::unique_ptr<Texture2D> inputTexture;

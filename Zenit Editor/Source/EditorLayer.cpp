@@ -15,6 +15,7 @@
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
 #define MODELS_PATH "\\Assets\\Models\\"
+#define SAVE_PATH   "Settings/SavedData.json"
 
 namespace Zenit {
 
@@ -42,26 +43,27 @@ namespace Zenit {
 		fbo = std::make_unique<FrameBuffer>(1280, 720, 0);
 
 		LoadSkyboxes();
-		
 		LoadModels();
-		//currentModel = ModelImporter::ImportModel("Assets/Models/Primitives/cubo.obj");
-
-		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
-		
-		uint32_t data = 0xffffffff;
-		diffuse = new Texture2D(&data, 1, 1);
-		normals = new Texture2D(&data, 1, 1);
-		metallic = new Texture2D(&data, 1, 1);
-		roughness = new Texture2D(&data, 1, 1);
-		ambientOcclusion = new Texture2D(&data, 1, 1);
 		
 		white = std::make_shared<Texture2D>("Settings/white.png");
+		panelNodes = new PanelNodes(this);
+		if (!Load())
+		{
+			uint32_t data = 0xffffffff;
+			diffuse = new Texture2D(&data, 1, 1);
+			diffuse->SetName("white");
+			normals = new Texture2D(&data, 1, 1);
+			normals->SetName("white");
+			metallic = new Texture2D(&data, 1, 1);
+			metallic->SetName("white");
+			roughness = new Texture2D(&data, 1, 1);
+			roughness->SetName("white");
+			ambientOcclusion = new Texture2D(&data, 1, 1);
+		}		
 
+		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
-
-		panelNodes = new PanelNodes(this);
-
 	}
 
 	void EditorLayer::OnDetach()
@@ -114,6 +116,10 @@ namespace Zenit {
 			if (ImGui::MenuItem("Export"))
 			{
 				ExportTextures();
+			}
+			else if (ImGui::MenuItem("Save"))
+			{
+				Save();
 			}
 			ImGui::EndMenu();
 		}
@@ -208,6 +214,7 @@ namespace Zenit {
 		ImGui::Begin("Performance");
 		{
 			ImGui::Text(std::to_string(Application::GetInstance().GetTimeStep()).c_str());
+			ImGui::Text(std::to_string(Application::GetInstance().GetTotalExecutionTime()).c_str());
 		}
 		ImGui::End();
 
@@ -236,6 +243,7 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		diffuse = n->texture.get();
+		diffuse->SetName(n->name + "_" + std::to_string(n->id.Get()));
 		return true;
 	}
 
@@ -250,6 +258,8 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		normals = n->texture.get();
+		normals->SetName(n->name + "_" + std::to_string(n->id.Get()));
+
 		return true;
 	}
 
@@ -264,6 +274,8 @@ namespace Zenit {
 
 		const auto n = (ComputeShaderNode*)node;
 		metallic = n->texture.get();
+		metallic->SetName(n->name + "_" + std::to_string(n->id.Get()));
+
 		return true;
 	}
 
@@ -282,15 +294,16 @@ namespace Zenit {
 			{
 				const auto n = (ComputeShaderNode*)node;
 				roughness = n->texture.get();
+				roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
 				return true;
 			}
-			case NodeOutputType::VEC1:
-			{
-				const auto n = (Vec1Node*)node;
-				roughnessValue = n->value;
-				return true;
-				break;
-			}
+			//case NodeOutputType::VEC1:
+			//{
+			//	const auto n = (Vec1Node*)node;
+			//	roughnessValue = n->value;
+			//	return true;
+			//	break;
+			//}
 		}
 
 		return false;
@@ -320,8 +333,8 @@ namespace Zenit {
 		roughness->Bind(3);
 		pbrShader->SetUniform1i("roughnessTexture", 3);
 
-		ambientOcclusion->Bind(4);
-		pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
+		//ambientOcclusion->Bind(4);
+		//pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
 
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
@@ -414,8 +427,78 @@ namespace Zenit {
 		delete[] data;
 	}
 
-	
-	
+	void EditorLayer::Save()
+	{
+		serializerRootValue = JSONSerializer::CreateValue();
+		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
+
+		JSONSerializer::SetObjectValue(rootObj, "App", JSONSerializer::CreateValue());
+		SerializerObject appObj = JSONSerializer::GetObjectWithName(rootObj, "App");
+		
+		JSONSerializer::SetString(appObj, "diffuse", diffuse->GetName().c_str());
+		JSONSerializer::SetString(appObj, "normals", normals->GetName().c_str());
+		JSONSerializer::SetString(appObj, "metallic", metallic->GetName().c_str());
+		JSONSerializer::SetString(appObj, "roughness", roughness->GetName().c_str());
+		
+		panelNodes->SaveNodes(appObj);
+		
+		JSONSerializer::DumpFile(serializerRootValue, SAVE_PATH);
+		JSONSerializer::FreeValue(serializerRootValue);
+	}
+
+	bool EditorLayer::Load()
+	{
+		//return false;
+
+		serializerRootValue = JSONSerializer::ReadFile(SAVE_PATH);
+		if (!serializerRootValue.value)
+			return false;
+
+		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
+		SerializerObject appObj = JSONSerializer::GetObjectWithName(rootObj, "App");
+
+		std::string diffuseName = JSONSerializer::GetStringFromObject(appObj, "diffuse");
+		std::string normalsName = JSONSerializer::GetStringFromObject(appObj, "normals");
+		std::string metallicName = JSONSerializer::GetStringFromObject(appObj, "metallic");
+		std::string roughnessName = JSONSerializer::GetStringFromObject(appObj, "roughness");
+
+		panelNodes->LoadNodes(appObj);
+
+		int nodeId = -1;
+		size_t start = diffuseName.find_last_of("_");
+		if (start != std::string::npos)
+		{			
+			nodeId = std::stoi(diffuseName.substr(start + 1));
+		}
+		SetDiffuseData(panelNodes->FindNode(nodeId));
+
+		nodeId = -1;
+		start = normalsName.find_last_of("_");
+		if (start != std::string::npos)
+		{
+			nodeId = std::stoi(normalsName.substr(start + 1));
+		}
+		SetNormalsData(panelNodes->FindNode(nodeId));
+
+		nodeId = -1;
+		start = metallicName.find_last_of("_");
+		if (start != std::string::npos)
+		{
+			nodeId = std::stoi(metallicName.substr(start + 1));
+		}
+		SetMetallicData(panelNodes->FindNode(nodeId));
+
+		nodeId = -1;
+		start = roughnessName.find_last_of("_");
+		if (start != std::string::npos)
+		{
+			nodeId = std::stoi(roughnessName.substr(start + 1));
+		}
+		SetRoughnessData(panelNodes->FindNode(nodeId));
+
+		return true;
+	}
+		
 	void EditorLayer::LoadSkyboxes()
 	{
 		std::filesystem::path cp = std::filesystem::current_path();
