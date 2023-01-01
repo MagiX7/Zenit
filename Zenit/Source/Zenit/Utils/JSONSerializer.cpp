@@ -64,7 +64,7 @@ namespace Zenit {
 		}
 	}
 
-	void JSONSerializer::SetNumber(SerializerObject& object, const char* name, int value)
+	void JSONSerializer::SetNumber(SerializerObject& object, const char* name, float value)
 	{
 		JSON_Status status = json_object_set_number(object, name, value);
 		if (status != JSONSuccess)

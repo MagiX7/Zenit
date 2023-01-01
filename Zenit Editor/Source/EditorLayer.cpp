@@ -59,14 +59,11 @@ namespace Zenit {
 			roughness = new Texture2D(&data, 1, 1);
 			roughness->SetName("white");
 			ambientOcclusion = new Texture2D(&data, 1, 1);
-		}
-		
-		
+		}		
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
-
 	}
 
 	void EditorLayer::OnDetach()
@@ -297,8 +294,8 @@ namespace Zenit {
 			{
 				const auto n = (ComputeShaderNode*)node;
 				roughness = n->texture.get();
-				return true;
 				roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
+				return true;
 			}
 			//case NodeOutputType::VEC1:
 			//{

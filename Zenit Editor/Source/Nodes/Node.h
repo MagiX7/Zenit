@@ -10,6 +10,8 @@ namespace ed = ax::NodeEditor;
 
 namespace Zenit {
 
+	class PanelNodes;
+
 	enum class PinType
 	{
 		None = -1,
@@ -45,6 +47,7 @@ namespace Zenit {
 		PERLIN_NOISE,
 		DERIVATIVE_NOISE,
 		VORONOI,
+		CIRCLE,
 
 		// Filters
 		NORMAL_MAP,
@@ -125,9 +128,6 @@ namespace Zenit {
 		NodeType type; // To be defined in each node
 		ImVec2 pos;
 		ImVec2 size;
-
-		std::string state;
-		std::string savedState;
 
 		bool isOutput; // Output written into the mesh
 

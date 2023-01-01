@@ -14,7 +14,7 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-		void SetTexture(std::shared_ptr<Texture2D> texture);
+		void SetInputTexture(std::shared_ptr<Texture2D> white);
 
 		virtual SerializerValue Save() override;
 		virtual void Load(SerializerObject& obj) override;

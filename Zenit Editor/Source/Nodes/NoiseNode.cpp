@@ -101,6 +101,7 @@ namespace Zenit {
 	void NoiseNode::Load(SerializerObject& obj)
 	{
 		noiseType = (NoiseType)JSONSerializer::GetNumberFromObject(obj, "noiseType");
-		res = JSONSerializer::GetNumberFromObject(obj, "resolution");
+		if (noiseType == NoiseType::PERLIN)
+			res = JSONSerializer::GetNumberFromObject(obj, "resolution");
 	}
 }

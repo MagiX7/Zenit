@@ -45,7 +45,7 @@ namespace Zenit {
 
 		static void SetObjectValue(SerializerObject& object, const char* name, SerializerValue& value);
 
-		static void SetNumber(SerializerObject& object, const char* name, int value);
+		static void SetNumber(SerializerObject& object, const char* name, float value);
 		
 		static void SetVector2f(SerializerObject& object, const char* name, glm::vec2 value);
 		static void SetVector3f(SerializerObject& object, const char* name, glm::vec3 value);

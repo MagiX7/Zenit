@@ -5,6 +5,7 @@ namespace Zenit {
 	CircleNode::CircleNode(int id, const char* name, NodeOutputType outputType)
 		: ComputeShaderNode(id, name, outputType), radius(0.3), blur(0.001)
 	{
+		type = NodeType::CIRCLE;
 		offset = { 0,0 };
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/circle.shader");
@@ -66,5 +67,8 @@ namespace Zenit {
 
 	void CircleNode::Load(SerializerObject& obj)
 	{
+		offset = JSONSerializer::GetVector2fFromObject(obj, "offset");
+		radius = JSONSerializer::GetNumberFromObject(obj, "radius");
+		blur = JSONSerializer::GetNumberFromObject(obj, "blur");
 	}
 }

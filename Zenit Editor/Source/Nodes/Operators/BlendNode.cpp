@@ -16,6 +16,10 @@ namespace Zenit {
 
 		tex1 = std::make_unique<Texture2D>("Settings/white.png");
 		tex2 = std::make_unique<Texture2D>("Settings/white.png");
+		tex1->SetName(name + '_' + id);
+		tex2->SetName(name + '_' + id);
+
+
 		blendMode = (BlendMode)0;
 	}
 
@@ -104,6 +108,8 @@ namespace Zenit {
 
 	void BlendNode::Load(SerializerObject& obj)
 	{
+		blendMode = (BlendMode)JSONSerializer::GetNumberFromObject(obj, "blendMode");
+		contribution = JSONSerializer::GetNumberFromObject(obj, "contribution");	
 	}
 
 }

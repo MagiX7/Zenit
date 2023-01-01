@@ -67,7 +67,7 @@ namespace Zenit {
 		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
-		JSONSerializer::SetString(object, "inputTexture", inputTexture->GetName().c_str());
+		//JSONSerializer::SetString(object, "inputTexture", inputTexture->GetName().c_str());
 		JSONSerializer::SetNumber(object, "max", max);
 		JSONSerializer::SetNumber(object, "min", min);
 
@@ -76,5 +76,7 @@ namespace Zenit {
 
 	void ClampNode::Load(SerializerObject& obj)
 	{
+		max = JSONSerializer::GetNumberFromObject(obj, "max");
+		min = JSONSerializer::GetNumberFromObject(obj, "min");
 	}
 }

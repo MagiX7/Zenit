@@ -70,8 +70,8 @@ namespace Zenit {
 		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
-		JSONSerializer::SetString(object, "firstTexture", inputTexture1->GetName().c_str());
-		JSONSerializer::SetString(object, "secondTexture", inputTexture2->GetName().c_str());
+		//JSONSerializer::SetString(object, "firstTexture", inputTexture1->GetName().c_str());
+		//JSONSerializer::SetString(object, "secondTexture", inputTexture2->GetName().c_str());
 
 		return value;
 	}

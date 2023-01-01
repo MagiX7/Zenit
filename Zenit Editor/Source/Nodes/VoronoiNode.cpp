@@ -42,11 +42,12 @@ namespace Zenit {
 		ImGui::Separator();
 		ImGui::Dummy({ 0, 10 });
 
-		if (ImGui::Button("Regenerate"))
+		bool changedBrightness = ImGui::DragFloat("Brightness", &brightness, 0.01f, 0.0f, 1.0f);
+		bool changedZoom = ImGui::DragFloat("Zoom", &zoom, 0.1f, 0.0f);
+
+		if (ImGui::Button("Regenerate") || changedBrightness || changedZoom)
 			regenerate = true;
 
-		ImGui::DragFloat("Brightness", &brightness, 0.01f, 0.0f, 1.0f);
-		ImGui::DragFloat("Zoom", &zoom, 0.1f, 0.0f);
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0, 1 }, { 1,0 });
 	}
 
@@ -67,5 +68,8 @@ namespace Zenit {
 
 	void VoronoiNode::Load(SerializerObject& obj)
 	{
+		brightness = JSONSerializer::GetNumberFromObject(obj, "brightness");
+		zoom = JSONSerializer::GetNumberFromObject(obj, "zoom");
+		latestSeed = JSONSerializer::GetNumberFromObject(obj, "seed");
 	}
 }

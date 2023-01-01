@@ -11,6 +11,7 @@ namespace Zenit {
 
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture->SetName(name + '_' + id);
 
 		center = { -0.5f,-0.5f };
 		radius = 1.0f;
@@ -58,7 +59,8 @@ namespace Zenit {
 
 	void TwirlNode::SetTexture(Texture2D* texture)
 	{
-		inputTexture.reset(texture);
+		*inputTexture = *texture;
+		//inputTexture.reset(texture);
 		regenerate = true;
 	}
 
@@ -79,6 +81,9 @@ namespace Zenit {
 
 	void TwirlNode::Load(SerializerObject& obj)
 	{
+		center = JSONSerializer::GetVector2fFromObject(obj, "center");
+		radius = JSONSerializer::GetNumberFromObject(obj, "radius");
+		angle = JSONSerializer::GetNumberFromObject(obj, "angle");
 	}
 
 }
