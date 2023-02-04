@@ -14,6 +14,7 @@ namespace Zenit {
 	{
 	public:
 		static Input* GetInstance();
+		void Shutdown();
 
 		bool IsKeyPressed(int keycode);
 		bool IsMouseButtonPressed(int button);

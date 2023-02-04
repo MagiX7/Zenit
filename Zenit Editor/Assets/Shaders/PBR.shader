@@ -21,13 +21,11 @@ void main()
 	gl_Position = projection * view * model * vec4(position, 1);
 	vTexCoords = texCoords;
 	vNormals = normalize((model * vec4(normals, 0.0)).xyz);
-	//vPosition = vec3(model * vec4(position, 1));
 	vPosition = position;
 
 	vec3 N = normalize(normals);
 	vec3 T = tangents;
 	T = normalize(T - dot(T, N) * N);
-	//vec3 B = normalize(biTangents);
 	vec3 B = cross(T, N);
 	TBN = mat3(T, B, N);
 }
@@ -44,17 +42,10 @@ layout(location = 5) uniform samplerCube irradianceMap;
 layout(location = 6) uniform samplerCube skyboxPrefilterMap;;
 layout(location = 7) uniform sampler2D skyboxBrdf;
 
-
-//uniform float metallic;
-//uniform float roughness;
-
 uniform vec3 camPos;
 uniform float reflectionLod;
 uniform int skyboxReflectionEnabled;
 uniform int drawSkybox;
-
-uniform float roughnessValue;
-
 
 out vec4 fragColor;
 
@@ -171,7 +162,7 @@ void main()
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
 	vec3 irradiance = texture(irradianceMap, normal).rgb;
 	float metallic = texture2D(metallicTexture, vTexCoords).r;
-	float roughness = texture2D(roughnessTexture, vTexCoords).r;
+	float roughness = max(texture2D(roughnessTexture, vTexCoords).r, 0.01f);
 	
 	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
 	

@@ -49,7 +49,7 @@ namespace Zenit {
 		{
 			case NoiseType::PERLIN:
 			{
-				computeShader->SetUniform1i("resolution", res);
+				computeShader->SetUniform1f("scale", scale);
 				break;
 			}
 			case NoiseType::NORMAL:
@@ -76,7 +76,8 @@ namespace Zenit {
 
 		if (noiseType == NoiseType::PERLIN)
 		{
-			ImGui::DragInt("Resolution", &res, 1.0f, 0, 10);
+			if (ImGui::DragInt("Scale", &scale, 0.1f))
+				regenerate = true;
 		}
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
@@ -93,7 +94,7 @@ namespace Zenit {
 		JSONSerializer::SetNumber(object, "noiseType", (int)noiseType);
 
 		if (noiseType == NoiseType::PERLIN)
-			JSONSerializer::SetNumber(object, "resolution", res);
+			JSONSerializer::SetNumber(object, "scale", scale);
 
 		return value;
 	}
@@ -102,6 +103,6 @@ namespace Zenit {
 	{
 		noiseType = (NoiseType)JSONSerializer::GetNumberFromObject(obj, "noiseType");
 		if (noiseType == NoiseType::PERLIN)
-			res = JSONSerializer::GetNumberFromObject(obj, "resolution");
+			scale = JSONSerializer::GetNumberFromObject(obj, "scale");
 	}
 }

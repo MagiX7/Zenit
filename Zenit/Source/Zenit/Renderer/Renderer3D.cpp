@@ -1,9 +1,31 @@
 #include "Renderer3D.h"
 #include "Zenit/Core/Log.h"
 
+#include "VertexBuffer.h"
+#include "Shader.h"
+
 #include <glad/glad.h>
 
 namespace Zenit {
+
+	Renderer3D* Renderer3D::instance = nullptr;
+
+	Renderer3D::Renderer3D()
+	{
+		
+	}
+
+	Renderer3D::~Renderer3D()
+	{
+	}
+
+	Renderer3D* Renderer3D::GetInstance()
+	{
+		if (!instance)
+			instance = new Renderer3D();
+
+		return instance;
+	}
 
 	void Renderer3D::Init()
 	{
@@ -11,6 +33,7 @@ namespace Zenit {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL);
+		glLineWidth(2.0f);
 	}
 
 	void Renderer3D::ShutDown()
@@ -27,4 +50,5 @@ namespace Zenit {
 	{
 		glViewport(0, 0, width, height);
 	}
+
 }

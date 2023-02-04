@@ -47,7 +47,7 @@ namespace Zenit {
 		if (viewportSize.x != dimensions.x || viewportSize.y != dimensions.y)
 		{
 			fbo->Resize(dimensions.x, dimensions.y);
-			Renderer3D::OnResize(dimensions.x, dimensions.y);
+			Renderer3D::GetInstance()->OnResize(dimensions.x, dimensions.y);
 			camera.SetApsectRatio(dimensions.x / dimensions.y);
 			ZN_TRACE("Viewport Resized");
 			viewportSize = { dimensions.x, dimensions.y };

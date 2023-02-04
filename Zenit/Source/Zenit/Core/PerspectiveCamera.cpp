@@ -5,6 +5,8 @@
 #include "PerspectiveCamera.h"
 #include "TimeStep.h"
 
+#include "Zenit/Utils/AABB.h"
+
 #include "Log.h"
 
 #include <glm/glm.hpp>
@@ -33,16 +35,16 @@ namespace Zenit {
 
 	PerspectiveCamera::~PerspectiveCamera()
 	{
-
 	}
 
 	void PerspectiveCamera::Update(TimeStep ts)
 	{
-		//if (HandleInput(ts))
-		//{
-		//	RecalculateMatrices();
-		//}
+		HandleInput(ts);
 	}
+
+	//void PerspectiveCamera::IsAABBInside(AABB& aabb)
+	//{
+	//}
 
 	void PerspectiveCamera::Scroll(TimeStep ts)
 	{
@@ -51,12 +53,6 @@ namespace Zenit {
 			position += dy * ts * 10 * forward;
 			RecalculateMatrices();
 		}
-		/*if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
-		{
-			position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
-			position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
-		}*/
-
 	}
 
 	void PerspectiveCamera::UpdateFovAndAspectRatio(float width, float height)
@@ -74,22 +70,14 @@ namespace Zenit {
 		projection = glm::perspective(glm::radians(fovY), aspectRatio, 0.01f, 100.0f);
 	}
 
-	bool PerspectiveCamera::HandleInput(TimeStep ts)
+	void PerspectiveCamera::HandleInput(TimeStep ts)
 	{
-		bool needToRecalculate = false;
-		//if (float dy = Input::GetInstance()->GetMouseScrolDy())
-		//{
-		//	position += Input::GetInstance()->GetMouseScrolDy() * ts * forward;
-		//	needToRecalculate = true;
-		//}
-		//if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
-		//{
-		//	position -= Input::GetInstance()->GetMouseMotionX() * 1.0f * ts * right;
-		//	position -= Input::GetInstance()->GetMouseMotionY() * 1.0f * ts * up;
-		//	needToRecalculate = true;
-		//}
-
-		return needToRecalculate;
+		if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_MIDDLE))
+		{
+			position -= Input::GetInstance()->GetMouseMotionX() * 100.0f * ts * right;
+			position -= Input::GetInstance()->GetMouseMotionY() * 100.0f * ts * up;
+			RecalculateMatrices();
+		}
 	}
 
 	bool PerspectiveCamera::HandleMovement(TimeStep ts)

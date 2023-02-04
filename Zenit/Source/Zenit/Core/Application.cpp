@@ -25,7 +25,7 @@ namespace Zenit {
 		window = std::make_unique<Window>(1720, 920);
 		window->SetEventCallback(ZN_BIND_EVENT_FN(Application::OnEvent));
 
-		Renderer3D::Init();
+		Renderer3D::GetInstance()->Init();
 
 		imguiLayer = new ImGuiLayer();
 		PushOverlay(imguiLayer);
@@ -36,13 +36,14 @@ namespace Zenit {
 
 	Application::~Application()
 	{
+		Input::GetInstance()->Shutdown();
 	}
 
 	void Application::Run()
 	{
 		while (isRunning)
 		{
-			Renderer3D::Clear({ 0.2f,0.2f,0.2f,1.0f });
+			Renderer3D::GetInstance()->Clear({ 0.2f,0.2f,0.2f,1.0f });
 
 			float t = glfwGetTime();
 			timestep = t - lastFrameTime;
@@ -118,7 +119,7 @@ namespace Zenit {
 			return false;
 		}
 		
-		Renderer3D::OnResize(e.GetWidth(), e.GetHeight());
+		Renderer3D::GetInstance()->OnResize(e.GetWidth(), e.GetHeight());
 		
 		minimized = false;
 	}

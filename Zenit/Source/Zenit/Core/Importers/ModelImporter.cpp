@@ -57,7 +57,8 @@ namespace Zenit {
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            model.meshes.push_back(ProcessMesh(mesh, scene));
+            model.AddMesh(ProcessMesh(mesh, scene));
+            //model.meshes.push_back(ProcessMesh(mesh, scene));
         }
         
         for (unsigned int i = 0; i < node->mNumChildren; i++)

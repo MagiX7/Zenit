@@ -91,7 +91,7 @@ namespace Zenit {
 
 		fbo->Bind();
 		{
-			Renderer3D::Clear({ 0.05,0.05,0.05,1 });
+			Renderer3D::GetInstance()->Clear({ 0.05,0.05,0.05,1 });
 			
 			if (skyboxProps.draw)
 				currentSkybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());

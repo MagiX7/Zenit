@@ -28,8 +28,8 @@ namespace Zenit {
 
 	private:
 		NoiseType noiseType;
-		int res = 10;
 		float latestSeed = 0;
+		int scale = 10;
 	};
 
 }

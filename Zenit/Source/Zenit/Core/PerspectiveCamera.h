@@ -6,6 +6,7 @@
 namespace Zenit {
 
 	class TimeStep;
+	class AABB;
 
 	class PerspectiveCamera
 	{
@@ -14,6 +15,8 @@ namespace Zenit {
 		PerspectiveCamera(glm::vec3 pos, glm::vec3 target, float yFov, float aspectRatio);
 		~PerspectiveCamera();
 		void Update(TimeStep ts);
+
+		//void IsAABBInside(AABB& aabb);
 
 		void Scroll(TimeStep ts);
 		void UpdateFovAndAspectRatio(float width, float height);
@@ -32,7 +35,7 @@ namespace Zenit {
 		inline float GetFovY() const { return fovY; }
 
 	private:
-		bool HandleInput(TimeStep ts);
+		void HandleInput(TimeStep ts);
 		bool HandleMovement(TimeStep ts);
 		void RecalculateMatrices();
 

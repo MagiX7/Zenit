@@ -28,6 +28,8 @@ namespace Zenit {
 		int start = path.find_last_of("\\") + 1;
 		int end = path.find_last_of(".");
 		name = path.substr(start, end - start);
+
+		aabb = AABB();
 	}
 
 	Model::~Model()
@@ -54,11 +56,13 @@ namespace Zenit {
 			{
 				glm::vec3 right = glm::vec3(transform[0][0], transform[1][0], transform[2][0]);
 				transform = glm::rotate(transform, -dy * ts, right);
+				//aabb.Transform(transform, -dy * ts, right);
 			}
 			if (dx)
 			{
 				glm::vec3 up = glm::vec3(transform[0][1], transform[1][1], transform[2][1]);
 				transform = glm::rotate(transform, dx * ts, up);
+				//aabb.Transform(transform, dx * ts, up);
 			}
 		}
 	}
@@ -72,5 +76,19 @@ namespace Zenit {
 	void Model::ResetRotation()
 	{
 		transform = glm::toMat4(glm::quat(0, 0, 0, 1));
+	}
+
+	void Model::AddMesh(Mesh* mesh)
+	{
+		meshes.push_back(mesh);
+		std::vector<Vertex> vertices = mesh->GetVertices();
+		std::vector<glm::vec3> positions;
+
+		positions.resize(vertices.size());
+		for (size_t i = 0; i < vertices.size(); ++i)
+			positions[i] = vertices[i].position;
+
+		aabb.Enclose(mesh->GetAABB());
+		aabb.RefreshData();
 	}
 }

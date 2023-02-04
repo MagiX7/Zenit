@@ -35,7 +35,8 @@ namespace Zenit {
 	void VertexBuffer::SetData(void* vertices, uint32_t size)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, size, vertices);
+		//glBufferSubData(GL_ARRAY_BUFFER, 0, size, vertices);
+		glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		count =  size / sizeof(uint32_t);

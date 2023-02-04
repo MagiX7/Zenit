@@ -38,12 +38,9 @@ namespace Zenit {
 
 	bool Window::Init()
 	{
-		bool ret = true;
-
 		if (!glfwInit())
 		{
 			ZN_CORE_INFO("[INFO] GLFW Initialization Failed.");
-			ret = false;
 			return false;
 		}
 		else
@@ -169,7 +166,7 @@ namespace Zenit {
 
 		glfwSwapInterval(1);
 
-		return ret;
+		return true;
 	}
 
 	void Window::Shutdown()
