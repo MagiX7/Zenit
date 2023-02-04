@@ -5,7 +5,7 @@ layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
 uniform vec3 inputColor;
 uniform float seed;
-uniform float scale;
+uniform int scale;
 
 uniform int resolution;
 

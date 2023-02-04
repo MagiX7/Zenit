@@ -18,9 +18,8 @@ namespace Zenit {
 		virtual void Load(SerializerObject& obj) override;
 
 	public:
-		float brightness;
 		float latestSeed;
-		float zoom;
+		int scale;
 	};
 
 }

@@ -49,7 +49,8 @@ namespace Zenit {
 		{
 			case NoiseType::PERLIN:
 			{
-				computeShader->SetUniform1f("scale", scale);
+				// Despite it is an int, it must be passed as a float
+				computeShader->SetUniform1i("scale", scale);
 				break;
 			}
 			case NoiseType::NORMAL:

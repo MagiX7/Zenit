@@ -172,7 +172,7 @@ namespace Zenit {
 	void Window::Shutdown()
 	{
 		glfwDestroyWindow(window);
-		//glfwTerminate();
+		glfwTerminate();
 	}
 
 	void Window::SwapBuffers()

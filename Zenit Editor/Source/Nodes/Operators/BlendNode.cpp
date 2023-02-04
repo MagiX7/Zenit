@@ -3,22 +3,17 @@
 namespace Zenit {
 
 	BlendNode::BlendNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType), contribution(0)
+		: ComputeShaderNode(id, name, outputType), contribution(0.5)
 	{
 		type = NodeType::BLEND;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/blend.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
-		BindCoreData();
-		computeShader->SetUniform1f("contribution", contribution);
-		DispatchCompute(1, 1);
-
 		tex1 = std::make_unique<Texture2D>("Settings/white.png");
 		tex2 = std::make_unique<Texture2D>("Settings/white.png");
 		tex1->SetName(name + '_' + id);
 		tex2->SetName(name + '_' + id);
-
 
 		blendMode = (BlendMode)0;
 	}
