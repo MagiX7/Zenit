@@ -85,7 +85,7 @@ namespace Zenit {
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
-		camera.Update(ts);
+		//camera.Update(ts);
 		panelViewport.OnUpdate(ts, currentModel, camera);
 		panelNodes->Update(ts);
 

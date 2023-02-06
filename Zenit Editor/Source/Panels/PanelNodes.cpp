@@ -29,6 +29,11 @@
 #define OUTPUT_METALLIC_PIN_ID 4
 #define OUTPUT_ROUGHNESS_PIN_ID 5
 
+#define FLAT_COLOR_NODE_HEADER_COLOR ImColor(120, 80, 80, 255);
+#define FILTER_NODE_HEADER_COLOR ImColor(80, 80, 150, 255);
+#define GENERATOR_NODE_HEADER_COLOR ImColor(80, 120, 80, 255);
+#define OPERATOR_NODE_HEADER_COLOR ImColor(120, 80, 150, 255);
+
 namespace Zenit {
 
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
@@ -36,30 +41,6 @@ namespace Zenit {
 		config = ed::Config();
 		config.SettingsFile = "Settings/NodeEditor.json";
 		config.UserPointer = this;
-
-		/*config.LoadNodeSettings = [](ed::NodeId nodeId, char* data, void* userPointer) -> size_t
-		{
-			auto self = static_cast<PanelNodes*>(userPointer);
-
-			auto node = self->FindNode(nodeId);
-			if (!node)
-				return 0;
-
-			if (data != nullptr)
-				memcpy(data, node->state.data(), node->state.size());
-			return node->state.size();
-		};
-
-		config.SaveNodeSettings = [](ed::NodeId nodeId, const char* data, size_t size, ed::SaveReasonFlags reason, void* userPointer) -> bool
-		{
-			auto self = static_cast<PanelNodes*>(userPointer);
-
-			Node* node = self->FindNode(nodeId);
-			if (!node)
-				return false;
-
-			node->state.assign(data, size);
-		};*/
 
 		config.NavigateButtonIndex = 2;
 		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
@@ -84,9 +65,13 @@ namespace Zenit {
 		roughness.node = node;
 		node->inputs.emplace_back(roughness);
 
+		node->headerColor = ImColor(100, 100, 100, 255);
+
 		nodes.emplace_back(node);
 		
 		creationId += 5;
+
+		nodeBgTexture = std::make_shared<Texture2D>("Settings/NodeBackground.png");
 	}
 
 	PanelNodes::~PanelNodes()
@@ -194,9 +179,9 @@ namespace Zenit {
 			{
 				ed::BeginNode(n->id);
 				ImGui::PushID(n->id.AsPointer());
-				ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
-				
+
 				int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
+				int height = ImGui::CalcTextSize(n->name.c_str()).y + 8;
 
 				ImGui::PushItemWidth(width);
 
@@ -223,22 +208,30 @@ namespace Zenit {
 				{
 					ImGui::TextUnformatted(n->name.c_str());
 				}
+
 				ImGui::PopItemWidth();
 
-				ImGui::NewLine();
+				ImVec2 titleMin = ImGui::GetItemRectMin();
+				ImVec2 titleMax = ImGui::GetItemRectMax();
+				ImRect titleRect = { titleMin, titleMax };
+
+				ImGui::Dummy({ 0, 3 });
 
 				ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
 				if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
 				{
 					ImGui::TableNextColumn();
-
 					for (const auto& input : n->inputs)
 					{
 						ed::BeginPin(input.id, input.kind);
 						ImGui::Text(input.name.c_str());
 						ed::EndPin();
-					}
 
+						auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+						ImVec2 leftCenter = rect.GetCenter();
+						leftCenter.x -= rect.GetWidth() / 2;
+					}
+					
 					ImGui::TableNextColumn();
 
 					n->OnImGuiNodeRender();
@@ -253,10 +246,56 @@ namespace Zenit {
 					}
 
 					ImGui::EndTable();
-					ed::PopStyleColor();
 				}
 				ImGui::PopID();
+
 				ed::EndNode();
+
+				// Draw Header
+				ImVec2 bgMax = ImGui::GetItemRectMax();
+				ImVec2 bgMin = ImGui::GetItemRectMin();
+
+				if ((bgMax.x > bgMin.x) && (bgMax.y > bgMin.y))
+				{
+					float alpha = (int)ImGui::GetStyle().Alpha * 255;
+					//ImColor color = ImColor(80, 80, 150, 100);
+					auto nodeDrawList = ed::GetNodeBackgroundDrawList(n->id);
+
+
+					//const auto halfBorderWidth = ed::GetStyle().NodeBorderWidth * 0.5f;
+					//
+					//auto bgColor = IM_COL32(0, 0, 0, alpha) | (color & IM_COL32(255, 255, 255, 0));
+
+					//auto uv = ImVec2(
+					//	(bgMax.x - bgMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
+					//	(bgMax.y - bgMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
+
+					//nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(),
+					//	bgMin, bgMax,
+					//	ImVec2(0.0f, 0.0f), uv,
+					//	bgColor, ed::GetStyle().NodeRounding/*, 1 | 2*/);
+
+
+					auto headerColor = IM_COL32(0, 0, 0, alpha) | (n->headerColor & IM_COL32(255, 255, 255, 0));
+
+					ImVec2 headerMin = bgMin;
+					ImVec2 headerMax = bgMax;
+					headerMax.y = titleMax.y + 3;
+
+					auto uv = ImVec2(
+						(headerMax.x - headerMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
+						(headerMax.y - headerMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
+
+					nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(), headerMin, headerMax,
+						ImVec2(0,0), uv + ImVec2(0.5,0.5),
+						headerColor, ed::GetStyle().NodeRounding, 1 | 2);
+
+					/*nodeDrawList->AddRectFilledMultiColor(headerMin, headerMax,
+						ImColor(180, 0, 0, 255), ImColor(0,180,180,255),
+						ImColor(255,0,0,255), ImColor(0,255,255,255));*/
+
+					
+				}
 			}
 
 		}
@@ -548,7 +587,7 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Perlin Noise"))
 				{
-					CreateNoiseNode("Noise", NoiseType::PERLIN);
+					CreateNoiseNode("Perlin Noise", NoiseType::PERLIN);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))
@@ -664,7 +703,8 @@ namespace Zenit {
 		ColorNode* node = new ColorNode(creationId++, name, NodeOutputType::TEXTURE, color);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
-		
+		node->headerColor = FLAT_COLOR_NODE_HEADER_COLOR;
+
 		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
@@ -676,6 +716,7 @@ namespace Zenit {
 	{
 		NoiseNode* node = new NoiseNode(creationId++, name, NodeOutputType::TEXTURE, noiseType);
 		node->size = { 5,5 };
+		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
@@ -693,6 +734,7 @@ namespace Zenit {
 	{
 		VoronoiNode* node = new VoronoiNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
@@ -719,6 +761,7 @@ namespace Zenit {
 	{
 		NormalMapNode* node = new NormalMapNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
@@ -736,6 +779,7 @@ namespace Zenit {
 	{
 		TwirlNode* node = new TwirlNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
@@ -753,6 +797,7 @@ namespace Zenit {
 	{
 		CircleNode* node = new CircleNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
@@ -766,6 +811,7 @@ namespace Zenit {
 	{
 		BlendNode* node = new BlendNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
@@ -787,6 +833,7 @@ namespace Zenit {
 	{
 		ClampNode* node = new ClampNode(creationId++, name, NodeOutputType::TEXTURE);
 		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
@@ -826,9 +873,7 @@ namespace Zenit {
 	{
 		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, isMax);
 		node->size = { 5,5 };
-		//node->pos = ImGui::GetMousePos();
-		//ed::SetNodePosition(node->id, node->pos);
-		//ImGui::SetCursorPos();
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
 		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);

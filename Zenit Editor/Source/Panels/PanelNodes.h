@@ -75,6 +75,7 @@ namespace Zenit {
 	private:
 		EditorLayer* editorLayer;
 
+		std::shared_ptr<Texture2D> nodeBgTexture;
 		std::vector<Node*> nodes;
 		std::vector<LinkInfo> links;
 		int creationId = 1;

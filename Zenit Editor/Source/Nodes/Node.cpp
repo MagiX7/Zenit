@@ -4,7 +4,7 @@
 namespace Zenit {
 
 	Node::Node(int id, const char* name, NodeOutputType outputType, ImColor color)
-		: id(id), name(name), nodeColor(color), outputType(outputType), size(5, 5), isOutput(false)
+		: id(id), name(name), headerColor(color), outputType(outputType), size(5, 5), isOutput(false)
 	{
 	}
 

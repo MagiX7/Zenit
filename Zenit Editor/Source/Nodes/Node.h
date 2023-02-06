@@ -123,7 +123,7 @@ namespace Zenit {
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
 
-		ImColor nodeColor = { 255,255,255,255 };
+		ImColor headerColor = { 255,255,255,255 };
 		NodeOutputType outputType;
 		NodeType type; // To be defined in each node
 		ImVec2 pos;
