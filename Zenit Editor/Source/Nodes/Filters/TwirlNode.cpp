@@ -7,7 +7,7 @@ namespace Zenit {
 	{
 		type = NodeType::TWIRL;
 
-		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/twirl.shader");
+		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/twirl.shader");
 
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");

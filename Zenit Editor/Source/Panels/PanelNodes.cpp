@@ -120,10 +120,6 @@ namespace Zenit {
 					rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
 				}
 			}
-			else if (ed::GetSelectedObjectCount() > 0 && Input::GetInstance()->IsKeyPressed(KEY_SPACE))
-			{
-				showGroupPopup = true;
-			}
 			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 			{
 				showCreationPopup = false;
@@ -182,7 +178,7 @@ namespace Zenit {
 
 				ed::NodeId selectedNodeId;
 				ed::GetSelectedNodes(&selectedNodeId, 1);
-				if (selectedNodeId == n->id && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				if (selectedNodeId == n->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				{
 					n->changeName = true;
 				}
@@ -583,6 +579,11 @@ namespace Zenit {
 				else if (ImGui::MenuItem("Perlin Noise"))
 				{
 					CreateNoiseNode("Perlin Noise", NoiseType::PERLIN);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Gradient Noise"))
+				{
+					CreateNoiseNode("Gradient Noise", NoiseType::GRADIENT);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))

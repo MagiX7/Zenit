@@ -9,7 +9,8 @@ namespace Zenit {
 	{
 		NORMAL = 1,
 		PERLIN,
-		DERIVATIVE
+		DERIVATIVE,
+		GRADIENT
 	};
 
 	class NoiseNode : public ComputeShaderNode
@@ -30,6 +31,12 @@ namespace Zenit {
 		NoiseType noiseType;
 		float latestSeed = 0;
 		int scale = 10;
+
+		// Perlin
+		int numOctaves = 5;
+
+		// FBM
+		float gValue = 0.707;
 	};
 
 }

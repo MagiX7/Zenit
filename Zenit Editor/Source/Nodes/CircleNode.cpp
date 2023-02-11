@@ -8,7 +8,7 @@ namespace Zenit {
 		type = NodeType::CIRCLE;
 		offset = { 0,0 };
 
-		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/circle.shader");
+		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/circle.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 
 		BindCoreData();

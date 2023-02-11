@@ -6,8 +6,7 @@ layout(rgba32f, binding = 0) uniform image2D imgOutput;
 uniform vec3 inputColor;
 uniform float seed;
 uniform int scale;
-
-uniform int resolution;
+uniform int numOctaves;
 
 const float PI = 3.14159265359;
 
@@ -16,7 +15,7 @@ float Hash(in vec2 p, in float scale)
 {
 	// This is tiling part, adjusts with the scale...
 	p = mod(p, scale);
-	return fract(sin(dot(p, vec2(27.16898, 38.90563))) * seed * 5151.5473453);
+	return fract(sin(dot(p, vec2(27.16898, 38.90563))) * fract(seed) * 5151.5473453);
 }
 
 //----------------------------------------------------------------------------------------
@@ -46,7 +45,7 @@ float fBm(in vec2 p)
 	p = mod(p, scale);
 	float amp = 0.6;
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < numOctaves; i++)
 	{
 		f += Noise(p, s) * amp;
 		amp *= .5;

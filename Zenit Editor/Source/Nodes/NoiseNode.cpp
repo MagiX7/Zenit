@@ -12,12 +12,21 @@ namespace Zenit {
 		{
 			case NoiseType::NORMAL:
 			{
-				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/noise.shader");
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/noise.shader");
 				break;
 			}
 			case NoiseType::PERLIN:
 			{
-				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/perlin_noise.shader");
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/perlin_noise.shader");
+				break;
+			}
+			case NoiseType::DERIVATIVE:
+			{
+				break;
+			}
+			case NoiseType::GRADIENT:
+			{
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/gradient_noise.shader");
 				break;
 			}
 		}
@@ -45,15 +54,19 @@ namespace Zenit {
 		computeShader->SetUniform1f("seed", latestSeed);
 		regenerate = false;
 
+		computeShader->SetUniform1i("scale", scale);
 		switch (noiseType)
 		{
 			case NoiseType::PERLIN:
 			{
-				// Despite it is an int, it must be passed as a float
-				computeShader->SetUniform1i("scale", scale);
+				computeShader->SetUniform1i("numOctaves", numOctaves);
 				break;
 			}
 			case NoiseType::NORMAL:
+			{
+				break;
+			}
+			case NoiseType::GRADIENT:
 			{
 				break;
 			}
@@ -75,11 +88,15 @@ namespace Zenit {
 		if (ImGui::Button("Regenerate"))
 			regenerate = true;
 
+		if (ImGui::DragInt("Scale", &scale, 0.1f))
+			regenerate = true;
+
 		if (noiseType == NoiseType::PERLIN)
 		{
-			if (ImGui::DragInt("Scale", &scale, 0.1f))
+			if (ImGui::DragInt("Number of Ocatves", &numOctaves, 0.1f, 0))
 				regenerate = true;
-		}
+		}		
+
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}

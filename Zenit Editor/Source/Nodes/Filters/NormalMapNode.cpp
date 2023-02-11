@@ -8,7 +8,7 @@ namespace Zenit {
 	{
 		type = NodeType::NORMAL_MAP;
 
-		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/normal_map.shader");
+		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/normal_map.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
 	}
@@ -27,7 +27,7 @@ namespace Zenit {
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("inputTexture", 1);
 		computeShader->SetUniform1f("zoom", zoom);
-		computeShader->SetUniform1f("bumpness", bumpness);
+		computeShader->SetUniform1f("bumpness", bumpness * 0.1f);
 		
 		DispatchCompute(1, 1);
 	}
