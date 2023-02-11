@@ -6,7 +6,7 @@
 
 namespace Zenit {
 
-	Mesh::Mesh(std::vector<Vertex> verts, std::vector<uint32_t> inds) : vertices(verts), indices(inds)
+	Mesh::Mesh(const char* meshName, std::vector<Vertex> verts, std::vector<uint32_t> inds) : name(meshName), vertices(verts), indices(inds)
 	{
 		SetBuffers();
 	}
@@ -15,8 +15,23 @@ namespace Zenit {
 	{
 	}
 
-	void Mesh::Draw()
+	void Mesh::Draw(const std::unique_ptr<Shader>& shader)
 	{
+		/*shader->Bind();
+		diffuse->Bind(0);
+		shader->SetUniform1i("diffuseTexture", 0);
+
+		normals->Bind(1);
+		shader->SetUniform1i("normalsTexture", 1);
+
+		metallic->Bind(2);
+		shader->SetUniform1i("metallicTexture", 2);
+
+		roughness->Bind(3);
+		shader->SetUniform1i("roughnessTexture", 3);*/
+
+
+
 		vao->Bind();
 		ibo->Bind();
 		glDrawElements(GL_TRIANGLES, ibo->GetCount(), GL_UNSIGNED_INT, 0);
@@ -44,6 +59,6 @@ namespace Zenit {
 
 		aabb = AABB();
 		for (int i = 0; i < vertices.size(); ++i)
-			aabb.Enclose(vertices[i].position);
+			aabb.Extend(vertices[i].position);
 	}
 }

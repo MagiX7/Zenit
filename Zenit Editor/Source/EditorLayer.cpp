@@ -11,6 +11,7 @@
 #include <stb_image/stb_image_write.h>
 
 #include <filesystem>
+#include <queue>
 
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
@@ -29,8 +30,7 @@ namespace Zenit {
 	}
 
 
-	EditorLayer::EditorLayer()
-		: camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 }, 60.0f, 1280.0f / 720.0f))
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 })), frustum({ camera })
 	{
 	}
 
@@ -44,7 +44,8 @@ namespace Zenit {
 
 		LoadSkyboxes();
 		LoadModels();
-		
+		currentMesh = nullptr;
+
 		white = std::make_shared<Texture2D>("Settings/white.png");
 		panelNodes = new PanelNodes(this);
 		if (!Load())
@@ -64,6 +65,9 @@ namespace Zenit {
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
+
+		FocusCameraOnModel();
+
 	}
 
 	void EditorLayer::OnDetach()
@@ -94,13 +98,13 @@ namespace Zenit {
 			Renderer3D::GetInstance()->Clear({ 0.05,0.05,0.05,1 });
 			
 			if (skyboxProps.draw)
-				currentSkybox->Draw(glm::mat3(camera.GetView()), camera.GetProjection());
+				currentSkybox->Draw(glm::mat3(camera.GetViewMatrix()), camera.GetProjectionMatrix());
 
 			if (currentModel)
 			{
 				pbrShader->Bind();
 				SetModelShaderData();
-				currentModel->Draw();
+				currentModel->Draw(pbrShader);
 				pbrShader->Unbind();
 			}
 		}
@@ -137,6 +141,7 @@ namespace Zenit {
 				if (ImGui::MenuItem(model->GetName().c_str()))
 				{
 					currentModel = model;
+					FocusCameraOnModel();
 				}
 			}
 
@@ -169,14 +174,13 @@ namespace Zenit {
 		}
 		ImGui::EndMainMenuBar();
 
-
 		ImGui::Begin("Lightning Settings");
 		{
 			ImGui::Text("Directional Light");
 			ImGui::Text("Direction");
 			ImGui::SameLine();
 			ImGui::DragFloat3("##Direction", glm::value_ptr(dirLight.dir), 0.1f);
-			
+
 			ImGui::Text("Intensity");
 			ImGui::SameLine();
 			ImGui::DragFloat("##Intensity", &dirLight.intensity, 0.05f, 0.0f);
@@ -202,8 +206,163 @@ namespace Zenit {
 		}
 		ImGui::End();
 
+		ImGui::Begin("Hierarchy");
+		{
+			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+				currentMesh = nullptr;
+
+			bool opened = ImGui::TreeNodeEx(currentModel->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow);
+			
+			if (ImGui::IsItemClicked())
+			{
+				// Set current mesh to 
+				currentMesh = nullptr;
+			}
+
+			if (opened)
+			{
+				std::queue<Mesh*> q;
+				q.push(currentModel->GetMeshes()[0]);
+
+				while (!q.empty())
+				{
+					auto& curr = q.front();
+					q.pop();
+
+					bool opened = ImGui::TreeNodeEx(curr->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow);
+					
+					if (ImGui::IsItemClicked())
+					{
+						// Set current mesh to 
+						currentMesh = curr;
+					}
+					
+					if (opened)
+					{
+						ImGui::TreePop();
+					}
+				}
+
+				ImGui::TreePop();
+			}
+		}
+		ImGui::End();
+
+		ImGui::Begin("Inspector");
+		{
+			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				// TODO: Model Inspector UI + delete all orthographic stuff
+				if (camera.GetProjectionType() == PerspectiveCamera::ProjectionType::PERSPECTIVE)
+				{
+					ImGui::Dummy({ 0,5 });
+
+					auto pos = camera.GetPosition();
+					if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.1f))
+					{
+						camera.SetPosition(pos);
+					}
+					if (ImGui::Button("Reset"))
+					{
+						camera.SetPosition(glm::vec3(0, 0, 2));
+					}
+
+					ImGui::Dummy({ 0,2.5f });
+
+					auto rot = camera.GetRotation();
+					if (ImGui::DragFloat3("Rotation", glm::value_ptr(rot), 0.1f))
+					{
+						camera.SetRotation(rot);
+					}
+					if (ImGui::Button("Reset##2"))
+					{
+						camera.SetRotation(glm::vec3(0, 0, 0));
+					}
+
+					ImGui::Dummy({ 0,5 });
+
+					float verticalFov = camera.GetVerticalFov();
+					if (ImGui::DragFloat("Vertical FOV", &verticalFov, 0.1f))
+						camera.SetVerticalFov(verticalFov);
+
+					float near = camera.GetPerspectiveNearClip();
+					if (ImGui::DragFloat("Near", &near, 0.1f))
+						camera.SetPerspectiveNearClip(near);
+
+					float far = camera.GetPerspectiveFarClip();
+					if (ImGui::DragFloat("Far", &far))
+						camera.SetPerspectiveFarClip(far);
+
+					ImGui::Dummy({ 0,5 });
+				}
+				else
+				{
+					float size = camera.GetOrthographicSize();
+					if (ImGui::DragFloat("Orthographic Size", &size))
+						camera.SetOrthographicSize(size);
+
+					float near = camera.GetOrthographicNearClip();
+					if (ImGui::DragFloat("Near", &near))
+						camera.SetOrthographicNearClip(near);
+
+					float far = camera.GetOrthographicFarClip();
+					if (ImGui::DragFloat("Far", &far))
+						camera.SetOrthographicFarClip(far);
+				}
+			}
+			
+			ImGui::Dummy({ 0, 3 });
+			ImGui::Separator();
+			ImGui::Dummy({ 0, 3 });
+			
+			if (ImGui::CollapsingHeader("Model", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				glm::vec3 pos = currentModel->GetTransform()[3];
+
+				if (ImGui::DragFloat3("Position##", glm::value_ptr(pos), 0.1f))
+				{
+					currentModel->SetPosition(pos);
+				}
+
+				if (currentModel && ImGui::Button("Reset Rotation"))
+					currentModel->ResetRotation();
+			}
+
+			ImGui::Dummy({ 0, 3 });
+			ImGui::Separator();
+			ImGui::Dummy({ 0, 3 });
+
+
+			if (currentMesh)
+			{
+				if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					//if (ImGui::Button("Apply textures"))
+					{
+						currentMesh->SetDiffuse(diffuse);
+						currentMesh->SetNormals(normals);
+						currentMesh->SetMetallic(metallic);
+						currentMesh->SetRoughness(roughness);
+					}
+				}
+			}
+			else
+			{
+				ImGui::BulletText("There is no selected mesh.");
+				ImGui::Text("         Textures will be applied to every mesh inside the model.");
+			}
+
+
+			if (Node* node = panelNodes->GetSelectedNode())
+				node->OnImGuiInspectorRender();
+
+
+
+		}
+		ImGui::End();
+
 		ImGui::Begin("Final Textures");
-		{			
+		{
 			ImGui::Image((ImTextureID)diffuse->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
 			ImGui::Image((ImTextureID)normals->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
 			ImGui::Image((ImTextureID)metallic->GetId(), { 200,200 }, { 0,1 }, { 1,0 });
@@ -217,11 +376,12 @@ namespace Zenit {
 			ImGui::Text(std::to_string(Application::GetInstance().GetTotalExecutionTime()).c_str());
 		}
 		ImGui::End();
+		
 
 
 		panelViewport.OnImGuiRender(fbo.get(), camera);
 		//panelLayerStack.OnImGuiRender(layers);
-		panelNodes->OnImGuiRender(&panelInspector);
+		panelNodes->OnImGuiRender();
 
 
 		if (showDemoWindow)
@@ -311,8 +471,8 @@ namespace Zenit {
 
 	void EditorLayer::SetModelShaderData()
 	{
-		pbrShader->SetUniformMatrix4f("view", camera.GetView());
-		pbrShader->SetUniformMatrix4f("projection", camera.GetProjection());
+		pbrShader->SetUniformMatrix4f("view", camera.GetViewMatrix());
+		pbrShader->SetUniformMatrix4f("projection", camera.GetProjectionMatrix());
 
 		pbrShader->SetUniformMatrix4f("model", currentModel->GetTransform());
 		pbrShader->SetUniformVec3f("camPos", camera.GetPosition());
@@ -575,6 +735,86 @@ namespace Zenit {
 		models.clear();
 
 		LoadModels();
+	}
+
+	void EditorLayer::FocusCameraOnModel()
+	{
+		/*glm::vec3 maxPoint = currentModel->GetAABB().GetMax();
+		glm::vec3 minPoint = currentModel->GetAABB().GetMin();
+
+		glm::vec3 h = (maxPoint - minPoint) / 2.0f;
+
+		float angle = glm::radians(camera.GetVerticalFov() / 2);
+
+		glm::vec3 distance = h / glm::tan(angle);
+
+		distance.x = (distance.x + 2.5f) * camera.GetForward().x;
+		distance.y = distance.y * camera.GetForward().y;
+		distance.z = (distance.z + 2.5f) * camera.GetForward().z;
+		glm::vec3 newPos = currentModel->GetAABB().GetCenter() - distance;
+		camera.SetPosition(newPos);
+		frustum.UpdateFrustum(camera);*/
+
+		/*newUp = newFront.Cross(float3(0.0f, 1.0f, 0.0f).Cross(newFront).Normalized());
+		const float meshRadius = mesh->GetLocalAABB().HalfDiagonal().Length();
+		const float currentDistance = meshCenter.Distance(cameraFrustum.Pos());
+		newPos = meshCenter + ((cameraFrustum.Pos() - meshCenter).Normalized() * meshRadius * 2);*/
+
+
+
+
+
+
+
+		/*AABB modelAabb = currentModel->GetAABB();
+
+		float verticalSize = modelAabb.GetMax().y - modelAabb.GetMin().y;
+
+		float dist = glm::abs(verticalSize / glm::tan(camera.GetVerticalFov() / 2));
+
+		float longest = modelAabb.GetLongestEdge();
+
+		do
+		{
+			glm::vec3 camPosition = camera.GetPosition();
+			glm::vec3 dir = glm::normalize(modelAabb.GetCenter() - camPosition);
+			
+			float totalDistance = glm::distance(modelAabb.GetCenter(), camPosition);
+			if (totalDistance > dist + longest)
+			{
+				camPosition += dir * dist;
+				camera.SetPosition(camPosition);
+				frustum.UpdateFrustum(camera);
+				ZN_CORE_TRACE(" >>> {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
+			}
+			else if (totalDistance < dist - longest)
+			{
+				camPosition -= dir * dist;
+				camera.SetPosition(camPosition);
+				frustum.UpdateFrustum(camera);
+				ZN_CORE_TRACE(" <<< {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
+			}
+			else
+			{
+				break;
+			}
+		} while (!modelAabb.IsInsideFrustum(frustum));*/
+
+		
+		//reference = modelAabb->CenterPoint();
+		//editorCam->SetPosition(position);
+		//editorCam->Look(reference);
+
+
+		
+
+
+	}
+
+	void EditorLayer::DrawHierarchyEntity()
+	{
+
+
 	}
 
 }

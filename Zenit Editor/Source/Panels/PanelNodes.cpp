@@ -1,7 +1,6 @@
 #include "Zenit.h"
 
 #include "PanelNodes.h"
-#include "PanelInspector.h"
 
 #include "Nodes/ColorNode.h"
 #include "Nodes/ComputeShaderNode.h"
@@ -97,20 +96,16 @@ namespace Zenit {
 		if (!hovered)
 			return;
 
-		lastSelectionBounds = context->GetSelectionBounds();		
+		lastSelectionBounds = context->GetSelectionBounds();
 	}
 
-	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
+	void PanelNodes::OnImGuiRender()
 	{
-		ed::NodeId selectedId;
-		ed::GetSelectedNodes(&selectedId, 1);
-		panelInspector->OnImGuiRender(editorLayer->currentModel, editorLayer->dirLight, FindNode(selectedId));
-
 		ImGui::Begin("Node editor");
 		
 		panelSize = ImGui::GetWindowSize();
 		hovered = ImGui::IsWindowHovered();
-
+		
 		if (ImGui::IsWindowHovered())
 		{
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
@@ -1240,6 +1235,13 @@ namespace Zenit {
 
 		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
 
+	}
+
+	Node* PanelNodes::GetSelectedNode()
+	{
+		ed::NodeId selectedId;
+		ed::GetSelectedNodes(&selectedId, 1);
+		return FindNode(selectedId);
 	}
 
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Zenit.h"
-#include "Panels/PanelInspector.h"
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelLayerStack.h"
 #include "Panels/PanelNodes.h"
@@ -54,9 +53,12 @@ namespace Zenit {
 		void LoadModels();
 		void ReloadModels();
 
+		void FocusCameraOnModel();
+
+		void DrawHierarchyEntity();
+
 	private:
 		bool finished = false;
-		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelLayerStack panelLayerStack;
 		PanelNodes* panelNodes;
@@ -69,8 +71,10 @@ namespace Zenit {
 		bool reloadSkyboxes = false;
 
 		PerspectiveCamera camera;
+		Frustum frustum;
 		std::vector<Model*> models;
 		Model* currentModel;
+		Mesh* currentMesh;
 
 		std::unique_ptr<Shader> pbrShader;
 		Texture2D* diffuse;

@@ -126,7 +126,7 @@ namespace Zenit {
             ComputeTangentsAndBiTangents(vertices, mesh->mNumFaces);
         }
 
-        return new Mesh(vertices, indices);
+        return new Mesh(mesh->mName.C_Str(), vertices, indices);
     }
 
     void ModelImporter::ComputeTangentsAndBiTangents(std::vector<Vertex>& vertices, unsigned int indicesCount)

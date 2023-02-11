@@ -24,7 +24,7 @@ namespace Zenit {
 		if (!allowModelRotation || !model)
 			return;
 
-		camera.Scroll(ts);
+		//camera.Scroll(ts);
 
 		float x = Input::GetInstance()->GetMouseX();
 		float y = Input::GetInstance()->GetMouseY();
@@ -48,7 +48,7 @@ namespace Zenit {
 		{
 			fbo->Resize(dimensions.x, dimensions.y);
 			Renderer3D::GetInstance()->OnResize(dimensions.x, dimensions.y);
-			camera.SetApsectRatio(dimensions.x / dimensions.y);
+			camera.SetViewportSize((uint32_t)dimensions.x, (uint32_t)dimensions.y);
 			ZN_TRACE("Viewport Resized");
 			viewportSize = { dimensions.x, dimensions.y };
 		}

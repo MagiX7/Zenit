@@ -3,7 +3,7 @@
 #include "Zenit/Core/Input.h"
 
 #include "Model.h"
-#include "Zenit/Core/PerspectiveCamera.h"
+#include "Zenit/Renderer/PerspectiveCamera.h"
 
 #include "Zenit/Renderer/Shader.h"
 #include "Zenit/Renderer/Texture2D.h"
@@ -67,10 +67,10 @@ namespace Zenit {
 		}
 	}
 
-	void Model::Draw() const
+	void Model::Draw(const std::unique_ptr<Shader>& shader) const
 	{
 		for (auto& m : meshes)
-			m->Draw();
+			m->Draw(shader);
 	}
 
 	void Model::ResetRotation()
@@ -88,7 +88,7 @@ namespace Zenit {
 		for (size_t i = 0; i < vertices.size(); ++i)
 			positions[i] = vertices[i].position;
 
-		aabb.Enclose(mesh->GetAABB());
-		aabb.RefreshData();
+		aabb.Extend(mesh->GetAABB());
+		//aabb.RefreshData();
 	}
 }

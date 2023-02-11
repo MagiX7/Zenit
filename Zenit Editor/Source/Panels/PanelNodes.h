@@ -12,7 +12,6 @@ namespace ed = ax::NodeEditor;
 namespace Zenit {
 
 	class EditorLayer;
-	class PanelInspector;
 	enum class NoiseType;
 
 	class PanelNodes
@@ -23,7 +22,7 @@ namespace Zenit {
 		virtual ~PanelNodes();
 
 		void Update(TimeStep ts);
-		void OnImGuiRender(PanelInspector* panelInspector);
+		void OnImGuiRender();
 
 		Node* FindNode(ed::NodeId id) const;
 		Pin* FindPin(ed::PinId id);
@@ -31,6 +30,8 @@ namespace Zenit {
 
 		void SaveNodes(SerializerObject& appObject);
 		void LoadNodes(SerializerObject& appObject);
+
+		Node* GetSelectedNode();
 
 	private:
 		void DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links);
@@ -69,8 +70,6 @@ namespace Zenit {
 
 		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
-
-		void LoadData();
 
 	private:
 		EditorLayer* editorLayer;
