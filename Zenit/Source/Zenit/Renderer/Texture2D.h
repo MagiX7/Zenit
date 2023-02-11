@@ -30,7 +30,7 @@ namespace Zenit {
 		inline void SetName(std::string value) { name = value; }
 
 	private:
-		uint32_t rendererId;
+		uint32_t rendererId = -1;
 
 		std::string path;
 		std::string name;

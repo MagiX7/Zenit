@@ -20,6 +20,12 @@ namespace Zenit {
 		void Clear(const glm::vec4& color);
 		void OnResize(int width, int height);
 
+		bool& GetCullingValue() { return culling; }
+		void SetCulling(bool value);
+
+		bool& GetDepthValue() { return depth; }
+		void SetDepth(bool value);
+
 	private:
 		Renderer3D();
 		virtual ~Renderer3D();
@@ -29,6 +35,9 @@ namespace Zenit {
 
 	private:
 		static Renderer3D* instance;
+
+		bool culling = true;
+		bool depth = true;
 
 	};
 }

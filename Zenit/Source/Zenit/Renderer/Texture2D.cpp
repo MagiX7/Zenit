@@ -10,7 +10,7 @@
 
 namespace Zenit {
 
-	Texture2D::Texture2D(uint32_t* data, int w, int h) : data(data)
+	Texture2D::Texture2D(uint32_t* data, int w, int h)
 	{
 		width = w;
 		height = h;

@@ -32,6 +32,7 @@ namespace Zenit {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glLineWidth(2.0f);
 	}
@@ -49,6 +50,18 @@ namespace Zenit {
 	void Renderer3D::OnResize(int width, int height)
 	{
 		glViewport(0, 0, width, height);
+	}
+
+	void Renderer3D::SetCulling(bool value)
+	{
+		culling = value;
+		culling ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+	}
+
+	void Renderer3D::SetDepth(bool value)
+	{
+		depth = value;
+		depth ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 	}
 
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Zenit/Scene/Entity.h"
 #include "Zenit/Core/TimeStep.h"
 #include "Zenit/Utils/AABB.h"
 
@@ -16,7 +15,7 @@ namespace Zenit {
 	class Texture2D;
 	class Skybox;
 
-	class Model : public Entity
+	class Model
 	{
 	public:
 		Model(std::string path);

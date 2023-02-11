@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Zenit/Scene/Entity.h"
 #include "Zenit/Renderer/Vertex.h"
 #include "Zenit/Utils/AABB.h"
 
@@ -15,8 +14,9 @@ namespace Zenit {
 	class VertexArray;
 	class VertexBuffer;
 	class IndexBuffer;
+	class Shader;
 
-	class Mesh : public Entity
+	class Mesh
 	{
 	public:
 		Mesh(const char* meshName, std::vector<Vertex> verts, std::vector<uint32_t> inds);

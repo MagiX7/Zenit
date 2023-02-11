@@ -172,6 +172,19 @@ namespace Zenit {
 			}
 			ImGui::EndMenu();
 		}
+		if (ImGui::BeginMenu("Render"))
+		{
+			bool cull = Renderer3D::GetInstance()->GetCullingValue();
+			if (ImGui::Checkbox("Cull Face", &cull));
+				Renderer3D::GetInstance()->SetCulling(cull);
+
+			bool depth = Renderer3D::GetInstance()->GetDepthValue();
+			if (ImGui::Checkbox("Depth testing", &depth));
+				Renderer3D::GetInstance()->SetDepth(depth);
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMainMenuBar();
 
 		ImGui::Begin("Lightning Settings");
@@ -211,7 +224,8 @@ namespace Zenit {
 			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
 				currentMesh = nullptr;
 
-			bool opened = ImGui::TreeNodeEx(currentModel->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow);
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
+			bool opened = ImGui::TreeNodeEx(currentModel->GetName().c_str(), flags | (currentMesh ? 0 : ImGuiTreeNodeFlags_Selected));
 			
 			if (ImGui::IsItemClicked())
 			{
@@ -222,14 +236,15 @@ namespace Zenit {
 			if (opened)
 			{
 				std::queue<Mesh*> q;
-				q.push(currentModel->GetMeshes()[0]);
+				for(auto mesh : currentModel->GetMeshes())
+					q.push(mesh);
 
 				while (!q.empty())
 				{
 					auto& curr = q.front();
 					q.pop();
 
-					bool opened = ImGui::TreeNodeEx(curr->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow);
+					bool opened = ImGui::TreeNodeEx(curr->GetName().c_str(), flags | (currentMesh == curr ? ImGuiTreeNodeFlags_Selected : 0));
 					
 					if (ImGui::IsItemClicked())
 					{
@@ -339,10 +354,10 @@ namespace Zenit {
 				{
 					//if (ImGui::Button("Apply textures"))
 					{
-						currentMesh->SetDiffuse(diffuse);
+						/*currentMesh->SetDiffuse(diffuse);
 						currentMesh->SetNormals(normals);
 						currentMesh->SetMetallic(metallic);
-						currentMesh->SetRoughness(roughness);
+						currentMesh->SetRoughness(roughness);*/
 					}
 				}
 			}
