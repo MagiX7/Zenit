@@ -2,8 +2,8 @@
 #include "Zenit/Core/Log.h"
 
 #include "Nodes/ColorNode.h"
-#include "Nodes/NoiseNode.h"
-#include "Nodes/VoronoiNode.h"
+#include "Nodes/Generators/NoiseNode.h"
+#include "Nodes/Generators/VoronoiNode.h"
 #include "Nodes/Constants/Vec1Node.h"
 #include "Helpers/Math.h"
 
@@ -265,7 +265,7 @@ namespace Zenit {
 
 		ImGui::Begin("Inspector");
 		{
-			if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("Camera"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
 			{
 				// TODO: Model Inspector UI + delete all orthographic stuff
 				if (camera.GetProjectionType() == PerspectiveCamera::ProjectionType::PERSPECTIVE)
@@ -330,7 +330,7 @@ namespace Zenit {
 			ImGui::Separator();
 			ImGui::Dummy({ 0, 3 });
 			
-			if (ImGui::CollapsingHeader("Model", ImGuiTreeNodeFlags_DefaultOpen))
+			if (ImGui::CollapsingHeader("Model"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
 			{
 				glm::vec3 pos = currentModel->GetTransform()[3];
 
@@ -365,13 +365,15 @@ namespace Zenit {
 			{
 				ImGui::BulletText("There is no selected mesh.");
 				ImGui::Text("         Textures will be applied to every mesh inside the model.");
+
+				ImGui::Dummy({ 0, 3 });
+				ImGui::Separator();
+				ImGui::Dummy({ 0, 3 });
 			}
 
 
 			if (Node* node = panelNodes->GetSelectedNode())
 				node->OnImGuiInspectorRender();
-
-
 
 		}
 		ImGui::End();
@@ -711,7 +713,6 @@ namespace Zenit {
 
 	void EditorLayer::LoadModels()
 	{
-		std::filesystem::path cp = std::filesystem::current_path();
 		if (std::filesystem::exists(MODELS_PATH))
 		{
 			ZN_ERROR("3D Models Folder couldn't be located");

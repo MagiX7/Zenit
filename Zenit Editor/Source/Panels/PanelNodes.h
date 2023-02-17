@@ -47,10 +47,11 @@ namespace Zenit {
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 
 		// Generators
+		Node* CreateCircleNode(const char* name);
+		Node* CreateCheckersNode(const char* name);
 		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
 		Node* CreateVoronoiNode(const char* name);
 		Node* CreateVector1Node(const char* name);
-		Node* CreateCircleNode(const char* name);
 		// Generators
 		
 		// Filters

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComputeShaderNode.h"
+#include "../ComputeShaderNode.h"
 
 namespace Zenit {
 
@@ -8,7 +8,7 @@ namespace Zenit {
 	enum class NoiseType
 	{
 		NORMAL = 1,
-		PERLIN,
+		FBM,
 		DERIVATIVE,
 		GRADIENT
 	};

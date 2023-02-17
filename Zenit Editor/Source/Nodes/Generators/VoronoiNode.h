@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ComputeShaderNode.h"
+#include "../ComputeShaderNode.h"
 
 namespace Zenit {
 

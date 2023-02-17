@@ -27,7 +27,7 @@ namespace Zenit {
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("inputTexture", 1);
 		computeShader->SetUniform1f("zoom", zoom);
-		computeShader->SetUniform1f("bumpness", bumpness * 0.1f);
+		computeShader->SetUniform1f("bumpness", bumpness * 0.075f);
 		
 		DispatchCompute(1, 1);
 	}

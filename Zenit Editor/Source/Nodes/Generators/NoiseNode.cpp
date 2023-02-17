@@ -15,7 +15,7 @@ namespace Zenit {
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/noise.shader");
 				break;
 			}
-			case NoiseType::PERLIN:
+			case NoiseType::FBM:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/perlin_noise.shader");
 				break;
@@ -57,7 +57,7 @@ namespace Zenit {
 		computeShader->SetUniform1i("scale", scale);
 		switch (noiseType)
 		{
-			case NoiseType::PERLIN:
+			case NoiseType::FBM:
 			{
 				computeShader->SetUniform1i("numOctaves", numOctaves);
 				break;
@@ -91,7 +91,7 @@ namespace Zenit {
 		if (ImGui::DragInt("Scale", &scale, 0.1f))
 			regenerate = true;
 
-		if (noiseType == NoiseType::PERLIN)
+		if (noiseType == NoiseType::FBM)
 		{
 			if (ImGui::DragInt("Number of Ocatves", &numOctaves, 0.1f, 0))
 				regenerate = true;
@@ -111,7 +111,7 @@ namespace Zenit {
 		JSONSerializer::SetNumber(object, "type", (int)type);
 		JSONSerializer::SetNumber(object, "noiseType", (int)noiseType);
 
-		if (noiseType == NoiseType::PERLIN)
+		if (noiseType == NoiseType::FBM)
 			JSONSerializer::SetNumber(object, "scale", scale);
 
 		return value;
@@ -120,7 +120,7 @@ namespace Zenit {
 	void NoiseNode::Load(SerializerObject& obj)
 	{
 		noiseType = (NoiseType)JSONSerializer::GetNumberFromObject(obj, "noiseType");
-		if (noiseType == NoiseType::PERLIN)
+		if (noiseType == NoiseType::FBM)
 			scale = JSONSerializer::GetNumberFromObject(obj, "scale");
 	}
 }

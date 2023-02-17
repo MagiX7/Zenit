@@ -2,11 +2,12 @@
 
 #include "PanelNodes.h"
 
-#include "Nodes/ColorNode.h"
 #include "Nodes/ComputeShaderNode.h"
-#include "Nodes/NoiseNode.h"
-#include "Nodes/VoronoiNode.h"
-#include "Nodes/CircleNode.h"
+#include "Nodes/ColorNode.h"
+#include "Nodes/Generators/CircleNode.h"
+#include "Nodes/Generators/CheckersNode.h"
+#include "Nodes/Generators/NoiseNode.h"
+#include "Nodes/Generators/VoronoiNode.h"
 
 #include "Nodes/Filters/NormalMapNode.h"
 #include "Nodes/Filters/TwirlNode.h"
@@ -571,14 +572,19 @@ namespace Zenit {
 					CreateCircleNode("Circle");
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Checkers"))
+				{
+					CreateCheckersNode("Checkers");
+					showCreationPopup = false;
+				}
 				else if (ImGui::MenuItem("Noise"))
 				{
 					CreateNoiseNode("Noise", NoiseType::NORMAL);
 					showCreationPopup = false;
 				}
-				else if (ImGui::MenuItem("Perlin Noise"))
+				else if (ImGui::MenuItem("FBM"))
 				{
-					CreateNoiseNode("Perlin Noise", NoiseType::PERLIN);
+					CreateNoiseNode("FBM", NoiseType::FBM);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Gradient Noise"))
@@ -801,6 +807,20 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		return nullptr;
+	}
+
+	Node* PanelNodes::CreateCheckersNode(const char* name)
+	{
+		CheckersNode* node = new CheckersNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+		
+		return node;
 	}
 
 	Node* PanelNodes::CreateBlendNode(const char* name)
@@ -1140,7 +1160,7 @@ namespace Zenit {
 				}
 				case NodeType::PERLIN_NOISE:
 				{
-					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::PERLIN);
+					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::FBM);
 					node->id = id;
 					node->Load(object);
 					break;

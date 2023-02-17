@@ -24,11 +24,11 @@ void main()
 	vec3 col = vec3(0);
 
 	float h = GetHeight(uv);
-	vec2 stepp = 1 / resolution;
+	vec2 stepp = 1. / resolution;
 	
 	vec2 dxy = h - vec2(
-		GetHeight(uv + vec2(stepp.x, 0)),
-		GetHeight(uv + vec2(0, stepp.y))
+		GetHeight(uv + vec2(stepp.x, 0.)),
+		GetHeight(uv + vec2(0., stepp.y))
 	);
 
 	col = normalize(vec3(dxy * bumpness / stepp, 1.)) * 0.5 + 0.5;
