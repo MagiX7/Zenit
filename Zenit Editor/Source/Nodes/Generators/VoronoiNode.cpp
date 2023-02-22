@@ -27,8 +27,9 @@ namespace Zenit {
 		computeShader->SetUniform1f("seed", latestSeed);
 		computeShader->SetUniform1i("scale", scale);
 		latestSeed += Application::GetInstance().GetTotalExecutionTime();
-		regenerate = false;
 		DispatchCompute(1, 1);
+		
+		regenerate = false;
 	}
 
 	void VoronoiNode::OnImGuiNodeRender()

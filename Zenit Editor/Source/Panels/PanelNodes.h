@@ -56,6 +56,8 @@ namespace Zenit {
 		
 		// Filters
 		Node* CreateNormalMapNode(const char* name);
+		Node* CreateEdgeDetectorNode(const char* name);
+		Node* CreateTilingNode(const char* name);
 		Node* CreateTwirlNode(const char* name);
 		// Filters
 		

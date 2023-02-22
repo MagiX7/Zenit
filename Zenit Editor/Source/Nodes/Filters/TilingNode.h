@@ -4,25 +4,28 @@
 
 namespace Zenit {
 
-	class NormalMapNode : public ComputeShaderNode
+	class TilingNode : public ComputeShaderNode
 	{
 	public:
-		NormalMapNode(int id, const char* name, NodeOutputType outputType);
-		virtual ~NormalMapNode();
+		TilingNode(int id, const char* name, NodeOutputType outputType);
+		virtual ~TilingNode();
 
 		virtual void Update(TimeStep ts) override;
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-		void SetInputTexture(std::shared_ptr<Texture2D> texture);
+		void SetTexture(Texture2D* texture);
 
 		virtual SerializerValue Save() override;
 		virtual void Load(SerializerObject& obj) override;
 
 	private:
-		std::shared_ptr<Texture2D> inputTexture;
-		float zoom = 1.0f;
-		float bumpness = 0.4f;
+		float horizontalOffset = 0.5f;
+		float verticalOffset = 0.5f;
+		int tileNum = 10;
+		std::unique_ptr<Texture2D> inputTexture;
+
 	};
+
 
 }

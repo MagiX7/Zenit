@@ -52,8 +52,6 @@ namespace Zenit {
 
 		BindCoreData();
 		computeShader->SetUniform1f("seed", latestSeed);
-		regenerate = false;
-
 		computeShader->SetUniform1i("scale", scale);
 		switch (noiseType)
 		{
@@ -73,6 +71,8 @@ namespace Zenit {
 		}
 
 		DispatchCompute(1, 1);
+
+		regenerate = false;
 	}
 
 	void NoiseNode::OnImGuiNodeRender()

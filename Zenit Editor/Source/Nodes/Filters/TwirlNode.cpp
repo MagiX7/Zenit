@@ -36,6 +36,8 @@ namespace Zenit {
 		computeShader->SetUniform1f("angle", angle);
 
 		DispatchCompute(1, 1);
+
+		regenerate = false;
 	}
 
 	void TwirlNode::OnImGuiNodeRender()

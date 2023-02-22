@@ -10,6 +10,8 @@
 #include "Nodes/Generators/VoronoiNode.h"
 
 #include "Nodes/Filters/NormalMapNode.h"
+#include "Nodes/Filters/EdgeDetectorNode.h"
+#include "Nodes/Filters/TilingNode.h"
 #include "Nodes/Filters/TwirlNode.h"
 
 #include "Nodes/Constants/Vec1Node.h"
@@ -558,6 +560,16 @@ namespace Zenit {
 					CreateNormalMapNode("Normal Map");
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Tiling"))
+				{
+					CreateTilingNode("Tiling");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Edge Detector"))
+				{
+					CreateEdgeDetectorNode("Edge Detector");
+					showCreationPopup = false;
+				}
 				else if (ImGui::MenuItem("Twirl"))
 				{
 					CreateTwirlNode("Twirl");
@@ -777,6 +789,42 @@ namespace Zenit {
 		return node;
 	}
 
+	Node* PanelNodes::CreateEdgeDetectorNode(const char* name)
+	{
+		EdgeDetectorNode* node = new EdgeDetectorNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
+	Node* PanelNodes::CreateTilingNode(const char* name)
+	{
+		TilingNode* node = new TilingNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
 	Node* PanelNodes::CreateTwirlNode(const char* name)
 	{
 		TwirlNode* node = new TwirlNode(creationId++, name, NodeOutputType::TEXTURE);
@@ -936,9 +984,21 @@ namespace Zenit {
 				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
 				break;
 			}
+			case NodeType::EDGE_DETECTOR:
+			{
+				const auto n = (EdgeDetectorNode*)endPin->node;
+				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				break;
+			}
 			case NodeType::TWIRL:
 			{
 				const auto n = (TwirlNode*)endPin->node;
+				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
+				break;
+			}
+			case NodeType::TILING:
+			{
+				const auto n = (TilingNode*)endPin->node;
 				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
 				break;
 			}
@@ -1158,7 +1218,7 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
-				case NodeType::PERLIN_NOISE:
+				case NodeType::FBM_NOISE:
 				{
 					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::FBM);
 					node->id = id;

@@ -27,9 +27,11 @@ namespace Zenit {
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("inputTexture", 1);
 		computeShader->SetUniform1f("zoom", zoom);
-		computeShader->SetUniform1f("bumpness", bumpness * 0.075f);
+		computeShader->SetUniform1f("bumpness", bumpness * 0.2f);
 		
 		DispatchCompute(1, 1);
+		
+		regenerate = false;
 	}
 
 	void NormalMapNode::OnImGuiNodeRender()
@@ -72,9 +74,6 @@ namespace Zenit {
 	{
 		zoom = JSONSerializer::GetNumberFromObject(obj, "zoom");
 		bumpness = JSONSerializer::GetNumberFromObject(obj, "bumpness");
-		
-		// TODO: Load from all nodes and when texture is created (inside constructor), change the name of it to the compute shader name + _nodeId
-
 	}
 
 }

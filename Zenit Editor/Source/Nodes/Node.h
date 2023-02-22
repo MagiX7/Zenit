@@ -43,14 +43,19 @@ namespace Zenit {
 	enum class NodeType
 	{
 		COLOR = 0,
+
+		// Generators
+		CIRCLE,
+		CHECKERS,
 		NOISE,
-		PERLIN_NOISE,
+		FBM_NOISE,
 		DERIVATIVE_NOISE,
 		VORONOI,
-		CIRCLE,
 
 		// Filters
 		NORMAL_MAP,
+		TILING,
+		EDGE_DETECTOR,
 		TWIRL,
 
 		// Operators

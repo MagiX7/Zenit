@@ -30,6 +30,8 @@ namespace Zenit {
 		computeShader->SetUniform1f("blur", blur);
 		computeShader->SetUniformVec2f("offset", offset);
 		DispatchCompute(1, 1);
+
+		regenerate = false;
 	}
 
 	void CircleNode::OnImGuiNodeRender()
