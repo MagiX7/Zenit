@@ -64,6 +64,9 @@ namespace Zenit {
 		MAX,
 		MIN,
 
+		// Transform
+		TRANSFORM,
+
 		// Helpers
 		COMMENT,
 	};

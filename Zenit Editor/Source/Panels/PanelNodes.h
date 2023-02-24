@@ -67,6 +67,10 @@ namespace Zenit {
 		Node* CreateMaxMinNode(const char* name, bool isMax);
 		// Operators
 
+		// Transform
+		Node* CreateTransformNode(const char* name);
+		// Transform
+
 		// Helpers
 		Node* CreateGroupNode(const char* name);
 		// Helpers

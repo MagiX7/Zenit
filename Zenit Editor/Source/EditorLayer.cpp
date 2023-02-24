@@ -265,7 +265,7 @@ namespace Zenit {
 
 		ImGui::Begin("Inspector");
 		{
-			if (ImGui::CollapsingHeader("Camera"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
+			if (ImGui::CollapsingHeader("Camera"))
 			{
 				// TODO: Model Inspector UI + delete all orthographic stuff
 				if (camera.GetProjectionType() == PerspectiveCamera::ProjectionType::PERSPECTIVE)
@@ -330,17 +330,22 @@ namespace Zenit {
 			ImGui::Separator();
 			ImGui::Dummy({ 0, 3 });
 			
-			if (ImGui::CollapsingHeader("Model"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
+			if (ImGui::CollapsingHeader("Model"))
 			{
-				glm::vec3 pos = currentModel->GetTransform()[3];
+				glm::vec3 pos = currentModel->GetPosition();
+				glm::vec3 rot = currentModel->GetRotation();
 
-				if (ImGui::DragFloat3("Position##", glm::value_ptr(pos), 0.1f))
+				if (ImGui::DragFloat3("Position##", glm::value_ptr(pos), 0.01f))
 				{
 					currentModel->SetPosition(pos);
 				}
+				if (ImGui::DragFloat3("Rotation##", glm::value_ptr(rot), 0.01f))
+				{
+					currentModel->SetRotation(rot);
+				}
 
-				if (currentModel && ImGui::Button("Reset Rotation"))
-					currentModel->ResetRotation();
+				if (currentModel && ImGui::Button("Reset##"))
+					currentModel->ResetTransform();
 			}
 
 			ImGui::Dummy({ 0, 3 });

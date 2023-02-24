@@ -59,12 +59,14 @@ namespace Zenit {
 		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "threshold", threshold);
 
 		return value;
 	}
 
 	void EdgeDetectorNode::Load(SerializerObject& obj)
 	{
+		JSONSerializer::GetNumberFromObject(obj, "threshold");
 	}
 
 }

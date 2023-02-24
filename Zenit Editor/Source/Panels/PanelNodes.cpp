@@ -20,6 +20,8 @@
 #include "Nodes/Operators/ClampNode.h"
 #include "Nodes/Operators/MaxMinNode.h"
 
+#include "Nodes/TransformNode.h"
+
 #include "EditorLayer.h"
 
 #include <ImGui/imgui_internal.h>
@@ -635,6 +637,15 @@ namespace Zenit {
 				}
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Transform"))
+			{
+				if (ImGui::MenuItem("Transform 2D"))
+				{
+					CreateTransformNode("Transform 2D");
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
 			ImGui::EndPopup();
 		}
 		ImGui::CloseCurrentPopup();
@@ -955,6 +966,24 @@ namespace Zenit {
 		return node;
 	}
 
+	Node* PanelNodes::CreateTransformNode(const char* name)
+	{
+		TransformNode* node = new TransformNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
 		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
@@ -976,8 +1005,15 @@ namespace Zenit {
 	{
 		const auto inNode = (ComputeShaderNode*)startPin->node;
 
+		// TODO: For similar cases use a TEMPLATED FUNCTION
 		switch (endPin->node->type)
 		{
+			case NodeType::TRANSFORM:
+			{
+				const auto n = (TransformNode*)endPin->node;
+				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				break;
+			}
 			case NodeType::NORMAL_MAP:
 			{
 				const auto n = (NormalMapNode*)endPin->node;

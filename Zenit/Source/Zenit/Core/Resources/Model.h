@@ -23,11 +23,16 @@ namespace Zenit {
 
 		void Update(TimeStep ts, float dx, float dy);
 		void Draw(const std::unique_ptr<Shader>& shader) const;
-		void ResetRotation();
 
 		void AddMesh(Mesh* mesh);
 
 		void SetPosition(const glm::vec3& pos) { transform[3] = glm::vec4(pos, 1); }
+		void SetRotation(const glm::vec3& rot) { rotation = rot; UpdateTransform(); }
+
+		inline const glm::vec3& GetPosition() { return transform[3]; }
+		inline const glm::vec3& GetRotation() { return rotation; }
+
+		void ResetTransform();
 
 		inline const glm::mat4& GetTransform() { return transform; }
 		inline const std::string& GetName() { return name; }
@@ -36,13 +41,16 @@ namespace Zenit {
 		inline const std::vector<Mesh*>& GetMeshes() { return meshes; }
 
 	private:
+		void UpdateTransform();
+
+	private:
 		std::string path;
 		std::string name;
 		std::vector<Mesh*> meshes;
 		AABB aabb;
 
 		glm::mat4 transform;
-		glm::quat rotation;
+		glm::vec3 rotation;
 
 	};
 

@@ -14,6 +14,7 @@
 #include "Zenit/Renderer/Skybox.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/orthonormalize.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -22,8 +23,8 @@ namespace Zenit {
 
 	Model::Model(std::string path) : path(path)
 	{
-		rotation = glm::quat(0, 0, 0, 1);
-		transform = glm::translate(glm::mat4(1.0), { 0,0,0 }) * glm::toMat4(rotation);
+		rotation = glm::vec3(0, 0, 0);
+		UpdateTransform();
 
 		int start = path.find_last_of("\\") + 1;
 		int end = path.find_last_of(".");
@@ -56,12 +57,14 @@ namespace Zenit {
 			{
 				glm::vec3 right = glm::vec3(transform[0][0], transform[1][0], transform[2][0]);
 				transform = glm::rotate(transform, -dy * ts, right);
+				glm::extractEulerAngleXYZ(transform, rotation.x, rotation.y, rotation.z);
 				//aabb.Transform(transform, -dy * ts, right);
 			}
 			if (dx)
 			{
 				glm::vec3 up = glm::vec3(transform[0][1], transform[1][1], transform[2][1]);
 				transform = glm::rotate(transform, dx * ts, up);
+				glm::extractEulerAngleXYZ(transform, rotation.x, rotation.y, rotation.z);
 				//aabb.Transform(transform, dx * ts, up);
 			}
 		}
@@ -73,10 +76,11 @@ namespace Zenit {
 			m->Draw(shader);
 	}
 
-	void Model::ResetRotation()
+	/*void Model::ResetRotation()
 	{
-		transform = glm::toMat4(glm::quat(0, 0, 0, 1));
-	}
+		rotation = glm::vec3(0);
+		UpdateTransform();
+	}*/
 
 	void Model::AddMesh(Mesh* mesh)
 	{
@@ -91,4 +95,17 @@ namespace Zenit {
 		aabb.Extend(mesh->GetAABB());
 		//aabb.RefreshData();
 	}
+
+	void Model::UpdateTransform()
+	{
+		transform = glm::translate(glm::mat4(1.0), { 0,0,0 })
+			* glm::eulerAngleXYZ(rotation.x, rotation.y, rotation.z);
+	}
+
+	void Model::ResetTransform()
+	{
+		rotation = glm::vec3(0.0f);
+		transform = glm::mat3(1.0f);
+	}
+
 }
