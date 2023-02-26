@@ -50,10 +50,6 @@ namespace Zenit {
 
 
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
-
-		// Generators
-		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
-		// Generators
 		
 		// Operators
 		Node* CreateBlendNode(const char* name);
@@ -66,10 +62,10 @@ namespace Zenit {
 		// Helpers
 
 
-		template<typename T>
-		T* CreateGeneratorNode(const char* name)
+		template<typename T, typename... Args>
+		T* CreateGeneratorNode(const char* name, Args&&... args)
 		{
-			T* node = new T(creationId++, name, NodeOutputType::TEXTURE);
+			T* node = new T(creationId++, name, NodeOutputType::TEXTURE, std::forward<Args>(args)...);
 			node->size = { 5,5 };
 			node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);
@@ -81,10 +77,10 @@ namespace Zenit {
 			return node;
 		}
 
-		template<typename T>
-		T* CreateFilterNode(const char* name)
+		template<typename T, typename... Args>
+		T* CreateFilterNode(const char* name, Args&&... args)
 		{
-			T* node = new T(creationId++, name, NodeOutputType::TEXTURE);
+			T* node = new T(creationId++, name, NodeOutputType::TEXTURE, std::forward<Args>(args)...);
 			node->size = { 5,5 };
 			node->headerColor = FILTER_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);

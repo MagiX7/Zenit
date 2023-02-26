@@ -562,17 +562,17 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Noise"))
 				{
-					CreateNoiseNode("Noise", NoiseType::NORMAL);
+					CreateGeneratorNode<NoiseNode>("Noise", NoiseType::NORMAL);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("FBM"))
 				{
-					CreateNoiseNode("FBM", NoiseType::FBM);
+					CreateGeneratorNode<NoiseNode>("FBM", NoiseType::FBM);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Gradient Noise"))
 				{
-					CreateNoiseNode("Gradient Noise", NoiseType::GRADIENT);
+					CreateGeneratorNode<NoiseNode>("Gradient Noise", NoiseType::GRADIENT);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))
@@ -665,6 +665,8 @@ namespace Zenit {
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
+		// TODO: Problem with locks. Maybe because of ImGui. Lock the update and imgui render or wait to end of frame?
+
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			if (id == nodes[i]->id)
@@ -700,24 +702,6 @@ namespace Zenit {
 		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
-
-		return nodes.back();
-	}
-
-	Node* PanelNodes::CreateNoiseNode(const char* name, NoiseType noiseType)
-	{
-		NoiseNode* node = new NoiseNode(creationId++, name, NodeOutputType::TEXTURE, noiseType);
-		node->size = { 5,5 };
-		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
 
 		return nodes.back();
 	}
@@ -1081,23 +1065,46 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
+
+				// Generators
+				case NodeType::CIRCLE:
+				{
+					CircleNode* node = CreateGeneratorNode<CircleNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CHECKERS:
+				{
+					CheckersNode* node = CreateGeneratorNode<CheckersNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
 				case NodeType::NORMAL_NOISE:
 				{
-					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::NORMAL);
+					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::NORMAL);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::FBM_NOISE:
 				{
-					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::FBM);
+					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::FBM);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::DERIVATIVE_NOISE:
 				{
-					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::DERIVATIVE);
+					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::DERIVATIVE);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::GRADIENT_NOISE:
+				{
+					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::GRADIENT);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1109,16 +1116,25 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
-				case NodeType::CIRCLE:
+
+				// Filters
+				case NodeType::NORMAL_MAP:
 				{
-					CircleNode* node = CreateGeneratorNode<CircleNode>(name);
+					NormalMapNode* node = CreateFilterNode<NormalMapNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
-				case NodeType::NORMAL_MAP:
+				case NodeType::TILING:
 				{
-					NormalMapNode* node = CreateFilterNode<NormalMapNode>(name);
+					TilingNode* node = CreateFilterNode<TilingNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::EDGE_DETECTOR:
+				{
+					EdgeDetectorNode* node = CreateFilterNode<EdgeDetectorNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1130,6 +1146,15 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
+				case NodeType::INVERT:
+				{
+					InvertNode* node = CreateFilterNode<InvertNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				// Operators
 				case NodeType::BLEND:
 				{
 					BlendNode* node = (BlendNode*)CreateBlendNode(name);
@@ -1158,6 +1183,15 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
+
+				case NodeType::TRANSFORM:
+				{
+					TransformNode* node = CreateFilterNode<TransformNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
 				case NodeType::COMMENT:
 				{
 					Node* node = CreateGroupNode(name);
