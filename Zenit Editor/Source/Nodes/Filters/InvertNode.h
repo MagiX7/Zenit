@@ -14,13 +14,13 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-		void SetInputTexture(std::shared_ptr<Texture2D> tex);
+		void SetInputTexture(Texture2D* tex);
 
 		virtual SerializerValue Save() override;
 		virtual void Load(SerializerObject& obj) override;
 
 	private:
-		std::shared_ptr<Texture2D> inputTexture;
+		Texture2D* inputTexture;
 
 	};
 

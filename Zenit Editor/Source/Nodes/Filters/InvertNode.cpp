@@ -9,7 +9,7 @@ namespace Zenit {
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/invert.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture = GetWhite();
 	}
 
 	InvertNode::~InvertNode()
@@ -39,7 +39,7 @@ namespace Zenit {
 		ImGui::Image((ImTextureID*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void InvertNode::SetInputTexture(std::shared_ptr<Texture2D> tex)
+	void InvertNode::SetInputTexture(Texture2D* tex)
 	{
 		inputTexture = tex;
 		regenerate = true;

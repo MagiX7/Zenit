@@ -11,10 +11,9 @@ namespace Zenit {
 		BindCoreData();
 		DispatchCompute(1, 1);
 
-		inputTexture1 = std::make_unique<Texture2D>("Settings/white.png");
-		inputTexture2 = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture1 = GetWhite();
+		inputTexture2 = GetWhite();
 
-		//maxMinType = (Type)isMax;
 		isMax ? type = NodeType::MAX : type = NodeType::MIN;
 	}
 
@@ -52,13 +51,13 @@ namespace Zenit {
 
 	void MaxMinNode::SetFirstTexture(Texture2D* texture)
 	{
-		inputTexture1.reset(texture);
+		inputTexture1 = texture;
 		regenerate = true;
 	}
 
 	void MaxMinNode::SetSecondTexture(Texture2D* texture)
 	{
-		inputTexture2.reset(texture);
+		inputTexture2 = texture;
 		regenerate = true;
 	}
 

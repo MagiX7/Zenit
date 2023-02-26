@@ -20,7 +20,7 @@ namespace Zenit {
 		virtual void Load(SerializerObject& obj) override;
 
 	private:
-		std::unique_ptr<Texture2D> inputTexture;
+		Texture2D* inputTexture;
 		glm::vec2 center;
 		float radius;
 		float angle;

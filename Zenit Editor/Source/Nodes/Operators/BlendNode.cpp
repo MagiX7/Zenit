@@ -10,10 +10,8 @@ namespace Zenit {
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/blend.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
-		tex1 = std::make_unique<Texture2D>("Settings/white.png");
-		tex2 = std::make_unique<Texture2D>("Settings/white.png");
-		tex1->SetName(name + '_' + id);
-		tex2->SetName(name + '_' + id);
+		tex1 = GetWhite();
+		tex2 = GetWhite();
 
 		blendMode = (BlendMode)0;
 	}
@@ -75,13 +73,13 @@ namespace Zenit {
 
 	void BlendNode::SetFirstTexture(Texture2D* texture)
 	{
-		tex1.reset(texture);
+		tex1 = texture;
 		regenerate = true;
 	}
 
 	void BlendNode::SetSecondTexture(Texture2D* texture)
 	{
-		tex2.reset(texture);
+		tex2 = texture;
 		regenerate = true;
 	}
 

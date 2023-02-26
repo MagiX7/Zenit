@@ -22,8 +22,8 @@ namespace Zenit {
 
 	private:
 		float contribution;
-		std::unique_ptr<Texture2D> tex1;
-		std::unique_ptr<Texture2D> tex2;
+		Texture2D* tex1;
+		Texture2D* tex2;
 
 		enum class BlendMode
 		{

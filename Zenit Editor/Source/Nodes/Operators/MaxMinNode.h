@@ -24,8 +24,8 @@ namespace Zenit {
 		virtual void Load(SerializerObject& obj) override;
 
 	private:
-		std::shared_ptr<Texture2D> inputTexture1;
-		std::shared_ptr<Texture2D> inputTexture2;
+		Texture2D* inputTexture1;
+		Texture2D* inputTexture2;
 		//enum class Type { MIN, MAX };
 		//Type maxMinType;
 	};

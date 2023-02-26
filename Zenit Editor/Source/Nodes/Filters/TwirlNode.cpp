@@ -10,9 +10,8 @@ namespace Zenit {
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/twirl.shader");
 
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
-		inputTexture->SetName(name + '_' + id);
-
+		inputTexture = GetWhite();
+		
 		center = { -0.5f,-0.5f };
 		radius = 1.0f;
 		angle = 3.0f;
@@ -43,7 +42,6 @@ namespace Zenit {
 	void TwirlNode::OnImGuiNodeRender()
 	{
 		ImGui::Image((ImTextureID*)texture->GetId(), { 50,50 }, { 0,1 }, { 1,0 });
-
 	}
 
 	void TwirlNode::OnImGuiInspectorRender()
@@ -61,8 +59,7 @@ namespace Zenit {
 
 	void TwirlNode::SetTexture(Texture2D* texture)
 	{
-		*inputTexture = *texture;
-		//inputTexture.reset(texture);
+		inputTexture = texture;
 		regenerate = true;
 	}
 

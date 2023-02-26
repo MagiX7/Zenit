@@ -15,8 +15,6 @@
 #include "Nodes/Filters/TwirlNode.h"
 #include "Nodes/Filters/InvertNode.h"
 
-#include "Nodes/Constants/Vec1Node.h"
-
 #include "Nodes/Operators/BlendNode.h"
 #include "Nodes/Operators/ClampNode.h"
 #include "Nodes/Operators/MaxMinNode.h"
@@ -798,37 +796,37 @@ namespace Zenit {
 			case NodeType::TRANSFORM:
 			{
 				const auto n = (TransformNode*)endPin->node;
-				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::NORMAL_MAP:
 			{
 				const auto n = (NormalMapNode*)endPin->node;
-				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::EDGE_DETECTOR:
 			{
 				const auto n = (EdgeDetectorNode*)endPin->node;
-				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::TWIRL:
 			{
 				const auto n = (TwirlNode*)endPin->node;
-				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
+				resetData ? n->SetTexture(ComputeShaderNode::GetWhite()) : n->SetTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::INVERT:
 			{
 				const auto n = (InvertNode*)endPin->node;
-				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::TILING:
 			{
 				const auto n = (TilingNode*)endPin->node;
-				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
+				resetData ? n->SetTexture(ComputeShaderNode::GetWhite()) : n->SetTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::BLEND:
@@ -836,7 +834,7 @@ namespace Zenit {
 				const auto n = (BlendNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
@@ -845,7 +843,7 @@ namespace Zenit {
 			case NodeType::CLAMP:
 			{
 				const auto n = (ClampNode*)endPin->node;
-				resetData ? n->SetInputTexture(editorLayer->white.get()) : n->SetInputTexture(inNode->texture.get());
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 			case NodeType::MAX:
@@ -853,7 +851,7 @@ namespace Zenit {
 				const auto n = (MaxMinNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
@@ -864,7 +862,7 @@ namespace Zenit {
 				const auto n = (MaxMinNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 

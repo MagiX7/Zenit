@@ -10,7 +10,7 @@ namespace Zenit {
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/normal_map.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture = GetWhite();
 	}
 
 	NormalMapNode::~NormalMapNode()
@@ -50,7 +50,7 @@ namespace Zenit {
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void NormalMapNode::SetInputTexture(std::shared_ptr<Texture2D> texture)
+	void NormalMapNode::SetInputTexture(Texture2D* texture)
 	{
 		inputTexture = texture;
 		regenerate = true;

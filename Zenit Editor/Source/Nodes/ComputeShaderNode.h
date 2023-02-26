@@ -17,9 +17,12 @@ namespace Zenit {
 
 		//virtual SerializerValue Save() {}
 
+		static Texture2D* GetWhite();
+
 	public:
 		std::shared_ptr<Texture2D> texture;
 		std::unique_ptr<ComputeShader> computeShader;
+		static Texture2D* white;
 
 	protected:
 		bool regenerate = true;

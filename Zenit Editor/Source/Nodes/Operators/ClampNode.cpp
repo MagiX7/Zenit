@@ -11,7 +11,7 @@ namespace Zenit {
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/clamp.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
 
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture = GetWhite();
 
 		BindCoreData();
 		DispatchCompute(1, 1);
@@ -49,14 +49,9 @@ namespace Zenit {
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void ClampNode::SetInputTexture(const std::unique_ptr<Texture2D>& tex)
-	{
-		*inputTexture = *tex;
-	}
-	
 	void ClampNode::SetInputTexture(Texture2D* tex)
 	{
-		*inputTexture = *tex;
+		inputTexture = tex;
 	}
 
 	SerializerValue ClampNode::Save()

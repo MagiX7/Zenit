@@ -2,6 +2,10 @@
 
 namespace Zenit {
 
+	//std::shared_ptr<Texture2D> ComputeShaderNode::white = std::make_shared<Texture2D>("Settings/white.png");
+	Texture2D* ComputeShaderNode::white = nullptr;
+
+
 	ComputeShaderNode::ComputeShaderNode(int id, const char* name, NodeOutputType outputType)
 		: Node(id, name, outputType)
 	{
@@ -25,5 +29,14 @@ namespace Zenit {
 	void ComputeShaderNode::Update(TimeStep ts)
 	{
 	}
+
+	Texture2D* ComputeShaderNode::GetWhite()
+	{
+		if (!white)
+			white = new Texture2D("Settings/white.png");
+		return white;
+	}
+
+
 
 }

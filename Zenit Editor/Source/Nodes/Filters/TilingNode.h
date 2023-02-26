@@ -23,7 +23,7 @@ namespace Zenit {
 		float horizontalOffset = 0.5f;
 		float verticalOffset = 0.5f;
 		int tileNum = 10;
-		std::unique_ptr<Texture2D> inputTexture;
+		Texture2D* inputTexture;
 
 	};
 

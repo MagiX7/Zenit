@@ -9,7 +9,7 @@ namespace Zenit {
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/tiling.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
+		inputTexture = GetWhite();
 	}
 
 	TilingNode::~TilingNode()
@@ -58,7 +58,7 @@ namespace Zenit {
 
 	void TilingNode::SetTexture(Texture2D* texture)
 	{
-		*inputTexture = *texture;
+		inputTexture = texture;
 		regenerate = true;
 	}
 

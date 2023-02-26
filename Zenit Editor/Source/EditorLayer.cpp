@@ -4,7 +4,6 @@
 #include "Nodes/ColorNode.h"
 #include "Nodes/Generators/NoiseNode.h"
 #include "Nodes/Generators/VoronoiNode.h"
-#include "Nodes/Constants/Vec1Node.h"
 #include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
@@ -29,6 +28,7 @@ namespace Zenit {
 		ZN_INFO("Model loaded");
 	}
 
+	//std::shared_ptr<Texture2D> EditorLayer::white = std::make_shared<Texture2D>("Settings/white.png");
 
 	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 })), frustum({ camera })
 	{
@@ -46,12 +46,12 @@ namespace Zenit {
 		LoadModels();
 		currentMesh = nullptr;
 
-		white = std::make_shared<Texture2D>("Settings/white.png");
 		panelNodes = new PanelNodes(this);
 		if (!Load())
 		{
 			uint32_t data = 0xffffffff;
-			diffuse = new Texture2D(&data, 1, 1);
+			//diffuse = new Texture2D(&data, 1, 1);
+			diffuse = ComputeShaderNode::GetWhite();
 			diffuse->SetName("white");
 			normals = new Texture2D(&data, 1, 1);
 			normals->SetName("white");
@@ -59,8 +59,7 @@ namespace Zenit {
 			metallic->SetName("white");
 			roughness = new Texture2D(&data, 1, 1);
 			roughness->SetName("white");
-			ambientOcclusion = new Texture2D(&data, 1, 1);
-		}		
+		}
 
 		pbrShader = std::make_unique<Shader>("Assets/Shaders/pbr.shader");
 		dirLight = DirectionalLight();
@@ -78,7 +77,6 @@ namespace Zenit {
 		delete normals;
 		delete metallic;
 		delete roughness;
-		delete ambientOcclusion;
 
 		delete panelNodes;
 
@@ -422,8 +420,9 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (diffuse != white.get())
-				diffuse = white.get();
+			//if (diffuse != white.get())
+
+			diffuse = ComputeShaderNode::GetWhite();
 			return false;
 		}
 
@@ -437,8 +436,7 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (normals != white.get())
-				normals = white.get();
+			normals = ComputeShaderNode::GetWhite();
 			return false;
 		}
 
@@ -453,8 +451,7 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (metallic != white.get())
-				metallic = white.get();
+			metallic = ComputeShaderNode::GetWhite();
 			return false;
 		}
 
@@ -469,30 +466,15 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			if (roughness != white.get())
-				roughness = white.get();
+			roughness = ComputeShaderNode::GetWhite();
 			return false;
 		}
 
-		switch (node->outputType)
-		{
-			case NodeOutputType::TEXTURE:
-			{
-				const auto n = (ComputeShaderNode*)node;
-				roughness = n->texture.get();
-				roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
-				return true;
-			}
-			//case NodeOutputType::VEC1:
-			//{
-			//	const auto n = (Vec1Node*)node;
-			//	roughnessValue = n->value;
-			//	return true;
-			//	break;
-			//}
-		}
-
-		return false;
+		const auto n = (ComputeShaderNode*)node;
+		roughness = n->texture.get();
+		roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
+		
+		return true;
 	}
 
 	void EditorLayer::SetModelShaderData()
@@ -518,10 +500,6 @@ namespace Zenit {
 		
 		roughness->Bind(3);
 		pbrShader->SetUniform1i("roughnessTexture", 3);
-
-		//ambientOcclusion->Bind(4);
-		//pbrShader->SetUniform1i("ambientOcclusionTexture", 4);
-
 
 		pbrShader->SetUniform1i("drawSkybox", skyboxProps.draw);
 		if (skyboxProps.draw)
@@ -598,19 +576,6 @@ namespace Zenit {
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_roughness.png").c_str(), w, h, channels, data, w * channels);
 		delete[] data;
-
-
-		w = ambientOcclusion->GetWidth() == 1 ? 1024 : ambientOcclusion->GetWidth();
-		h = ambientOcclusion->GetHeight() == 1 ? 1024 : ambientOcclusion->GetHeight();
-		data = new GLubyte[channels * w * h];
-		memset(data, 0, channels * w * h);
-		ambientOcclusion->Bind(0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		stbi_flip_vertically_on_write(1);
-		stbi_write_png((path + "_ambientOcclusion.png").c_str(), w, h, channels, data, w * channels);
-		delete[] data;
 	}
 
 	void EditorLayer::Save()
@@ -634,8 +599,6 @@ namespace Zenit {
 
 	bool EditorLayer::Load()
 	{
-		//return false;
-
 		serializerRootValue = JSONSerializer::ReadFile(SAVE_PATH);
 		if (!serializerRootValue.value)
 			return false;
@@ -832,12 +795,6 @@ namespace Zenit {
 
 
 		
-
-
-	}
-
-	void EditorLayer::DrawHierarchyEntity()
-	{
 
 
 	}

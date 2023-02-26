@@ -55,8 +55,6 @@ namespace Zenit {
 
 		void FocusCameraOnModel();
 
-		void DrawHierarchyEntity();
-
 	private:
 		bool finished = false;
 		PanelViewport panelViewport;
@@ -80,11 +78,7 @@ namespace Zenit {
 		Texture2D* diffuse;
 		Texture2D* normals;
 		Texture2D* metallic;
-		std::shared_ptr<Texture2D> white;
-		float metallicValue = 1.0f;
 		Texture2D* roughness;
-		float roughnessValue = 1.0f;
-		Texture2D* ambientOcclusion;
 
 		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
