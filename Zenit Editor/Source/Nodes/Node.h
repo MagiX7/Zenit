@@ -57,6 +57,7 @@ namespace Zenit {
 		TILING,
 		EDGE_DETECTOR,
 		TWIRL,
+		INVERT,
 
 		// Operators
 		BLEND,

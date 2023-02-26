@@ -18,8 +18,8 @@ namespace Zenit {
 
 	void TransformNode::Update(TimeStep ts)
 	{
-		//if (!regenerate)
-			//return;
+		if (!regenerate)
+			return;
 
 		BindCoreData();
 

@@ -282,6 +282,8 @@ namespace Zenit {
 						camera.SetPosition(glm::vec3(0, 0, 2));
 					}
 
+					// TODO: Inverse Node (One minus)
+
 					ImGui::Dummy({ 0,2.5f });
 
 					auto rot = camera.GetRotation();

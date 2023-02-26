@@ -13,6 +13,7 @@
 #include "Nodes/Filters/EdgeDetectorNode.h"
 #include "Nodes/Filters/TilingNode.h"
 #include "Nodes/Filters/TwirlNode.h"
+#include "Nodes/Filters/InvertNode.h"
 
 #include "Nodes/Constants/Vec1Node.h"
 
@@ -577,6 +578,11 @@ namespace Zenit {
 					CreateTwirlNode("Twirl");
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Invert"))
+				{
+					CreateInvertNode("Invert"); // Essentially 1-color from input texture
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Generators"))
@@ -854,6 +860,24 @@ namespace Zenit {
 		return node;
 	}
 
+	Node* PanelNodes::CreateInvertNode(const char* name)
+	{
+		InvertNode* node = new InvertNode(creationId++, name, NodeOutputType::TEXTURE);
+		node->size = { 5,5 };
+		node->headerColor = FILTER_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
 	Node* PanelNodes::CreateCircleNode(const char* name)
 	{
 		CircleNode* node = new CircleNode(creationId++, name, NodeOutputType::TEXTURE);
@@ -1030,6 +1054,12 @@ namespace Zenit {
 			{
 				const auto n = (TwirlNode*)endPin->node;
 				resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
+				break;
+			}
+			case NodeType::INVERT:
+			{
+				const auto n = (InvertNode*)endPin->node;
+				resetData ? n->SetInputTexture(editorLayer->white) : n->SetInputTexture(inNode->texture);
 				break;
 			}
 			case NodeType::TILING:
