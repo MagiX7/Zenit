@@ -34,11 +34,6 @@
 #define OUTPUT_METALLIC_PIN_ID 4
 #define OUTPUT_ROUGHNESS_PIN_ID 5
 
-#define FLAT_COLOR_NODE_HEADER_COLOR ImColor(120, 80, 80, 255);
-#define FILTER_NODE_HEADER_COLOR ImColor(80, 80, 150, 255);
-#define GENERATOR_NODE_HEADER_COLOR ImColor(80, 120, 80, 255);
-#define OPERATOR_NODE_HEADER_COLOR ImColor(120, 80, 150, 255);
-
 namespace Zenit {
 
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
@@ -51,30 +46,7 @@ namespace Zenit {
 		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
 		ed::SetCurrentEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
 
-
-		Node* node = new Node(OUTPUT_NODE_ID, "PBR", NodeOutputType::NONE);
-
-		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", PinType::Object, ed::PinKind::Input);
-		albedo.node = node;
-		node->inputs.emplace_back(albedo);
-
-		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", PinType::Object, ed::PinKind::Input);
-		normals.node = node;
-		node->inputs.emplace_back(normals);
-
-		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Object, ed::PinKind::Input);
-		metallic.node = node;
-		node->inputs.emplace_back(metallic);
-
-		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Object, ed::PinKind::Input);
-		roughness.node = node;
-		node->inputs.emplace_back(roughness);
-
-		node->headerColor = ImColor(100, 100, 100, 255);
-
-		nodes.emplace_back(node);
-		
-		creationId += 5;
+		CreateFinalOutputNode();
 
 		nodeBgTexture = std::make_shared<Texture2D>("Settings/NodeBackground.png");
 	}
@@ -547,40 +519,31 @@ namespace Zenit {
 				}
 				ImGui::EndMenu();
 			}
-			if (ImGui::BeginMenu("Constants"))
-			{
-				if (ImGui::MenuItem("Vector1"))
-				{
-					CreateVector1Node("Vector 1");
-					showCreationPopup = false;
-				}
-				ImGui::EndMenu();
-			}
 			if (ImGui::BeginMenu("Filters"))
 			{
 				if (ImGui::MenuItem("Normal Map"))
 				{
-					CreateNormalMapNode("Normal Map");
+					CreateFilterNode<NormalMapNode>("Normal Map");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Tiling"))
 				{
-					CreateTilingNode("Tiling");
+					CreateFilterNode<TilingNode>("Tiling");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Edge Detector"))
 				{
-					CreateEdgeDetectorNode("Edge Detector");
+					CreateFilterNode<EdgeDetectorNode>("Edge Detector");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Twirl"))
 				{
-					CreateTwirlNode("Twirl");
+					CreateFilterNode<TwirlNode>("Twirl");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Invert"))
 				{
-					CreateInvertNode("Invert"); // Essentially 1-color from input texture
+					CreateFilterNode<InvertNode>("Invert");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -589,12 +552,12 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Circle"))
 				{
-					CreateCircleNode("Circle");
+					CreateGeneratorNode<CircleNode>("Circle");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Checkers"))
 				{
-					CreateCheckersNode("Checkers");
+					CreateGeneratorNode<CheckersNode>("Checkers");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Noise"))
@@ -614,7 +577,7 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Voronoi"))
 				{
-					CreateVoronoiNode("Voronoi");
+					CreateGeneratorNode<VoronoiNode>("Voronoi");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -647,7 +610,8 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Transform 2D"))
 				{
-					CreateTransformNode("Transform 2D");
+					// Despite it is not a filter, it is created the same way
+					CreateFilterNode<TransformNode>("Transform 2D");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -719,12 +683,9 @@ namespace Zenit {
 		const Pin* output = FindPin(link->outputId);
 
 		ComputeShaderNode* other = (ComputeShaderNode*)output->node;
-		//if (other->outputType == NodeOutputType::TEXTURE)
-		//{
-			other->BindCoreData();
-			other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-			other->DispatchCompute(1, 1);
-		//}
+		other->BindCoreData();
+		other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+		other->DispatchCompute(1, 1);
 
 		ed::DeleteLink(id);
 	}
@@ -759,151 +720,6 @@ namespace Zenit {
 		node->outputs.emplace_back(output);
 
 		return nodes.back();
-	}
-
-	Node* PanelNodes::CreateVoronoiNode(const char* name)
-	{
-		VoronoiNode* node = new VoronoiNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateVector1Node(const char* name)
-	{
-		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Float, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateNormalMapNode(const char* name)
-	{
-		NormalMapNode* node = new NormalMapNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateEdgeDetectorNode(const char* name)
-	{
-		EdgeDetectorNode* node = new EdgeDetectorNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateTilingNode(const char* name)
-	{
-		TilingNode* node = new TilingNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateTwirlNode(const char* name)
-	{
-		TwirlNode* node = new TwirlNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateInvertNode(const char* name)
-	{
-		InvertNode* node = new InvertNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateCircleNode(const char* name)
-	{
-		CircleNode* node = new CircleNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return nullptr;
-	}
-
-	Node* PanelNodes::CreateCheckersNode(const char* name)
-	{
-		CheckersNode* node = new CheckersNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = GENERATOR_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-		
-		return node;
 	}
 
 	Node* PanelNodes::CreateBlendNode(const char* name)
@@ -946,28 +762,6 @@ namespace Zenit {
 		return node;
 	}
 
-	/*Node* PanelNodes::CreateMinNode(const char* name)
-	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, false);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
-		input2.node = node;
-		node->inputs.emplace_back(input2);
-
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-
-		return node;
-	}*/
-
 	Node* PanelNodes::CreateMaxMinNode(const char* name, bool isMax)
 	{
 		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, isMax);
@@ -984,24 +778,6 @@ namespace Zenit {
 		node->inputs.emplace_back(input2);
 
 		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateTransformNode(const char* name)
-	{
-		TransformNode* node = new TransformNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		node->headerColor = FILTER_NODE_HEADER_COLOR;
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -1027,6 +803,9 @@ namespace Zenit {
 
 	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
 	{
+		assert(startPin && endPin && "Pins are null");
+		assert(startPin->node && endPin->node && "Nodes are null");
+
 		const auto inNode = (ComputeShaderNode*)startPin->node;
 
 		// TODO: For similar cases use a TEMPLATED FUNCTION
@@ -1186,6 +965,33 @@ namespace Zenit {
 		}
 	}
 
+	void PanelNodes::CreateFinalOutputNode()
+	{
+		Node* node = new Node(OUTPUT_NODE_ID, "PBR", NodeOutputType::NONE);
+
+		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", PinType::Object, ed::PinKind::Input);
+		albedo.node = node;
+		node->inputs.emplace_back(albedo);
+
+		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", PinType::Object, ed::PinKind::Input);
+		normals.node = node;
+		node->inputs.emplace_back(normals);
+
+		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Object, ed::PinKind::Input);
+		metallic.node = node;
+		node->inputs.emplace_back(metallic);
+
+		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Object, ed::PinKind::Input);
+		roughness.node = node;
+		node->inputs.emplace_back(roughness);
+
+		node->headerColor = ImColor(100, 100, 100, 255);
+
+		nodes.emplace_back(node);
+
+		creationId += 5;
+	}
+
 	void PanelNodes::SaveNodes(SerializerObject& appObject)
 	{
 		SerializerValue value = JSONSerializer::CreateValue();
@@ -1255,8 +1061,6 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
-		//SerializerObject panelNodesObject = JSONSerializer::GetObjectWithName(appObject, "nodes");
-		//creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
 		SerializerArray nodesArray = JSONSerializer::GetArrayFromObject(appObject, "nodes");
 		size_t size = JSONSerializer::GetArraySize(nodesArray);
 
@@ -1277,7 +1081,7 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
-				case NodeType::NOISE:
+				case NodeType::NORMAL_NOISE:
 				{
 					NoiseNode* node = (NoiseNode*)CreateNoiseNode(name, NoiseType::NORMAL);
 					node->id = id;
@@ -1300,28 +1104,28 @@ namespace Zenit {
 				}
 				case NodeType::VORONOI:
 				{
-					VoronoiNode* node = (VoronoiNode*)CreateVoronoiNode(name);
+					VoronoiNode* node = CreateGeneratorNode<VoronoiNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::CIRCLE:
 				{
-					CircleNode* node = (CircleNode*)CreateCircleNode(name);
+					CircleNode* node = CreateGeneratorNode<CircleNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::NORMAL_MAP:
 				{
-					NormalMapNode* node = (NormalMapNode*)CreateNormalMapNode(name);
+					NormalMapNode* node = CreateFilterNode<NormalMapNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::TWIRL:
 				{
-					TwirlNode* node = (TwirlNode*)CreateTwirlNode(name);
+					TwirlNode* node = CreateFilterNode<TwirlNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1390,6 +1194,5 @@ namespace Zenit {
 		ed::GetSelectedNodes(&selectedId, 1);
 		return FindNode(selectedId);
 	}
-
 
 }

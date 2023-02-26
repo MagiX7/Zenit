@@ -17,7 +17,7 @@ namespace Zenit {
 
 	void ComputeShaderNode::DispatchCompute(int xPixels, int yPixels) const
 	{
-		glDispatchCompute(texture->GetWidth() / xPixels, texture->GetHeight() / yPixels, 1); // 8 and 4 is bc of the shader file
+		glDispatchCompute(texture->GetWidth() / xPixels, texture->GetHeight() / yPixels, 1);
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 		computeShader->Unbind();
 	}

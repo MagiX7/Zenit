@@ -9,6 +9,11 @@
 
 namespace ed = ax::NodeEditor;
 
+#define FLAT_COLOR_NODE_HEADER_COLOR ImColor(120, 80, 80, 255);
+#define FILTER_NODE_HEADER_COLOR ImColor(80, 80, 150, 255);
+#define GENERATOR_NODE_HEADER_COLOR ImColor(80, 120, 80, 255);
+#define OPERATOR_NODE_HEADER_COLOR ImColor(120, 80, 150, 255);
+
 namespace Zenit {
 
 	class EditorLayer;
@@ -40,27 +45,15 @@ namespace Zenit {
 		void HandleLinks(std::vector<LinkInfo>& links);
 		void ShowNodeCreationPopup();
 
-
 		void DeleteNode(ed::NodeId id);
 		void DeleteLink(const ed::LinkId& id);
+
 
 		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
 
 		// Generators
-		Node* CreateCircleNode(const char* name);
-		Node* CreateCheckersNode(const char* name);
 		Node* CreateNoiseNode(const char* name, NoiseType noiseType);
-		Node* CreateVoronoiNode(const char* name);
-		Node* CreateVector1Node(const char* name);
 		// Generators
-		
-		// Filters
-		Node* CreateNormalMapNode(const char* name);
-		Node* CreateEdgeDetectorNode(const char* name);
-		Node* CreateTilingNode(const char* name);
-		Node* CreateTwirlNode(const char* name);
-		Node* CreateInvertNode(const char* name);
-		// Filters
 		
 		// Operators
 		Node* CreateBlendNode(const char* name);
@@ -68,16 +61,49 @@ namespace Zenit {
 		Node* CreateMaxMinNode(const char* name, bool isMax);
 		// Operators
 
-		// Transform
-		Node* CreateTransformNode(const char* name);
-		// Transform
-
 		// Helpers
 		Node* CreateGroupNode(const char* name);
 		// Helpers
 
+
+		template<typename T>
+		T* CreateGeneratorNode(const char* name)
+		{
+			T* node = new T(creationId++, name, NodeOutputType::TEXTURE);
+			node->size = { 5,5 };
+			node->headerColor = GENERATOR_NODE_HEADER_COLOR;
+			nodes.emplace_back(node);
+
+			Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+			output.node = node;
+			node->outputs.emplace_back(output);
+
+			return node;
+		}
+
+		template<typename T>
+		T* CreateFilterNode(const char* name)
+		{
+			T* node = new T(creationId++, name, NodeOutputType::TEXTURE);
+			node->size = { 5,5 };
+			node->headerColor = FILTER_NODE_HEADER_COLOR;
+			nodes.emplace_back(node);
+
+			Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+			input.node = node;
+			node->inputs.emplace_back(input);
+
+			Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+			output.node = node;
+			node->outputs.emplace_back(output);
+
+			return node;
+		}
+
 		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
+
+		void CreateFinalOutputNode();
 
 	private:
 		EditorLayer* editorLayer;

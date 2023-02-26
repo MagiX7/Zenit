@@ -6,27 +6,31 @@ namespace Zenit {
 		: ComputeShaderNode(id, name, outputType), noiseType(nType)
 	{
 		//type = NodeType::PERLIN_NOISE;
-		type = NodeType(noiseType);
+		//noiseType = NodeType(noiseType);
 
 		switch (noiseType)
 		{
 			case NoiseType::NORMAL:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/noise.shader");
+				type = NodeType::NORMAL_NOISE;
 				break;
 			}
 			case NoiseType::FBM:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/perlin_noise.shader");
+				type = NodeType::FBM_NOISE;
 				break;
 			}
 			case NoiseType::DERIVATIVE:
 			{
+				type = NodeType::DERIVATIVE_NOISE;
 				break;
 			}
 			case NoiseType::GRADIENT:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/gradient_noise.shader");
+				type = NodeType::GRADIENT_NOISE;
 				break;
 			}
 		}

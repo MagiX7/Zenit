@@ -35,9 +35,6 @@ namespace Zenit {
 	{
 		NONE,
 		TEXTURE,
-		VEC1,
-		VEC2,
-		VEC3,
 	};
 
 	enum class NodeType
@@ -47,9 +44,10 @@ namespace Zenit {
 		// Generators
 		CIRCLE,
 		CHECKERS,
-		NOISE,
+		NORMAL_NOISE,
 		FBM_NOISE,
 		DERIVATIVE_NOISE,
+		GRADIENT_NOISE,
 		VORONOI,
 
 		// Filters
