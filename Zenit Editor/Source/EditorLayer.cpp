@@ -68,6 +68,7 @@ namespace Zenit {
 
 		FocusCameraOnModel();
 
+		Application::GetInstance().GetWindow().SetIcon("Settings/icon.png");
 	}
 
 	void EditorLayer::OnDetach()

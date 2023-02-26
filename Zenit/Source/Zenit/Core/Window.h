@@ -24,6 +24,7 @@ namespace Zenit {
 
 		bool ShouldClose();
 
+		void SetIcon(const char* path);
 
 		inline void SetTitle(const std::string& title) { props.title = title; }
 

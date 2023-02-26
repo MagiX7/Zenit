@@ -22,7 +22,7 @@ namespace Zenit {
 		Log::Init();
 		ZN_CORE_INFO("[INFO] Logging system initialized");
 		
-		window = std::make_unique<Window>(1720, 920);
+		window = std::make_unique<Window>(1720, 920, "Zenit Editor");
 		window->SetEventCallback(ZN_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer3D::GetInstance()->Init();

@@ -5,7 +5,8 @@
 #include "Zenit/Events/MouseEvent.h"
 #include "Log.h"
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <stb_image.h>
 
 #include <iostream>
 
@@ -184,5 +185,15 @@ namespace Zenit {
 	bool Window::ShouldClose()
 	{
 		return glfwWindowShouldClose(window);
-	}	
+	}
+
+	void Window::SetIcon(const char* path)
+	{
+		stbi_set_flip_vertically_on_load(false);
+		GLFWimage images[1];
+		images[0].pixels = stbi_load(path, &images[0].width, &images[0].height, 0, 4);
+		glfwSetWindowIcon(window, 1, images);
+		stbi_image_free(images[0].pixels);
+	}
+
 }
