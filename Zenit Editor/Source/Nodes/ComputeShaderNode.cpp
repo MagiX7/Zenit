@@ -32,8 +32,7 @@ namespace Zenit {
 
 	Texture2D* ComputeShaderNode::GetWhite()
 	{
-		if (!white)
-			white = new Texture2D("Settings/white.png");
+		if (!white) white = new Texture2D("Settings/white.png");
 		return white;
 	}
 

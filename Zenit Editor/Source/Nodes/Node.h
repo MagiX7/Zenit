@@ -40,6 +40,7 @@ namespace Zenit {
 	enum class NodeType
 	{
 		COLOR = 0,
+		GRADIENT,
 
 		// Generators
 		CIRCLE,

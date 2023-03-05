@@ -4,6 +4,8 @@
 
 #include "Nodes/ComputeShaderNode.h"
 #include "Nodes/ColorNode.h"
+#include "Nodes/GradientNode.h"
+
 #include "Nodes/Generators/CircleNode.h"
 #include "Nodes/Generators/CheckersNode.h"
 #include "Nodes/Generators/NoiseNode.h"
@@ -517,10 +519,15 @@ namespace Zenit {
 					CreateFlatColorNode("Flat Color", { 1,0,0 });
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Gradient"))
+				{
+					CreateFilterNode<GradientNode>("Gradient");
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Filters"))
-			{
+			{ 
 				if (ImGui::MenuItem("Normal Map"))
 				{
 					CreateFilterNode<NormalMapNode>("Normal Map");
@@ -809,6 +816,12 @@ namespace Zenit {
 			case NodeType::NORMAL_MAP:
 			{
 				const auto n = (NormalMapNode*)endPin->node;
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				break;
+			}
+			case NodeType::GRADIENT:
+			{
+				const auto n = (GradientNode*)endPin->node;
 				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
