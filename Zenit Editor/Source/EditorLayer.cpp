@@ -28,7 +28,6 @@ namespace Zenit {
 		ZN_INFO("Model loaded");
 	}
 
-	//std::shared_ptr<Texture2D> EditorLayer::white = std::make_shared<Texture2D>("Settings/white.png");
 
 	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 })), frustum({ camera })
 	{

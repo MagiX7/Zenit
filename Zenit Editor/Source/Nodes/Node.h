@@ -49,6 +49,7 @@ namespace Zenit {
 		DERIVATIVE_NOISE,
 		GRADIENT_NOISE,
 		VORONOI,
+		KIFS_FRACTAL,
 
 		// Filters
 		NORMAL_MAP,

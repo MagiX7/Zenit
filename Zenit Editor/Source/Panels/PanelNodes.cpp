@@ -8,6 +8,8 @@
 #include "Nodes/Generators/CheckersNode.h"
 #include "Nodes/Generators/NoiseNode.h"
 #include "Nodes/Generators/VoronoiNode.h"
+#include "Nodes/Generators/VoronoiNode.h"
+#include "Nodes/Generators/KifsFractalNode.h"
 
 #include "Nodes/Filters/NormalMapNode.h"
 #include "Nodes/Filters/EdgeDetectorNode.h"
@@ -576,6 +578,11 @@ namespace Zenit {
 				else if (ImGui::MenuItem("Voronoi"))
 				{
 					CreateGeneratorNode<VoronoiNode>("Voronoi");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("KIFS Fractal"))
+				{
+					CreateGeneratorNode<KifsFractalNode>("KIFS Fractal");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();

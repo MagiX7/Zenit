@@ -1,13 +1,13 @@
-#include "Application.h"
-#include "Window.h"
-#include "Input.h"
+#include "Zenit/Core/Application.h"
+#include "Zenit/Core/Window.h"
+#include "Zenit/Core/Input.h"
 
 #include "PerspectiveCamera.h"
-#include "TimeStep.h"
+#include "Zenit/Core/TimeStep.h"
 
 #include "Zenit/Utils/AABB.h"
 
-#include "Log.h"
+#include "Zenit/Core/Log.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
