@@ -64,6 +64,9 @@ namespace Zenit {
 		CLAMP,
 		MAX,
 		MIN,
+		POW,
+		ABS,
+		NORMALIZE,
 
 		// Transform
 		TRANSFORM,

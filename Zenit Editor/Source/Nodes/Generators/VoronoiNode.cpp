@@ -11,7 +11,7 @@ namespace Zenit {
 		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
 
 		latestSeed = 1.54;
-		scale = 10;
+		scale = 5;
 	}
 
 	VoronoiNode::~VoronoiNode()

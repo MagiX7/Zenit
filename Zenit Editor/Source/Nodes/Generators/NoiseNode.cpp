@@ -31,6 +31,7 @@ namespace Zenit {
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/gradient_noise.shader");
 				type = NodeType::GRADIENT_NOISE;
+				latestSeed = 4.122871f;
 				break;
 			}
 		}
@@ -40,7 +41,7 @@ namespace Zenit {
 		BindCoreData();
 		computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
 		DispatchCompute(1, 1);
-
+		
 	}
 
 	NoiseNode::~NoiseNode()

@@ -18,6 +18,7 @@ namespace Zenit {
 
 	class EditorLayer;
 	enum class NoiseType;
+	enum class SingleInstructionType;
 
 	class PanelNodes
 	{
@@ -55,6 +56,7 @@ namespace Zenit {
 		Node* CreateBlendNode(const char* name);
 		Node* CreateClampNode(const char* name);
 		Node* CreateMaxMinNode(const char* name, bool isMax);
+		Node* CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType);
 		// Operators
 
 		// Helpers

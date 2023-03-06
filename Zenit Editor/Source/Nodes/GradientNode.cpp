@@ -31,6 +31,8 @@ namespace Zenit {
 		computeShader->SetUniform1i("horizontal", horizontal);
 		computeShader->SetUniform1f("distance", distance);
 		DispatchCompute(1, 1);
+
+		regenerate = false;
 	}
 
 	void GradientNode::OnImGuiNodeRender()
@@ -55,6 +57,7 @@ namespace Zenit {
 	void GradientNode::SetInputTexture(Texture2D* tex)
 	{
 		inputTexture = tex;
+		regenerate = true;
 	}
 
 	SerializerValue GradientNode::Save()

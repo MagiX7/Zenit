@@ -22,6 +22,7 @@
 #include "Nodes/Operators/BlendNode.h"
 #include "Nodes/Operators/ClampNode.h"
 #include "Nodes/Operators/MaxMinNode.h"
+#include "Nodes/Operators/SingleInstructionNode.h"
 
 #include "Nodes/TransformNode.h"
 
@@ -616,6 +617,11 @@ namespace Zenit {
 					CreateMaxMinNode("Min", false);
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Pow"))
+				{
+					CreateSingleInstructionNode("Pow", SingleInstructionType::POW);
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Transform"))
@@ -780,6 +786,24 @@ namespace Zenit {
 		return node;
 	}
 
+	Node* PanelNodes::CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType)
+	{
+		auto node = new SingleInstructionNode(creationId++, name, NodeOutputType::TEXTURE, instructionType);
+		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
+		nodes.emplace_back(node);
+
+		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		input.node = node;
+		node->inputs.emplace_back(input);
+
+		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		output.node = node;
+		node->outputs.emplace_back(output);
+
+		return node;
+	}
+
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
 		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
@@ -886,6 +910,14 @@ namespace Zenit {
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
+				break;
+			}
+			case NodeType::POW:
+			case NodeType::ABS:
+			case NodeType::NORMALIZE:
+			{
+				const auto n = (SingleInstructionNode*)endPin->node;
+				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
 				break;
 			}
 
