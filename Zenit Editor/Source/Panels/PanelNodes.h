@@ -101,6 +101,13 @@ namespace Zenit {
 		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
+		template<typename T>
+		void UpdateNodeWithSingleInputTexture(Node* affectedNode, Texture2D* tex, bool resetData)
+		{
+			T* n = (T*)affectedNode;
+			resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(tex);
+		}
+
 		void CreateFinalOutputNode();
 
 	private:

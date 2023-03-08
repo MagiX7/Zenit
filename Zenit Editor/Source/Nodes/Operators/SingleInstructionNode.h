@@ -7,6 +7,8 @@ namespace Zenit {
 	enum class SingleInstructionType
 	{
 		POW = 19,
+		ADD = 20,
+		SUBSTRACT = 21,
 	};
 
 	class SingleInstructionNode : public ComputeShaderNode
@@ -27,7 +29,9 @@ namespace Zenit {
 	private:
 		SingleInstructionType instrType;
 		Texture2D* inputTexture;
-		float factor = 1.0f;
+		float factor = -1.0f;
+		bool useColor = false;
+		glm::vec3 color = glm::vec3(-1);
 	};
 
 }

@@ -57,7 +57,7 @@ namespace Zenit {
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void TwirlNode::SetTexture(Texture2D* texture)
+	void TwirlNode::SetInputTexture(Texture2D* texture)
 	{
 		inputTexture = texture;
 		regenerate = true;

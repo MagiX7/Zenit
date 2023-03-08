@@ -56,7 +56,7 @@ namespace Zenit {
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void TilingNode::SetTexture(Texture2D* texture)
+	void TilingNode::SetInputTexture(Texture2D* texture)
 	{
 		inputTexture = texture;
 		regenerate = true;

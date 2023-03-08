@@ -13,6 +13,21 @@ namespace Zenit {
 			case SingleInstructionType::POW:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/pow.shader");
+				factor = 1.0f;
+				break;
+			}
+			case SingleInstructionType::ADD:
+			{
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/add.shader");
+				factor = 0.0f;
+				color = glm::vec3(1);
+				break;
+			}
+			case SingleInstructionType::SUBSTRACT:
+			{
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/substract.shader");
+				factor = 0.0f;
+				color = glm::vec3(1);
 				break;
 			}
 		}
@@ -36,14 +51,20 @@ namespace Zenit {
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("inputTexture", 1);
 
+		computeShader->SetUniform1f("factor", factor);
+
+	
 		switch (instrType)
 		{
-			case SingleInstructionType::POW:
+			case SingleInstructionType::ADD:
+			case SingleInstructionType::SUBSTRACT:
 			{
-				computeShader->SetUniform1f("factor", factor);
+				computeShader->SetUniformVec3f("inColor", color);
+				computeShader->SetUniform1i("useColor", useColor);
 				break;
 			}
 		}
+		
 
 		DispatchCompute(1, 1);
 
@@ -68,6 +89,29 @@ namespace Zenit {
 				}
 				break;
 			}
+			case SingleInstructionType::ADD:
+			case SingleInstructionType::SUBSTRACT:
+			{
+				if (ImGui::DragFloat("Factor", &factor, 0.01f, 0.0f, 1.0f))
+				{
+					if (factor < 0.0f) factor = 0.0f;
+					regenerate = true;
+				}
+
+				ImGui::Checkbox("Use color", &useColor);
+
+				if (useColor)
+				{
+					if (ImGui::CollapsingHeader("Color", ImGuiTreeNodeFlags_DefaultOpen))
+					{
+						ImGui::SetNextItemWidth(128);
+						if (ImGui::ColorPicker3("Color", glm::value_ptr(color)))
+							regenerate = true;
+					}
+				}
+
+				break;
+			}
 		}		
 
 		ImGui::Image((ImTextureID*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
@@ -88,11 +132,15 @@ namespace Zenit {
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
 		
+		JSONSerializer::SetNumber(object, "factor", factor);
+		
 		switch (instrType)
 		{
-			case SingleInstructionType::POW:
+			case SingleInstructionType::ADD:
+			case SingleInstructionType::SUBSTRACT:
 			{
-				JSONSerializer::SetNumber(object, "factor", factor);
+				JSONSerializer::SetVector3f(object, "color", color);
+				JSONSerializer::SetNumber(object, "useColor", useColor);
 				break;
 			}
 		}
@@ -102,15 +150,16 @@ namespace Zenit {
 
 	void SingleInstructionNode::Load(SerializerObject& obj)
 	{
-		switch (instrType)
-		{
-			case SingleInstructionType::POW:
-			{
-				factor = JSONSerializer::GetNumberFromObject(obj, "factor");
-				break;
-			}
-		}
-
+		factor = JSONSerializer::GetNumberFromObject(obj, "factor");
+		//switch (instrType)
+		//{
+		//	case SingleInstructionType::POW:
+		//	case SingleInstructionType::ADD:
+		//	case SingleInstructionType::SUBSTRACT:
+		//	{
+		//		break;
+		//	}
+		//}
 	}
 
 }

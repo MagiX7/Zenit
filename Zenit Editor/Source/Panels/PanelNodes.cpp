@@ -622,6 +622,16 @@ namespace Zenit {
 					CreateSingleInstructionNode("Pow", SingleInstructionType::POW);
 					showCreationPopup = false;
 				}
+				else if (ImGui::MenuItem("Add"))
+				{
+					CreateSingleInstructionNode("Add", SingleInstructionType::ADD);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Substract"))
+				{
+					CreateSingleInstructionNode("Substract", SingleInstructionType::SUBSTRACT);
+					showCreationPopup = false;
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Transform"))
@@ -828,49 +838,41 @@ namespace Zenit {
 
 		const auto inNode = (ComputeShaderNode*)startPin->node;
 
-		// TODO: For similar cases use a TEMPLATED FUNCTION
 		switch (endPin->node->type)
 		{
 			case NodeType::TRANSFORM:
 			{
-				const auto n = (TransformNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<TransformNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::NORMAL_MAP:
 			{
-				const auto n = (NormalMapNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<NormalMapNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::GRADIENT:
 			{
-				const auto n = (GradientNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<GradientNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::EDGE_DETECTOR:
 			{
-				const auto n = (EdgeDetectorNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<EdgeDetectorNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::TWIRL:
 			{
-				const auto n = (TwirlNode*)endPin->node;
-				resetData ? n->SetTexture(ComputeShaderNode::GetWhite()) : n->SetTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<TwirlNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::INVERT:
 			{
-				const auto n = (InvertNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<InvertNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::TILING:
 			{
-				const auto n = (TilingNode*)endPin->node;
-				resetData ? n->SetTexture(ComputeShaderNode::GetWhite()) : n->SetTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<TilingNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::BLEND:
@@ -886,8 +888,7 @@ namespace Zenit {
 			}
 			case NodeType::CLAMP:
 			{
-				const auto n = (ClampNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<ClampNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::MAX:
@@ -913,16 +914,13 @@ namespace Zenit {
 				break;
 			}
 			case NodeType::POW:
-			case NodeType::ABS:
-			case NodeType::NORMALIZE:
+			case NodeType::ADD:
+			case NodeType::SUBSTRACT:
 			{
-				const auto n = (SingleInstructionNode*)endPin->node;
-				resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(inNode->texture.get());
+				UpdateNodeWithSingleInputTexture<SingleInstructionNode>(endPin->node, inNode->texture.get(), resetData);
 				break;
 			}
-
 		}
-
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
