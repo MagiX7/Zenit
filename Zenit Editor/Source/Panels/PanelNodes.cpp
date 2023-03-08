@@ -1029,7 +1029,6 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
 
-		//JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
 		JSONSerializer::SetNumber(appObject, "creationId", creationId);
 
 		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();

@@ -74,13 +74,13 @@ project "Zenit"
         }
 
     filter "configurations:Debug"
-        defines {"SPDLOG_COMPILED_LIB"}
+        defines {"SPDLOG_COMPILED_LIB", "ZN_DEBUG"}
         runtime "Debug"
         buildoptions "/MTd"
         symbols "On"
 
     filter "configurations:Release"
-        defines {"SPDLOG_COMPILED_LIB"}
+        defines {"SPDLOG_COMPILED_LIB", "ZN_RELEASE"}
         runtime "Release"
         buildoptions "/MT"
         optimize "On"
