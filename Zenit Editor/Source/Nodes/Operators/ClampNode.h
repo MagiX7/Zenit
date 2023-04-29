@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class ClampNode : public ComputeShaderNode
+	class ClampNode : public Node
 	{
 	public:
 		ClampNode(int id, const char* name, NodeOutputType outputType);

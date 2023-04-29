@@ -4,7 +4,7 @@ namespace Zenit {
 
 	// TODO: Handle different blend curves (easings maybe?)
 	ClampNode::ClampNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType), min(0.0f), max(1.0f)
+		: Node(id, name, outputType), min(0.0f), max(1.0f)
 	{
 		type = NodeType::CLAMP;
 

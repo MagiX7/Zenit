@@ -2,7 +2,7 @@
 
 namespace Zenit {
 	ColorNode::ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color)
-		: ComputeShaderNode(id, name, outputType), color(color)
+		: Node(id, name, outputType), color(color)
 	{
 		type = NodeType::COLOR;
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/color.shader");

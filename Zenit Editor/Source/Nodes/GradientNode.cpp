@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	GradientNode::GradientNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType)
+		: Node(id, name, outputType)
 	{
 		type = NodeType::GRADIENT;
 

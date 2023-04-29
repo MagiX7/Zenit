@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	CircleNode::CircleNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType), radius(0.3), blur(0.001)
+		: Node(id, name, outputType), radius(0.3), blur(0.001)
 	{
 		type = NodeType::CIRCLE;
 		offset = { 0,0 };

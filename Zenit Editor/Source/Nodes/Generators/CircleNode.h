@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class CircleNode : public ComputeShaderNode
+	class CircleNode : public Node
 	{
 	public:
 		CircleNode(int id, const char* name, NodeOutputType outputType);

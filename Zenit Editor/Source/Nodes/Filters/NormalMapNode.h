@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class NormalMapNode : public ComputeShaderNode
+	class NormalMapNode : public Node
 	{
 	public:
 		NormalMapNode(int id, const char* name, NodeOutputType outputType);

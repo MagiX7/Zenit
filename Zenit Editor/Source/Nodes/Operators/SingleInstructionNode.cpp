@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	SingleInstructionNode::SingleInstructionNode(int id, const char* name, NodeOutputType outputType, SingleInstructionType instructionType)
-		: ComputeShaderNode(id, name, outputType)
+		: Node(id, name, outputType)
 	{
 		this->type = (NodeType)instructionType;
 		instrType = instructionType;

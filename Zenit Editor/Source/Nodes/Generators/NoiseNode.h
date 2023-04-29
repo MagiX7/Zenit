@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
@@ -13,7 +13,7 @@ namespace Zenit {
 		GRADIENT
 	};
 
-	class NoiseNode : public ComputeShaderNode
+	class NoiseNode : public Node
 	{
 	public:
 

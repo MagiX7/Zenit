@@ -50,7 +50,7 @@ namespace Zenit {
 		{
 			uint32_t data = 0xffffffff;
 			//diffuse = new Texture2D(&data, 1, 1);
-			diffuse = ComputeShaderNode::GetWhite();
+			diffuse = Node::GetWhite();
 			diffuse->SetName("white");
 			normals = new Texture2D(&data, 1, 1);
 			normals->SetName("white");
@@ -421,11 +421,11 @@ namespace Zenit {
 		{
 			//if (diffuse != white.get())
 
-			diffuse = ComputeShaderNode::GetWhite();
+			diffuse = Node::GetWhite();
 			return false;
 		}
 
-		const auto n = (ComputeShaderNode*)node;
+		const auto n = (Node*)node;
 		diffuse = n->texture.get();
 		diffuse->SetName(n->name + "_" + std::to_string(n->id.Get()));
 		return true;
@@ -435,11 +435,11 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			normals = ComputeShaderNode::GetWhite();
+			normals = Node::GetWhite();
 			return false;
 		}
 
-		const auto n = (ComputeShaderNode*)node;
+		const auto n = (Node*)node;
 		normals = n->texture.get();
 		normals->SetName(n->name + "_" + std::to_string(n->id.Get()));
 
@@ -450,11 +450,11 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			metallic = ComputeShaderNode::GetWhite();
+			metallic = Node::GetWhite();
 			return false;
 		}
 
-		const auto n = (ComputeShaderNode*)node;
+		const auto n = (Node*)node;
 		metallic = n->texture.get();
 		metallic->SetName(n->name + "_" + std::to_string(n->id.Get()));
 
@@ -465,11 +465,11 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			roughness = ComputeShaderNode::GetWhite();
+			roughness = Node::GetWhite();
 			return false;
 		}
 
-		const auto n = (ComputeShaderNode*)node;
+		const auto n = (Node*)node;
 		roughness = n->texture.get();
 		roughness->SetName(n->name + "_" + std::to_string(n->id.Get()));
 		

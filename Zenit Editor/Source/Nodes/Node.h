@@ -119,6 +119,12 @@ namespace Zenit {
 		virtual void OnImGuiNodeRender() {};
 		virtual void OnImGuiInspectorRender() {};
 
+		void BindCoreData() const;
+		void DispatchCompute(int xPixels, int yPixels) const;
+
+		static Texture2D* GetWhite();
+
+
 		virtual SerializerValue Save() { return SerializerValue(); };
 		virtual void Load(SerializerObject& obj) {};
 
@@ -141,7 +147,13 @@ namespace Zenit {
 		ImVec2 pos;
 		ImVec2 size;
 
-		bool isOutput; // Output written into the mesh
+		// Compute Shader parameters
+		std::shared_ptr<Texture2D> texture;
+		std::unique_ptr<ComputeShader> computeShader;
+		static Texture2D* white;
+
+	protected:
+		bool regenerate = true;
 
 	};
 

@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	KifsFractalNode::KifsFractalNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType)
+		: Node(id, name, outputType)
 	{
 		type = NodeType::KIFS_FRACTAL;
 

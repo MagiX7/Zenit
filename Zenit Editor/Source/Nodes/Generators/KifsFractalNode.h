@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class KifsFractalNode : public ComputeShaderNode
+	class KifsFractalNode : public Node
 	{
 	public:
 		KifsFractalNode(int id, const char* name, NodeOutputType outputType);

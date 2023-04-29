@@ -105,7 +105,7 @@ namespace Zenit {
 		void UpdateNodeWithSingleInputTexture(Node* affectedNode, Texture2D* tex, bool resetData)
 		{
 			T* n = (T*)affectedNode;
-			resetData ? n->SetInputTexture(ComputeShaderNode::GetWhite()) : n->SetInputTexture(tex);
+			resetData ? n->SetInputTexture(Node::GetWhite()) : n->SetInputTexture(tex);
 		}
 
 		void CreateFinalOutputNode();

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class EdgeDetectorNode : public ComputeShaderNode
+	class EdgeDetectorNode : public Node
 	{
 	public:
 		EdgeDetectorNode(int id, const char* name, NodeOutputType outputType);

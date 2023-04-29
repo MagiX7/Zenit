@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ComputeShaderNode.h"
+#include "Node.h"
 
 namespace Zenit {
 
-	class GradientNode : public ComputeShaderNode
+	class GradientNode : public Node
 	{
 	public:
 		GradientNode(int id, const char* name, NodeOutputType outputType);

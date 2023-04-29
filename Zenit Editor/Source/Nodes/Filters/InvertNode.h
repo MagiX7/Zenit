@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class InvertNode : public ComputeShaderNode
+	class InvertNode : public Node
 	{
 	public:
 		InvertNode(int id, const char* name, NodeOutputType outputType);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
@@ -11,7 +11,7 @@ namespace Zenit {
 		SUBSTRACT = 21,
 	};
 
-	class SingleInstructionNode : public ComputeShaderNode
+	class SingleInstructionNode : public Node
 	{
 	public:
 		SingleInstructionNode(int id, const char* name, NodeOutputType outputType, SingleInstructionType type);

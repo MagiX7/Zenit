@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ComputeShaderNode.h"
+#include "Node.h"
 
 namespace Zenit {
 
-	class TransformNode : public ComputeShaderNode
+	class TransformNode : public Node
 	{
 	public:
 		TransformNode(int id, const char* name, NodeOutputType outputType);

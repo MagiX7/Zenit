@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class MaxMinNode : public ComputeShaderNode
+	class MaxMinNode : public Node
 	{
 	public:
 		MaxMinNode(int id, const char* name, NodeOutputType outputType, bool isMax);

@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	BlendNode::BlendNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType), contribution(0.5)
+		: Node(id, name, outputType), contribution(0.5)
 	{
 		type = NodeType::BLEND;
 

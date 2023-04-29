@@ -2,7 +2,7 @@
 
 #include "PanelNodes.h"
 
-#include "Nodes/ComputeShaderNode.h"
+#include "Nodes/Node.h"
 #include "Nodes/ColorNode.h"
 #include "Nodes/GradientNode.h"
 
@@ -712,7 +712,7 @@ namespace Zenit {
 		const LinkInfo* link = FindLink(id);
 		const Pin* output = FindPin(link->outputId);
 
-		ComputeShaderNode* other = (ComputeShaderNode*)output->node;
+		Node* other = (Node*)output->node;
 		other->BindCoreData();
 		other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
 		other->DispatchCompute(1, 1);
@@ -836,7 +836,7 @@ namespace Zenit {
 		assert(startPin && endPin && "Pins are null");
 		assert(startPin->node && endPin->node && "Nodes are null");
 
-		const auto inNode = (ComputeShaderNode*)startPin->node;
+		const auto inNode = (Node*)startPin->node;
 
 		switch (endPin->node->type)
 		{
@@ -880,7 +880,7 @@ namespace Zenit {
 				const auto n = (BlendNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
@@ -896,7 +896,7 @@ namespace Zenit {
 				const auto n = (MaxMinNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
@@ -907,7 +907,7 @@ namespace Zenit {
 				const auto n = (MaxMinNode*)endPin->node;
 
 				Texture2D* tex = nullptr;
-				resetData ? tex = ComputeShaderNode::GetWhite() : tex = inNode->texture.get();
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
 				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 

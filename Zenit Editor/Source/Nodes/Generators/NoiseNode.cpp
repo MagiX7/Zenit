@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	NoiseNode::NoiseNode(int id, const char* name, NodeOutputType outputType, NoiseType nType)
-		: ComputeShaderNode(id, name, outputType), noiseType(nType)
+		: Node(id, name, outputType), noiseType(nType)
 	{
 		//type = NodeType::PERLIN_NOISE;
 		//noiseType = NodeType(noiseType);

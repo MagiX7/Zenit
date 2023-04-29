@@ -3,7 +3,7 @@
 namespace Zenit {
 
 	MaxMinNode::MaxMinNode(int id, const char* name, NodeOutputType outputType, bool isMax)
-		: ComputeShaderNode(id, name, outputType)
+		: Node(id, name, outputType)
 	{
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/maxmin.shader");
 		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
