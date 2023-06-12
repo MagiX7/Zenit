@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	BlendNode::BlendNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType), contribution(0.5)
+	BlendNode::BlendNode(int id, const char* name)
+		: Node(id, name), contribution(0.5)
 	{
 		type = NodeType::BLEND;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/blend.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		tex1 = GetWhite();
 		tex2 = GetWhite();

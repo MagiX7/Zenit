@@ -10,7 +10,7 @@ namespace Zenit {
         importer.GetExtensionList(exts);
         std::vector<std::string> extensions;
         std::string currentExtension;
-        
+
         for (int i = 0; i < exts.size(); ++i)
         {
             char currentChar = exts[i];

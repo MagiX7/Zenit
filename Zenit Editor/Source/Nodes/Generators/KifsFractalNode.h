@@ -7,7 +7,7 @@ namespace Zenit {
 	class KifsFractalNode : public Node
 	{
 	public:
-		KifsFractalNode(int id, const char* name, NodeOutputType outputType);
+		KifsFractalNode(int id, const char* name);
 		virtual ~KifsFractalNode();
 
 		virtual void Update(TimeStep ts) override;

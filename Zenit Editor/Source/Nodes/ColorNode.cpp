@@ -1,12 +1,12 @@
 #include "ColorNode.h"
 
 namespace Zenit {
-	ColorNode::ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color)
-		: Node(id, name, outputType), color(color)
+	ColorNode::ColorNode(int id, const char* name,  const glm::vec3& color)
+		: Node(id, name), color(color)
 	{
 		type = NodeType::COLOR;
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/color.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 	}
 
 	void ColorNode::Update(TimeStep)

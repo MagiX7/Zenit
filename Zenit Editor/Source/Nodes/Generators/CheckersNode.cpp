@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	CheckersNode::CheckersNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	CheckersNode::CheckersNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::CHECKERS;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/checkers.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 	}
 
 	CheckersNode::~CheckersNode()

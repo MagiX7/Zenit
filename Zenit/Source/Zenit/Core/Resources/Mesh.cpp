@@ -15,23 +15,8 @@ namespace Zenit {
 	{
 	}
 
-	void Mesh::Draw(const std::unique_ptr<Shader>& shader)
+	void Mesh::Draw()
 	{
-		/*shader->Bind();
-		diffuse->Bind(0);
-		shader->SetUniform1i("diffuseTexture", 0);
-
-		normals->Bind(1);
-		shader->SetUniform1i("normalsTexture", 1);
-
-		metallic->Bind(2);
-		shader->SetUniform1i("metallicTexture", 2);
-
-		roughness->Bind(3);
-		shader->SetUniform1i("roughnessTexture", 3);*/
-
-
-
 		vao->Bind();
 		ibo->Bind();
 		glDrawElements(GL_TRIANGLES, ibo->GetCount(), GL_UNSIGNED_INT, 0);
@@ -43,7 +28,7 @@ namespace Zenit {
 	{
 		vao = std::make_shared<VertexArray>();
 
-		vbo = std::make_shared<VertexBuffer>(&vertices[0], vertices.size() * sizeof(Vertex));
+		vbo = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
 		vbo->SetLayout({
 			{ShaderDataType::VEC3F, "position"},
 			{ShaderDataType::VEC3F, "normals"},

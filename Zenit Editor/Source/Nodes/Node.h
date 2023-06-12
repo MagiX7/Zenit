@@ -8,34 +8,11 @@
 
 namespace ed = ax::NodeEditor;
 
+#define NODE_TEXTURE_SIZE 2048
+
 namespace Zenit {
 
 	class PanelNodes;
-
-	enum class PinType
-	{
-		None = -1,
-		Flow,
-		Bool,
-		Int,
-		Float,
-		String,
-		Object,
-		Function,
-		Delegate,
-	};
-
-	enum class PinKind
-	{
-		Output,
-		Input
-	};
-
-	enum class NodeOutputType
-	{
-		NONE,
-		TEXTURE,
-	};
 
 	enum class NodeType
 	{
@@ -45,7 +22,7 @@ namespace Zenit {
 		// Generators
 		CIRCLE,
 		CHECKERS,
-		NORMAL_NOISE,
+		WHITE_NOISE,
 		FBM_NOISE,
 		DERIVATIVE_NOISE,
 		GRADIENT_NOISE,
@@ -95,13 +72,12 @@ namespace Zenit {
 		ed::PinId id;
 		Node* node;
 		std::string name;
-		PinType type;
 		ed::PinKind kind;
 
 		//std::vector<LinkInfo> links;
 
-		Pin(int pinId, const char* pinName, PinType type, ed::PinKind kind)
-			: id(pinId), node(nullptr), name(pinName), type(type), kind(kind)
+		Pin(int pinId, const char* pinName, ed::PinKind kind)
+			: id(pinId), node(nullptr), name(pinName), kind(kind)
 		{
 		}
 	};
@@ -110,7 +86,7 @@ namespace Zenit {
 	{
 	public:
 		Node() = delete;
-		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255));
+		Node(int id, const char* name, ImColor color = ImColor(255, 255, 255));
 
 		virtual ~Node();
 
@@ -142,7 +118,6 @@ namespace Zenit {
 		std::vector<Pin> outputs;
 
 		ImColor headerColor = { 255,255,255,255 };
-		NodeOutputType outputType;
 		NodeType type; // To be defined in each node
 		ImVec2 pos;
 		ImVec2 size;

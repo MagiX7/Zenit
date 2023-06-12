@@ -7,7 +7,7 @@ namespace Zenit {
 	class TwirlNode : public Node
 	{
 	public:
-		TwirlNode(int id, const char* name, NodeOutputType outputType);
+		TwirlNode(int id, const char* name);
 		virtual ~TwirlNode();
 
 		virtual void Update(TimeStep ts) override;

@@ -7,7 +7,7 @@ namespace Zenit {
 	class CheckersNode : public Node
 	{
 	public:
-		CheckersNode(int id, const char* name, NodeOutputType outputType);
+		CheckersNode(int id, const char* name);
 		virtual ~CheckersNode();
 
 		virtual void Update(TimeStep ts) override;

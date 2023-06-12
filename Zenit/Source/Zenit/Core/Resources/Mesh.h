@@ -22,7 +22,7 @@ namespace Zenit {
 		Mesh(const char* meshName, std::vector<Vertex> verts, std::vector<uint32_t> inds);
 		~Mesh();
 
-		void Draw(const std::unique_ptr<Shader>&);
+		void Draw();
 
 		inline const std::vector<Vertex>& GetVertices() { return vertices; }
 		inline AABB& GetAABB() { return aabb; }

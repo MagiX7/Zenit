@@ -67,12 +67,12 @@ namespace Zenit {
 		template<typename T, typename... Args>
 		T* CreateGeneratorNode(const char* name, Args&&... args)
 		{
-			T* node = new T(creationId++, name, NodeOutputType::TEXTURE, std::forward<Args>(args)...);
+			T* node = new T(creationId++, name, std::forward<Args>(args)...);
 			node->size = { 5,5 };
 			node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);
 
-			Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+			Pin output = Pin(creationId++, "Output", ed::PinKind::Output);
 			output.node = node;
 			node->outputs.emplace_back(output);
 
@@ -82,16 +82,16 @@ namespace Zenit {
 		template<typename T, typename... Args>
 		T* CreateFilterNode(const char* name, Args&&... args)
 		{
-			T* node = new T(creationId++, name, NodeOutputType::TEXTURE, std::forward<Args>(args)...);
+			T* node = new T(creationId++, name, std::forward<Args>(args)...);
 			node->size = { 5,5 };
 			node->headerColor = FILTER_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);
 
-			Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
+			Pin input = Pin(creationId++, "Input", ed::PinKind::Input);
 			input.node = node;
 			node->inputs.emplace_back(input);
 
-			Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+			Pin output = Pin(creationId++, "Output", ed::PinKind::Output);
 			output.node = node;
 			node->outputs.emplace_back(output);
 
@@ -121,7 +121,7 @@ namespace Zenit {
 
 		ed::Detail::EditorContext* context;
 		ed::Config config;
-		Pin incorrectPin = Pin(-1, "", PinType::None, ed::PinKind::None);
+		Pin incorrectPin = Pin(-1, "", ed::PinKind::None);
 		LinkInfo incorrectLink = LinkInfo(-1, -1, -1);
 
 		ed::NodeId rightClickedNodeId = 0;

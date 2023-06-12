@@ -457,10 +457,6 @@ namespace Zenit {
 					{
 						ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 					}
-					else if (endPin->type != startPin->type)
-					{
-						ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
-					}
 					else if (ed::AcceptNewItem(ImColor(128, 255,128)))
 					{
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
@@ -493,8 +489,6 @@ namespace Zenit {
 							Pin* outputPin = FindPin(link.outputId);
 
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
-
-							// TODO: Handle links deletion between normal/current nodes
 							UpdateNode(inputPin, outputPin, true);
 
 							links.erase(links.begin() + i);
@@ -570,7 +564,7 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Noise"))
 				{
-					CreateGeneratorNode<NoiseNode>("Noise", NoiseType::NORMAL);
+					CreateGeneratorNode<NoiseNode>("Noise", NoiseType::WHITE);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("FBM"))
@@ -627,9 +621,9 @@ namespace Zenit {
 					CreateSingleInstructionNode("Add", SingleInstructionType::ADD);
 					showCreationPopup = false;
 				}
-				else if (ImGui::MenuItem("Substract"))
+				else if (ImGui::MenuItem("Subtract"))
 				{
-					CreateSingleInstructionNode("Substract", SingleInstructionType::SUBSTRACT);
+					CreateSingleInstructionNode("Subtract", SingleInstructionType::SUBTRACT);
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -722,12 +716,12 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
-		ColorNode* node = new ColorNode(creationId++, name, NodeOutputType::TEXTURE, color);
+		ColorNode* node = new ColorNode(creationId++, name, color);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 		node->headerColor = FLAT_COLOR_NODE_HEADER_COLOR;
 
-		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		Pin pin = Pin(creationId++, "Output", ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
@@ -736,20 +730,20 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateBlendNode(const char* name)
 	{
-		BlendNode* node = new BlendNode(creationId++, name, NodeOutputType::TEXTURE);
+		BlendNode* node = new BlendNode(creationId++, name);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "Output",ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -758,16 +752,16 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateClampNode(const char* name)
 	{
-		ClampNode* node = new ClampNode(creationId++, name, NodeOutputType::TEXTURE);
+		ClampNode* node = new ClampNode(creationId++, name);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -776,20 +770,20 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateMaxMinNode(const char* name, bool isMax)
 	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, isMax);
+		MaxMinNode* node = new MaxMinNode(creationId++, name, isMax);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -798,16 +792,16 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType)
 	{
-		auto node = new SingleInstructionNode(creationId++, name, NodeOutputType::TEXTURE, instructionType);
+		auto node = new SingleInstructionNode(creationId++, name, instructionType);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -816,7 +810,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
-		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
+		Node* node = new Node(creationId++ , name);
 		node->type = NodeType::COMMENT;
 
 		ImVec2 padding = { 16, 35 };
@@ -999,21 +993,21 @@ namespace Zenit {
 
 	void PanelNodes::CreateFinalOutputNode()
 	{
-		Node* node = new Node(OUTPUT_NODE_ID, "PBR", NodeOutputType::NONE);
+		Node* node = new Node(OUTPUT_NODE_ID, "PBR");
 
-		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", PinType::Object, ed::PinKind::Input);
+		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", ed::PinKind::Input);
 		albedo.node = node;
 		node->inputs.emplace_back(albedo);
 
-		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", PinType::Object, ed::PinKind::Input);
+		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", ed::PinKind::Input);
 		normals.node = node;
 		node->inputs.emplace_back(normals);
 
-		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Object, ed::PinKind::Input);
+		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", ed::PinKind::Input);
 		metallic.node = node;
 		node->inputs.emplace_back(metallic);
 
-		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Object, ed::PinKind::Input);
+		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", ed::PinKind::Input);
 		roughness.node = node;
 		node->inputs.emplace_back(roughness);
 
@@ -1033,7 +1027,6 @@ namespace Zenit {
 
 		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();
 		SerializerArray nodesArray = JSONSerializer::CreateArrayFromValue(nodesArrayValue);
-
 		JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
 
 		for (int i = 1; i < nodes.size(); ++i)
@@ -1045,7 +1038,6 @@ namespace Zenit {
 
 			SerializerValue inputPinsArrayValue = JSONSerializer::CreateArrayValue();
 			SerializerArray inputPinsArray = JSONSerializer::CreateArrayFromValue(inputPinsArrayValue);
-
 			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
 			for (const auto& pin : node->inputs)
 			{
@@ -1114,6 +1106,7 @@ namespace Zenit {
 				}
 
 				// Generators
+
 				case NodeType::CIRCLE:
 				{
 					CircleNode* node = CreateGeneratorNode<CircleNode>(name);
@@ -1128,9 +1121,9 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
-				case NodeType::NORMAL_NOISE:
+				case NodeType::WHITE_NOISE:
 				{
-					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::NORMAL);
+					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::WHITE);
 					node->id = id;
 					node->Load(object);
 					break;

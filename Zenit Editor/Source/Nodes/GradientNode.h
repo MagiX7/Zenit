@@ -7,7 +7,7 @@ namespace Zenit {
 	class GradientNode : public Node
 	{
 	public:
-		GradientNode(int id, const char* name, NodeOutputType outputType);
+		GradientNode(int id, const char* name);
 		virtual ~GradientNode();
 
 		virtual void Update(TimeStep ts) override;

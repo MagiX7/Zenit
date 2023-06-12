@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	GradientNode::GradientNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	GradientNode::GradientNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::GRADIENT;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/gradient.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		inputTexture = GetWhite();
 	}

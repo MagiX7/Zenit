@@ -3,13 +3,13 @@
 
 namespace Zenit {
 
-	NormalMapNode::NormalMapNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	NormalMapNode::NormalMapNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::NORMAL_MAP;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/normal_map.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 		inputTexture = GetWhite();
 	}
 
@@ -42,7 +42,7 @@ namespace Zenit {
 	void NormalMapNode::OnImGuiInspectorRender()
 	{
 		bool changedZoom = ImGui::DragFloat("Zoom", &zoom, 0.05f, 0.0f);
-		bool changedBumbpness = ImGui::DragFloat("Bumpness", &bumpness, 0.001f, -1.0f, 1.0f);
+		bool changedBumbpness = ImGui::DragFloat("Bumpness", &bumpness, 0.01f, -1.0f, 1.0f);
 		
 		if (changedZoom || changedBumbpness)
 			regenerate = true;

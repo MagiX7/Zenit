@@ -2,14 +2,14 @@
 
 namespace Zenit {
 
-	CircleNode::CircleNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType), radius(0.3), blur(0.001)
+	CircleNode::CircleNode(int id, const char* name)
+		: Node(id, name), radius(0.3), blur(0.001)
 	{
 		type = NodeType::CIRCLE;
 		offset = { 0,0 };
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/circle.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		BindCoreData();
 		//computeShader->SetUniform1i("inputTexture", 0);

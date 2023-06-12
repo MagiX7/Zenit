@@ -70,10 +70,10 @@ namespace Zenit {
 		}
 	}
 
-	void Model::Draw(const std::unique_ptr<Shader>& shader) const
+	void Model::Draw() const
 	{
 		for (auto& m : meshes)
-			m->Draw(shader);
+			m->Draw();
 	}
 
 	/*void Model::ResetRotation()

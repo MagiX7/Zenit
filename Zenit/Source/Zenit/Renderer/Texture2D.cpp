@@ -55,17 +55,17 @@ namespace Zenit {
 			return;
 		}
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &rendererId);
-		glBindTexture(GL_TEXTURE_2D, rendererId);
-		glTextureStorage2D(rendererId, 1, storageFormat, width, height);
+		glCreateTextures(GL_TEXTURE_2D, 1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
+		glTextureStorage2D(id, 1, storageFormat, width, height);
 
-		glTextureParameteri(rendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(rendererId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-		glTextureSubImage2D(rendererId, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, data);
+		glTextureSubImage2D(id, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, data);
 
 		stbi_image_free(data);
 
@@ -73,23 +73,23 @@ namespace Zenit {
 
 	Texture2D::~Texture2D()
 	{
-		glDeleteTextures(1, &rendererId);
+		glDeleteTextures(1, &id);
 	}
 
 	void Texture2D::SetData(uint32_t* data)
 	{
-		if (rendererId > 0)
-			glDeleteTextures(1, &rendererId);
+		if (id > 0)
+			glDeleteTextures(1, &id);
 
 		this->data = data;
-		glCreateTextures(GL_TEXTURE_2D, 1, &rendererId);
-		glBindTexture(GL_TEXTURE_2D, rendererId);
+		glCreateTextures(GL_TEXTURE_2D, 1, &id);
+		glBindTexture(GL_TEXTURE_2D, id);
 
-		glTextureParameteri(rendererId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTextureParameteri(rendererId, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTextureParameteri(rendererId, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
@@ -100,13 +100,12 @@ namespace Zenit {
 	void Texture2D::Bind(uint32_t slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, rendererId);
-		//glBindTextureUnit(slot, rendererId);
+		glBindTexture(GL_TEXTURE_2D, id);
 	}
 
 	void Texture2D::BindImage()
 	{
-		glBindImageTexture(0, rendererId, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+		glBindImageTexture(0, id, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 	}
 
 	void Texture2D::Unbind()

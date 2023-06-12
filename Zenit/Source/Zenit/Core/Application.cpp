@@ -54,8 +54,8 @@ namespace Zenit {
 					l->OnUpdate(timestep);
 
 			imguiLayer->Begin();
-			for (auto& l : layerStack)
-				l->OnImGuiRender();
+			for (auto& layer : layerStack)
+				layer->OnImGuiRender();
 			imguiLayer->End();
 			
 			Input::GetInstance()->ResetScrollStats();

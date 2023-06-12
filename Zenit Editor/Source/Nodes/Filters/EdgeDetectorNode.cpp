@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	EdgeDetectorNode::EdgeDetectorNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	EdgeDetectorNode::EdgeDetectorNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::EDGE_DETECTOR;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/edge_detector.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 		inputTexture = GetWhite();
 	}
 
@@ -18,8 +18,8 @@ namespace Zenit {
 
 	void EdgeDetectorNode::Update(TimeStep ts)
 	{
-		if (!regenerate)
-			return;
+		//if (!regenerate)
+			//return;
 
 		BindCoreData();
 

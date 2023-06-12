@@ -3,13 +3,13 @@
 namespace Zenit {
 
 	// TODO: Handle different blend curves (easings maybe?)
-	ClampNode::ClampNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType), min(0.0f), max(1.0f)
+	ClampNode::ClampNode(int id, const char* name)
+		: Node(id, name), min(0.0f), max(1.0f)
 	{
 		type = NodeType::CLAMP;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/clamp.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		inputTexture = GetWhite();
 

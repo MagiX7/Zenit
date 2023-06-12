@@ -2,18 +2,18 @@
 
 namespace Zenit {
 
-	NoiseNode::NoiseNode(int id, const char* name, NodeOutputType outputType, NoiseType nType)
-		: Node(id, name, outputType), noiseType(nType)
+	NoiseNode::NoiseNode(int id, const char* name, NoiseType nType)
+		: Node(id, name), noiseType(nType)
 	{
 		//type = NodeType::PERLIN_NOISE;
 		//noiseType = NodeType(noiseType);
 
 		switch (noiseType)
 		{
-			case NoiseType::NORMAL:
+			case NoiseType::WHITE:
 			{
-				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/noise.shader");
-				type = NodeType::NORMAL_NOISE;
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/white_noise.shader");
+				type = NodeType::WHITE_NOISE;
 				break;
 			}
 			case NoiseType::FBM:
@@ -32,11 +32,12 @@ namespace Zenit {
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/gradient_noise.shader");
 				type = NodeType::GRADIENT_NOISE;
 				latestSeed = 4.122871f;
+				regenerate = true;
 				break;
 			}
 		}
 
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		BindCoreData();
 		computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
@@ -65,7 +66,7 @@ namespace Zenit {
 				computeShader->SetUniform1i("numOctaves", numOctaves);
 				break;
 			}
-			case NoiseType::NORMAL:
+			case NoiseType::WHITE:
 			{
 				break;
 			}

@@ -7,7 +7,7 @@ namespace Zenit {
 	class VoronoiNode : public Node
 	{
 	public:
-		VoronoiNode(int id, const char* name, NodeOutputType outputType);
+		VoronoiNode(int id, const char* name);
 		virtual ~VoronoiNode();
 
 		virtual void Update(TimeStep ts) override;

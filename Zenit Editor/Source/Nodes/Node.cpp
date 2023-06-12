@@ -5,8 +5,8 @@ namespace Zenit {
 
 	Texture2D* Node::white = nullptr;
 
-	Node::Node(int id, const char* name, NodeOutputType outputType, ImColor color)
-		: id(id), name(name), headerColor(color), outputType(outputType), size(5, 5)
+	Node::Node(int id, const char* name, ImColor color)
+		: id(id), name(name), headerColor(color), size(5, 5)
 	{
 	}
 
@@ -24,13 +24,11 @@ namespace Zenit {
 		texture->BindImage();
 		computeShader->Bind();
 		computeShader->SetUniform1i("imgOutput", 0);
-		//texture->UnbindImage();
 	}
 
 	void Node::DispatchCompute(int xPixels, int yPixels) const
 	{
-		glDispatchCompute(texture->GetWidth() / xPixels, texture->GetHeight() / yPixels, 1);
-		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+		computeShader->Dispatch(texture->GetWidth() / xPixels, texture->GetHeight() / yPixels, 1);
 		computeShader->Unbind();
 	}
 

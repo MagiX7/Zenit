@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	InvertNode::InvertNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	InvertNode::InvertNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::INVERT;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/invert.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 		inputTexture = GetWhite();
 	}
 

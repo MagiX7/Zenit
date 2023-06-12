@@ -7,7 +7,7 @@ namespace Zenit {
 	class ClampNode : public Node
 	{
 	public:
-		ClampNode(int id, const char* name, NodeOutputType outputType);
+		ClampNode(int id, const char* name);
 		virtual ~ClampNode();
 
 		virtual void Update(TimeStep ts) override;

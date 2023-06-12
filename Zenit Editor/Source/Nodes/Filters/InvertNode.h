@@ -7,7 +7,7 @@ namespace Zenit {
 	class InvertNode : public Node
 	{
 	public:
-		InvertNode(int id, const char* name, NodeOutputType outputType);
+		InvertNode(int id, const char* name);
 		virtual ~InvertNode();
 
 		virtual void Update(TimeStep ts) override;

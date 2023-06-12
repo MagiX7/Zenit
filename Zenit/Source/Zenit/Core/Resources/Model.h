@@ -22,7 +22,7 @@ namespace Zenit {
 		~Model();
 
 		void Update(TimeStep ts, float dx, float dy);
-		void Draw(const std::unique_ptr<Shader>& shader) const;
+		void Draw() const;
 
 		void AddMesh(Mesh* mesh);
 

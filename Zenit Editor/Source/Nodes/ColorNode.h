@@ -9,7 +9,7 @@ namespace Zenit {
 	class ColorNode : public Node
 	{
 	public:
-		ColorNode(int id, const char* name, NodeOutputType outputType, const glm::vec3& color);
+		ColorNode(int id, const char* name, const glm::vec3& color);
 
 		virtual void Update(TimeStep ts) override;
 		virtual void OnImGuiNodeRender() override;

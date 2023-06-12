@@ -7,7 +7,7 @@ namespace Zenit {
 	class CircleNode : public Node
 	{
 	public:
-		CircleNode(int id, const char* name, NodeOutputType outputType);
+		CircleNode(int id, const char* name);
 		virtual ~CircleNode();
 
 		virtual void Update(TimeStep ts) override;

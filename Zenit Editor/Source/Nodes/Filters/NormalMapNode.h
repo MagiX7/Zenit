@@ -7,7 +7,7 @@ namespace Zenit {
 	class NormalMapNode : public Node
 	{
 	public:
-		NormalMapNode(int id, const char* name, NodeOutputType outputType);
+		NormalMapNode(int id, const char* name);
 		virtual ~NormalMapNode();
 
 		virtual void Update(TimeStep ts) override;
@@ -22,7 +22,7 @@ namespace Zenit {
 	private:
 		Texture2D* inputTexture;
 		float zoom = 1.0f;
-		float bumpness = 0.4f;
+		float bumpness = 1.0f;
 	};
 
 }

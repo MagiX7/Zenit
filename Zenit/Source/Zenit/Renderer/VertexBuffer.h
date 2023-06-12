@@ -14,10 +14,10 @@ namespace Zenit {
 	public:
 		VertexBuffer();
 		VertexBuffer(float* vertices, int count);
-		VertexBuffer(const Vertex* vertices, uint32_t size);
+		VertexBuffer(Vertex* vertices, uint32_t size);
 		virtual ~VertexBuffer();
 
-		void SetData(void* vertices, uint32_t size);
+		//void SetData(void* vertices, uint32_t size);
 		//void SetData(const std::vector<Vertex>&);
 		void Bind() const;
 		void Unbind() const;

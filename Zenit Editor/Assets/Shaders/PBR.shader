@@ -15,6 +15,7 @@ out vec3 vPosition;
 out vec2 vTexCoords;
 out vec3 vNormals;
 out mat3 TBN;
+out mat4 vModel;
 
 void main()
 {
@@ -22,6 +23,7 @@ void main()
 	vTexCoords = texCoords;
 	vNormals = normalize((model * vec4(normals, 0.0)).xyz);
 	vPosition = position;
+	vModel = model;
 
 	vec3 N = normalize(normals);
 	vec3 T = tangents;
@@ -39,7 +41,7 @@ layout(location = 2) uniform sampler2D metallicTexture;
 layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
 layout(location = 5) uniform samplerCube irradianceMap;
-layout(location = 6) uniform samplerCube skyboxPrefilterMap;;
+layout(location = 6) uniform samplerCube skyboxPrefilterMap;
 layout(location = 7) uniform sampler2D skyboxBrdf;
 
 uniform vec3 camPos;
@@ -53,6 +55,7 @@ in vec3 vPosition;
 in vec2 vTexCoords;
 in vec3 vNormals;
 in mat3 TBN;
+in mat4 vModel;
 
 const float PI = 3.14159265359;
 
@@ -122,7 +125,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
 
 	vec3 numerator = NDF * F * G;
-	float denominator = max(4 * NdotV * NdotL, 0.0001);
+	float denominator = max((4 * NdotV * NdotL), 0.0001);
 	vec3 specular = numerator / denominator;
 
 	// Lambert Diffuse ========
@@ -133,30 +136,21 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 
 	vec3 radiance = dirLight.color * dirLight.intensity;
 
-	return (kd * albedo / PI + specular) * radiance * NdotL;
+	return (kd * (albedo / PI) + specular) * radiance * NdotL;
 }
 
 void main()
 {
-	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
+	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz;
 
 	if (normal == vec3(1.0))
 	{
-		normal = vNormals;
+		normal = normalize(vNormals);
 	}
 	else
 	{
-		vec3 Q1 = dFdx(vPosition);
-		vec3 Q2 = dFdy(vPosition);
-		vec2 st1 = dFdx(vTexCoords);
-		vec2 st2 = dFdy(vTexCoords);
-
-		vec3 N = normalize(vNormals);
-		vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-		vec3 B = -normalize(cross(N, T));
-		mat3 TBN = mat3(T, B, N);
-
 		normal = normalize(TBN * normal);
+		normal = normalize((vModel * vec4(normal, 0.0)).xyz);
 	}
 
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;

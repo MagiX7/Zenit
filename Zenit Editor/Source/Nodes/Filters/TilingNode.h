@@ -7,7 +7,7 @@ namespace Zenit {
 	class TilingNode : public Node
 	{
 	public:
-		TilingNode(int id, const char* name, NodeOutputType outputType);
+		TilingNode(int id, const char* name);
 		virtual ~TilingNode();
 
 		virtual void Update(TimeStep ts) override;

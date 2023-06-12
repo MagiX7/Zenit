@@ -7,7 +7,7 @@ namespace Zenit {
 	class MaxMinNode : public Node
 	{
 	public:
-		MaxMinNode(int id, const char* name, NodeOutputType outputType, bool isMax);
+		MaxMinNode(int id, const char* name , bool isMax);
 		virtual ~MaxMinNode();
 
 		virtual void Update(TimeStep ts) override;

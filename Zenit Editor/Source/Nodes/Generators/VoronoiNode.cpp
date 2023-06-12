@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	VoronoiNode::VoronoiNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	VoronoiNode::VoronoiNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::VORONOI;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/voronoi.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		latestSeed = 1.54;
 		scale = 5;

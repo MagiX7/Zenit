@@ -8,13 +8,13 @@ namespace Zenit {
 	{
 		POW = 19,
 		ADD = 20,
-		SUBSTRACT = 21,
+		SUBTRACT = 21,
 	};
 
 	class SingleInstructionNode : public Node
 	{
 	public:
-		SingleInstructionNode(int id, const char* name, NodeOutputType outputType, SingleInstructionType type);
+		SingleInstructionNode(int id, const char* name, SingleInstructionType type);
 		virtual ~SingleInstructionNode();
 
 		virtual void Update(TimeStep ts) override;

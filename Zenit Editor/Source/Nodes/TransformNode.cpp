@@ -2,13 +2,13 @@
 
 namespace Zenit {
 
-	TransformNode::TransformNode(int id, const char* name, NodeOutputType outputType)
-		: Node(id, name, outputType)
+	TransformNode::TransformNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::TRANSFORM;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/transform.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 		inputTexture = GetWhite();
 	}
 

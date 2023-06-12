@@ -7,7 +7,7 @@ namespace Zenit {
 	class BlendNode : public Node
 	{
 	public:
-		BlendNode(int id, const char* name, NodeOutputType outputType);
+		BlendNode(int id, const char* name);
 		virtual ~BlendNode();
 
 		virtual void Update(TimeStep ts) override;

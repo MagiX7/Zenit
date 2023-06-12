@@ -7,7 +7,7 @@ namespace Zenit {
 	class TransformNode : public Node
 	{
 	public:
-		TransformNode(int id, const char* name, NodeOutputType outputType);
+		TransformNode(int id, const char* name);
 		virtual ~TransformNode();
 
 		virtual void Update(TimeStep ts) override;

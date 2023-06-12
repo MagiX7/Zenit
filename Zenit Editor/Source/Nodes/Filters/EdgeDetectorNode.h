@@ -7,7 +7,7 @@ namespace Zenit {
 	class EdgeDetectorNode : public Node
 	{
 	public:
-		EdgeDetectorNode(int id, const char* name, NodeOutputType outputType);
+		EdgeDetectorNode(int id, const char* name);
 		virtual ~EdgeDetectorNode();
 
 		virtual void Update(TimeStep ts) override;
@@ -21,7 +21,7 @@ namespace Zenit {
 
 	private:
 		Texture2D* inputTexture;
-		int threshold = 1;
+		int threshold = 20;
 	};
 
 

@@ -2,8 +2,8 @@
 
 namespace Zenit {
 
-	SingleInstructionNode::SingleInstructionNode(int id, const char* name, NodeOutputType outputType, SingleInstructionType instructionType)
-		: Node(id, name, outputType)
+	SingleInstructionNode::SingleInstructionNode(int id, const char* name, SingleInstructionType instructionType)
+		: Node(id, name)
 	{
 		this->type = (NodeType)instructionType;
 		instrType = instructionType;
@@ -23,7 +23,7 @@ namespace Zenit {
 				color = glm::vec3(1);
 				break;
 			}
-			case SingleInstructionType::SUBSTRACT:
+			case SingleInstructionType::SUBTRACT:
 			{
 				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/substract.shader");
 				factor = 0.0f;
@@ -32,7 +32,7 @@ namespace Zenit {
 			}
 		}
 
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
 		inputTexture = GetWhite();
 	}
@@ -57,7 +57,7 @@ namespace Zenit {
 		switch (instrType)
 		{
 			case SingleInstructionType::ADD:
-			case SingleInstructionType::SUBSTRACT:
+			case SingleInstructionType::SUBTRACT:
 			{
 				computeShader->SetUniformVec3f("inColor", color);
 				computeShader->SetUniform1i("useColor", useColor);
@@ -90,7 +90,7 @@ namespace Zenit {
 				break;
 			}
 			case SingleInstructionType::ADD:
-			case SingleInstructionType::SUBSTRACT:
+			case SingleInstructionType::SUBTRACT:
 			{
 				if (ImGui::DragFloat("Factor", &factor, 0.01f, 0.0f, 1.0f))
 				{
@@ -137,7 +137,7 @@ namespace Zenit {
 		switch (instrType)
 		{
 			case SingleInstructionType::ADD:
-			case SingleInstructionType::SUBSTRACT:
+			case SingleInstructionType::SUBTRACT:
 			{
 				JSONSerializer::SetVector3f(object, "color", color);
 				JSONSerializer::SetNumber(object, "useColor", useColor);

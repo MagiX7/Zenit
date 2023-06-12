@@ -7,7 +7,7 @@ namespace Zenit {
 	// This needs to match with NodeType
 	enum class NoiseType
 	{
-		NORMAL = 1,
+		WHITE = 1,
 		FBM,
 		DERIVATIVE,
 		GRADIENT
@@ -17,7 +17,7 @@ namespace Zenit {
 	{
 	public:
 
-		NoiseNode(int id, const char* name, NodeOutputType outputType, NoiseType nType);
+		NoiseNode(int id, const char* name, NoiseType nType);
 		virtual ~NoiseNode();
 
 		virtual void Update(TimeStep ts) override;

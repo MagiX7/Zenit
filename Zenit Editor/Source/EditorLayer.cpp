@@ -52,10 +52,13 @@ namespace Zenit {
 			//diffuse = new Texture2D(&data, 1, 1);
 			diffuse = Node::GetWhite();
 			diffuse->SetName("white");
+			
 			normals = new Texture2D(&data, 1, 1);
 			normals->SetName("white");
+
 			metallic = new Texture2D(&data, 1, 1);
 			metallic->SetName("white");
+
 			roughness = new Texture2D(&data, 1, 1);
 			roughness->SetName("white");
 		}
@@ -94,7 +97,7 @@ namespace Zenit {
 
 		fbo->Bind();
 		{
-			Renderer3D::GetInstance()->Clear({ 0.05,0.05,0.05,1 });
+			Renderer3D::GetInstance()->Clear({ 0.15,0.15,0.15,1 });
 			
 			if (skyboxProps.draw)
 				currentSkybox->Draw(glm::mat3(camera.GetViewMatrix()), camera.GetProjectionMatrix());
@@ -103,7 +106,7 @@ namespace Zenit {
 			{
 				pbrShader->Bind();
 				SetModelShaderData();
-				currentModel->Draw(pbrShader);
+				currentModel->Draw();
 				pbrShader->Unbind();
 			}
 		}
@@ -524,8 +527,10 @@ namespace Zenit {
 			return;
 
 		constexpr int channels = 4;
-		int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
-		int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
+		//int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
+		//int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
+		int w = NODE_TEXTURE_SIZE;
+		int h = NODE_TEXTURE_SIZE;
 		GLubyte* data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 
@@ -538,8 +543,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = normals->GetWidth() == 1 ? 1024 : normals->GetWidth();
-		h = normals->GetHeight() == 1 ? 1024 : normals->GetHeight();
+		w = NODE_TEXTURE_SIZE;
+		h = NODE_TEXTURE_SIZE;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		normals->Bind(0);
@@ -551,8 +556,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = metallic->GetWidth() == 1 ? 1024 : metallic->GetWidth();
-		h = metallic->GetHeight() == 1 ? 1024 : metallic->GetHeight();
+		w = NODE_TEXTURE_SIZE;
+		h = NODE_TEXTURE_SIZE;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		metallic->Bind(2);
@@ -564,8 +569,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = roughness->GetWidth() == 1 ? 1024 : roughness->GetWidth();
-		h = roughness->GetHeight() == 1 ? 1024 : roughness->GetHeight();
+		w = NODE_TEXTURE_SIZE;
+		h = NODE_TEXTURE_SIZE;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		roughness->Bind(0);
