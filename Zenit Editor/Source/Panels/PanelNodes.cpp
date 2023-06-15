@@ -25,6 +25,7 @@
 #include "Nodes/Operators/SingleInstructionNode.h"
 
 #include "Nodes/TransformNode.h"
+#include "Nodes/GroupNode.h"
 
 #include "EditorLayer.h"
 
@@ -42,7 +43,7 @@ namespace Zenit {
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
 	{
 		config = ed::Config();
-		config.SettingsFile = "Settings/NodeEditor.json";
+		//config.SettingsFile = "Settings/NodeEditor.json";
 		config.UserPointer = this;
 
 		config.NavigateButtonIndex = 2;
@@ -143,134 +144,121 @@ namespace Zenit {
 
 		for (auto n : nodes)
 		{
-			if (n->type == NodeType::COMMENT)
+			if (n->type == NodeType::GROUP)
 			{
 				DrawGroupNode(n);
+				continue;
 			}
-			else
+			
+			ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 6.0f);
+			ed::BeginNode(n->id);
+			
+			if (repositionNodes)
+				ed::SetNodePosition(n->id, n->pos);
+
+			ImGui::PushID(n->id.AsPointer());
+
+			int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
+			int height = ImGui::CalcTextSize(n->name.c_str()).y + 8;
+
+			ImGui::PushItemWidth(width);
+
+			ed::NodeId selectedNodeId;
+			ed::GetSelectedNodes(&selectedNodeId, 1);
+			if (selectedNodeId == n->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				ed::BeginNode(n->id);
-				ImGui::PushID(n->id.AsPointer());
+				n->changeName = true;
+			}
+			else if (selectedNodeId != n->id)
+			{
+				n->changeName = false;
+			}
 
-				int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
-				int height = ImGui::CalcTextSize(n->name.c_str()).y + 8;
-
-				ImGui::PushItemWidth(width);
-
-				ed::NodeId selectedNodeId;
-				ed::GetSelectedNodes(&selectedNodeId, 1);
-				if (selectedNodeId == n->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				{
-					n->changeName = true;
-				}
-				else if (selectedNodeId != n->id)
+			if (n->changeName)
+			{
+				ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+				if (ImGui::InputText("", &n->name, flags))
 				{
 					n->changeName = false;
 				}
-
-				if (n->changeName)
-				{
-					ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("", &n->name, flags))
-					{
-						n->changeName = false;
-					}
-				}
-				else
-				{
-					ImGui::TextUnformatted(n->name.c_str());
-				}
-
-				ImGui::PopItemWidth();
-
-				ImVec2 titleMin = ImGui::GetItemRectMin();
-				ImVec2 titleMax = ImGui::GetItemRectMax();
-				ImRect titleRect = { titleMin, titleMax };
-
-				ImGui::Dummy({ 0, 3 });
-
-				ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
-				if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
-				{
-					ImGui::TableNextColumn();
-					for (const auto& input : n->inputs)
-					{
-						ed::BeginPin(input.id, input.kind);
-						ImGui::Text(input.name.c_str());
-						ed::EndPin();
-
-						auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-						ImVec2 leftCenter = rect.GetCenter();
-						leftCenter.x -= rect.GetWidth() / 2;
-					}
-					
-					ImGui::TableNextColumn();
-
-					n->OnImGuiNodeRender();
-
-					ImGui::TableNextColumn();
-					for (const auto& output : n->outputs)
-					{
-						ed::BeginPin(output.id, output.kind);
-						ImGui::Text(output.name.c_str());
-						ed::EndPin();
-						ImGui::Dummy({ 0,10 });
-					}
-
-					ImGui::EndTable();
-				}
-				ImGui::PopID();
-
-				ed::EndNode();
-
-				// Draw Header
-				ImVec2 bgMax = ImGui::GetItemRectMax();
-				ImVec2 bgMin = ImGui::GetItemRectMin();
-
-				if ((bgMax.x > bgMin.x) && (bgMax.y > bgMin.y))
-				{
-					float alpha = (int)ImGui::GetStyle().Alpha * 255;
-					//ImColor color = ImColor(80, 80, 150, 100);
-					auto nodeDrawList = ed::GetNodeBackgroundDrawList(n->id);
-
-
-					//const auto halfBorderWidth = ed::GetStyle().NodeBorderWidth * 0.5f;
-					//
-					//auto bgColor = IM_COL32(0, 0, 0, alpha) | (color & IM_COL32(255, 255, 255, 0));
-
-					//auto uv = ImVec2(
-					//	(bgMax.x - bgMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
-					//	(bgMax.y - bgMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
-
-					//nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(),
-					//	bgMin, bgMax,
-					//	ImVec2(0.0f, 0.0f), uv,
-					//	bgColor, ed::GetStyle().NodeRounding/*, 1 | 2*/);
-
-
-					auto headerColor = IM_COL32(0, 0, 0, alpha) | (n->headerColor & IM_COL32(255, 255, 255, 0));
-
-					ImVec2 headerMin = bgMin;
-					ImVec2 headerMax = bgMax;
-					headerMax.y = titleMax.y + 3;
-
-					auto uv = ImVec2(
-						(headerMax.x - headerMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
-						(headerMax.y - headerMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
-
-					nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(), headerMin, headerMax,
-						ImVec2(0,0), uv + ImVec2(0.5,0.5),
-						headerColor, ed::GetStyle().NodeRounding, 1 | 2);
-
-					/*nodeDrawList->AddRectFilledMultiColor(headerMin, headerMax,
-						ImColor(180, 0, 0, 255), ImColor(0,180,180,255),
-						ImColor(255,0,0,255), ImColor(0,255,255,255));*/
-
-					
-				}
+			}
+			else
+			{
+				ImGui::TextUnformatted(n->name.c_str());
 			}
 
+			ImGui::PopItemWidth();
+
+			ImVec2 titleMin = ImGui::GetItemRectMin();
+			ImVec2 titleMax = ImGui::GetItemRectMax();
+			ImRect titleRect = { titleMin, titleMax };
+
+			ImGui::Dummy({ 0, 3 });
+
+			ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
+			if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
+			{
+				ImGui::TableNextColumn();
+				for (const auto& input : n->inputs)
+				{
+					ed::BeginPin(input.id, input.kind);
+					ImGui::Text(input.name.c_str());
+					ed::EndPin();
+
+					auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+					ImVec2 leftCenter = rect.GetCenter();
+					leftCenter.x -= rect.GetWidth() / 2;
+				}
+					
+				ImGui::TableNextColumn();
+				
+				n->OnImGuiNodeRender();
+
+				ImGui::TableNextColumn();
+				for (const auto& output : n->outputs)
+				{
+					ed::BeginPin(output.id, output.kind);
+					ImGui::Text(output.name.c_str());
+					ed::EndPin();
+					ImGui::Dummy({ 0,10 });
+				}
+
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
+
+			ed::EndNode();
+
+			// Draw Header
+			ImVec2 bgMax = ImGui::GetItemRectMax();
+			ImVec2 bgMin = ImGui::GetItemRectMin();
+
+			if ((bgMax.x > bgMin.x) && (bgMax.y > bgMin.y))
+			{
+				float alpha = (int)ImGui::GetStyle().Alpha * 255;
+				auto nodeDrawList = ed::GetNodeBackgroundDrawList(n->id);
+
+				auto headerColor = IM_COL32(0, 0, 0, alpha) | (n->headerColor & IM_COL32(255, 255, 255, 0));
+
+				ImVec2 headerMin = bgMin;
+				ImVec2 headerMax = bgMax;
+				headerMax.y = titleMax.y + 3;
+
+				auto uv = ImVec2(
+					(headerMax.x - headerMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
+					(headerMax.y - headerMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
+
+				nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(), headerMin, headerMax,
+					ImVec2(0,0), uv + ImVec2(0.5,0.5),
+					headerColor, ed::GetStyle().NodeRounding, 1 | 2);
+					
+			}
+
+			// Pop border rounding
+			ed::PopStyleVar();
 		}
+
+		repositionNodes = false;
 
 		// Links creation
 		HandleLinks(links);
@@ -286,15 +274,26 @@ namespace Zenit {
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.75f);
 		ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
 		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+		ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 6.0f);
 		
 		ed::BeginNode(node->id);
+
+		if (repositionNodes)
+			ed::SetNodePosition(node->id, node->pos);
+
 		ImGui::PushID(node->id.AsPointer());
 
 		ImGui::PushItemWidth(node->size.x);
-		//static bool changeName = false;
-		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+
+		ed::NodeId selectedNodeId;
+		ed::GetSelectedNodes(&selectedNodeId, 1);
+		if (selectedNodeId == node->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
 			node->changeName = true;
+		}
+		else if (selectedNodeId != node->id)
+		{
+			node->changeName = false;
 		}
 
 		if (node->changeName)
@@ -317,6 +316,7 @@ namespace Zenit {
 		ed::EndNode();
 		ed::PopStyleColor(2);
 		ImGui::PopStyleVar();
+		ed::PopStyleVar();
 
 		if (ed::BeginGroupHint(node->id))
 		{
@@ -810,8 +810,8 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
-		Node* node = new Node(creationId++ , name);
-		node->type = NodeType::COMMENT;
+		auto node = new GroupNode(creationId++ , name);
+		node->type = NodeType::GROUP;
 
 		ImVec2 padding = { 16, 35 };
 		node->pos = lastSelectionBounds.GetTL() - padding;
@@ -1023,6 +1023,11 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
 
+		//SerializerValue masterNodeValue = JSONSerializer::CreateValue();
+		//SerializerObject masterNodeObject = JSONSerializer::CreateObjectFromValue(value);
+		ImVec2 pos = ed::GetNodePosition(nodes[0]->id);
+		JSONSerializer::SetVector2f(appObject, "pos", glm::vec2(pos.x, pos.y));
+
 		JSONSerializer::SetNumber(appObject, "creationId", creationId);
 
 		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();
@@ -1031,9 +1036,17 @@ namespace Zenit {
 
 		for (int i = 1; i < nodes.size(); ++i)
 		{
+			// TODO: Size save is good, position doesnt save
 			Node* node = nodes[i];
 			SerializerValue nodeValue = node->Save();
 			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
+			pos = ed::GetNodePosition(node->id);
+			JSONSerializer::SetVector2f(nodeObject, "pos", glm::vec2(pos.x, pos.y));
+			if (node->type == NodeType::GROUP)
+			{
+				JSONSerializer::SetVector2f(nodeObject, "size", glm::vec2(node->size.x, node->size.y));
+			}
+
 			JSONSerializer::AppendValueToArray(nodesArray, nodeValue);
 
 			SerializerValue inputPinsArrayValue = JSONSerializer::CreateArrayValue();
@@ -1084,6 +1097,10 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
+		repositionNodes = true;
+		glm::vec2 pos = JSONSerializer::GetVector2fFromObject(appObject, "pos");
+		nodes[0]->pos = ImVec2(pos.x, pos.y);
+
 		SerializerArray nodesArray = JSONSerializer::GetArrayFromObject(appObject, "nodes");
 		size_t size = JSONSerializer::GetArraySize(nodesArray);
 
@@ -1095,63 +1112,63 @@ namespace Zenit {
 			int id = JSONSerializer::GetNumberFromObject(object, "id");
 			NodeType type = (NodeType)JSONSerializer::GetNumberFromObject(object, "type");
 
+			Node* node = nullptr;
 			switch (type)
 			{
 				case NodeType::COLOR:
 				{
-					ColorNode* node = (ColorNode*)CreateFlatColorNode(name, {});
+					node = (ColorNode*)CreateFlatColorNode(name, {});
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 
 				// Generators
-
 				case NodeType::CIRCLE:
 				{
-					CircleNode* node = CreateGeneratorNode<CircleNode>(name);
+					node = CreateGeneratorNode<CircleNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::CHECKERS:
 				{
-					CheckersNode* node = CreateGeneratorNode<CheckersNode>(name);
+					node = CreateGeneratorNode<CheckersNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::WHITE_NOISE:
 				{
-					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::WHITE);
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::WHITE);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::FBM_NOISE:
 				{
-					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::FBM);
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::FBM);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::DERIVATIVE_NOISE:
 				{
-					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::DERIVATIVE);
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::DERIVATIVE);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::GRADIENT_NOISE:
 				{
-					NoiseNode* node = CreateGeneratorNode<NoiseNode>(name, NoiseType::GRADIENT);
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::GRADIENT);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::VORONOI:
 				{
-					VoronoiNode* node = CreateGeneratorNode<VoronoiNode>(name);
+					node = CreateGeneratorNode<VoronoiNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1160,35 +1177,35 @@ namespace Zenit {
 				// Filters
 				case NodeType::NORMAL_MAP:
 				{
-					NormalMapNode* node = CreateFilterNode<NormalMapNode>(name);
+					node = CreateFilterNode<NormalMapNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::TILING:
 				{
-					TilingNode* node = CreateFilterNode<TilingNode>(name);
+					node = CreateFilterNode<TilingNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::EDGE_DETECTOR:
 				{
-					EdgeDetectorNode* node = CreateFilterNode<EdgeDetectorNode>(name);
+					node = CreateFilterNode<EdgeDetectorNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::TWIRL:
 				{
-					TwirlNode* node = CreateFilterNode<TwirlNode>(name);
+					node = CreateFilterNode<TwirlNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::INVERT:
 				{
-					InvertNode* node = CreateFilterNode<InvertNode>(name);
+					node = CreateFilterNode<InvertNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1197,28 +1214,28 @@ namespace Zenit {
 				// Operators
 				case NodeType::BLEND:
 				{
-					BlendNode* node = (BlendNode*)CreateBlendNode(name);
+					node = (BlendNode*)CreateBlendNode(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::CLAMP:
 				{
-					ClampNode* node = (ClampNode*)CreateClampNode(name);
+					node = (ClampNode*)CreateClampNode(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::MAX:
 				{
-					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, true);
+					node = (MaxMinNode*)CreateMaxMinNode(name, true);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 				case NodeType::MIN:
 				{
-					MaxMinNode* node = (MaxMinNode*)CreateMaxMinNode(name, false);
+					node = (MaxMinNode*)CreateMaxMinNode(name, false);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1226,19 +1243,28 @@ namespace Zenit {
 
 				case NodeType::TRANSFORM:
 				{
-					TransformNode* node = CreateFilterNode<TransformNode>(name);
+					node = CreateFilterNode<TransformNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
 				}
 
-				case NodeType::COMMENT:
+				case NodeType::GROUP:
 				{
-					Node* node = CreateGroupNode(name);
+					node = CreateGroupNode(name);
 					node->id = id;
-					//node->Load(object);
+					node->Load(object);
 					break;
 				}
+
+			}		
+			glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
+			node->pos = ImVec2(position.x, position.y);
+			//ed::SetNodePosition(node->id, node->pos);
+			if (node->type == NodeType::GROUP)
+			{
+				glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
+				node->size = ImVec2(size.x, size.y);
 			}
 		}
 		creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");

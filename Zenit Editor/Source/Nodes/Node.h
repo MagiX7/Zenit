@@ -49,7 +49,7 @@ namespace Zenit {
 		TRANSFORM,
 
 		// Helpers
-		COMMENT,
+		GROUP,
 	};
 
 	struct Pin;

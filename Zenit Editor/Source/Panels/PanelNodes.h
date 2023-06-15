@@ -109,7 +109,7 @@ namespace Zenit {
 		}
 
 		void CreateFinalOutputNode();
-
+		
 	private:
 		EditorLayer* editorLayer;
 
@@ -118,6 +118,7 @@ namespace Zenit {
 		std::vector<LinkInfo> links;
 		int creationId = 1;
 		int linkCreationId = 1000;
+		bool repositionNodes = false;
 
 		ed::Detail::EditorContext* context;
 		ed::Config config;
