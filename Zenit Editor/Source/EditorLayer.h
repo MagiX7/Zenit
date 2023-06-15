@@ -43,7 +43,7 @@ namespace Zenit {
 
 	private:
 		void SetModelShaderData();
-		void ExportTextures();
+		void ExportTextures(int resolution, int channels);
 		void Save();
 		bool Load();
 
@@ -89,6 +89,7 @@ namespace Zenit {
 		Node* metallicOutput = nullptr;
 		Node* roughnessOutput = nullptr;
 		Node* aoOutput = nullptr;
+		bool showExportingPanel = false;
 
 		std::stack<Layer*> layers;
 

@@ -7,6 +7,7 @@
 #include "Helpers/Math.h"
 
 #include <ImGui/imgui.h>
+#include <ImGui/misc/cpp/imgui_stdlib.h>
 #include <stb_image/stb_image_write.h>
 
 #include <filesystem>
@@ -91,7 +92,6 @@ namespace Zenit {
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
-		//camera.Update(ts);
 		panelViewport.OnUpdate(ts, currentModel, camera);
 		panelNodes->Update(ts);
 
@@ -121,7 +121,8 @@ namespace Zenit {
 		{
 			if (ImGui::MenuItem("Export"))
 			{
-				ExportTextures();
+				showExportingPanel = true;
+				//ExportTextures();
 			}
 			else if (ImGui::MenuItem("Save"))
 			{
@@ -410,6 +411,78 @@ namespace Zenit {
 		panelNodes->OnImGuiRender();
 
 
+		if (showExportingPanel)
+		{
+			ImGui::OpenPopup("Export Settings");
+			ImGui::Dummy({ 0,10 });
+			ImGui::SetNextWindowSize({ 340 , 175});
+			if (ImGui::BeginPopupModal("Export Settings", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				ImGui::SetNextItemWidth(256);
+
+				const char* items[] = { "512", "1024", "2048", "4096", "8192" };
+				static int currentResIndex = 1;
+				const char* previewValues = items[currentResIndex];
+				if (ImGui::BeginCombo("Resolution", previewValues))
+				{
+					for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+					{
+						const bool isSelected = (currentResIndex == n);
+						if (ImGui::Selectable(items[n], isSelected))
+							currentResIndex = n;
+
+						if (isSelected)
+							ImGui::SetItemDefaultFocus();
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::SetNextItemWidth(256);
+				static int channels = 4;
+				ImGui::SliderInt("Channels", &channels, 1, 4);
+				
+				ImGui::Dummy({ 0, 5 });
+				ImGui::Separator();
+				ImGui::Dummy({ 0, 5 });
+
+				
+				ImGuiStyle& style = ImGui::GetStyle();
+				//float size = ImGui::CalcTextSize("Export").x + style.FramePadding.x * 2.0f;
+				float size = 100 + 100 + 25 + style.FramePadding.x * 2.0f;
+				float avail = ImGui::GetContentRegionAvail().x;
+
+				float off = (avail - size) * 0.5f;
+				if (off > 0.0f)
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+				if (ImGui::Button("Export", { 100,0 }))
+				{
+					int res = -1;
+					switch (currentResIndex)
+					{
+						case 1: res = 512; break;
+						case 2: res = 1024; break;
+						case 3: res = 2048; break;
+						case 4: res = 4096; break;
+						case 5: res = 8192; break;
+					}
+					ExportTextures(res, channels);
+					showExportingPanel = false;
+				}
+
+				ImGui::SameLine(0, 25);
+
+				if (ImGui::Button("Cancel", { 100, 0 }))
+				{
+					currentResIndex = 1;
+					channels = 4;
+					showExportingPanel = false;
+				}
+
+				ImGui::EndPopup();
+			}
+		}
+
 		if (showDemoWindow)
 			ImGui::ShowDemoWindow(&showDemoWindow);
 	}
@@ -520,17 +593,14 @@ namespace Zenit {
 		}
 	}
 
-	void EditorLayer::ExportTextures()
+	void EditorLayer::ExportTextures(int resolution, int channels)
 	{
 		std::string path = FileDialog::SaveFile("png (*.png)\0*.png\0");
 		if (path.empty())
 			return;
 
-		constexpr int channels = 4;
-		//int w = diffuse->GetWidth() == 1 ? 1024 : diffuse->GetWidth();
-		//int h = diffuse->GetHeight() == 1 ? 1024 : diffuse->GetHeight();
-		int w = NODE_TEXTURE_SIZE;
-		int h = NODE_TEXTURE_SIZE;
+		int w = resolution;
+		int h = resolution;
 		GLubyte* data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 
@@ -543,8 +613,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = NODE_TEXTURE_SIZE;
-		h = NODE_TEXTURE_SIZE;
+		w = resolution;
+		h = resolution;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		normals->Bind(0);
@@ -556,8 +626,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = NODE_TEXTURE_SIZE;
-		h = NODE_TEXTURE_SIZE;
+		w = resolution;
+		h = resolution;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		metallic->Bind(2);
@@ -569,8 +639,8 @@ namespace Zenit {
 		delete[] data;
 
 
-		w = NODE_TEXTURE_SIZE;
-		h = NODE_TEXTURE_SIZE;
+		w = resolution;
+		h = resolution;
 		data = new GLubyte[channels * w * h];
 		memset(data, 0, channels * w * h);
 		roughness->Bind(0);
