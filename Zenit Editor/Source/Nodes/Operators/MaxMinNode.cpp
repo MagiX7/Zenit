@@ -35,6 +35,10 @@ namespace Zenit {
 		computeShader->SetUniform1i("tex2", 2);
 
 		DispatchCompute(1, 1);
+
+		Node::Update(ts);
+
+		regenerate = false;
 	}
 
 	void MaxMinNode::OnImGuiNodeRender()

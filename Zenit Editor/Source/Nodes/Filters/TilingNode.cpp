@@ -33,8 +33,9 @@ namespace Zenit {
 
 		DispatchCompute(1, 1);
 
-		regenerate = false;
+		Node::Update(ts);
 
+		regenerate = false;
 	}
 
 	void TilingNode::OnImGuiNodeRender()

@@ -10,10 +10,6 @@ namespace Zenit {
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/circle.shader");
 		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
-
-		BindCoreData();
-		//computeShader->SetUniform1i("inputTexture", 0);
-		DispatchCompute(1, 1);
 	}
 
 	CircleNode::~CircleNode()
@@ -30,6 +26,8 @@ namespace Zenit {
 		computeShader->SetUniform1f("blur", blur);
 		computeShader->SetUniformVec2f("offset", offset);
 		DispatchCompute(1, 1);
+
+		Node::Update(ts);
 
 		regenerate = false;
 	}

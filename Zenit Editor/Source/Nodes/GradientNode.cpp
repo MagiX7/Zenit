@@ -32,6 +32,8 @@ namespace Zenit {
 		computeShader->SetUniform1f("distance", distance);
 		DispatchCompute(1, 1);
 
+		Node::Update(ts);
+
 		regenerate = false;
 	}
 

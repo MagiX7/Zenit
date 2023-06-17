@@ -1,6 +1,8 @@
 #include "Node.h"
 #include "Panels/PanelNodes.h"
 
+#include "../Helpers/NodeHelpers.h"
+
 namespace Zenit {
 
 	Texture2D* Node::white = nullptr;
@@ -17,6 +19,16 @@ namespace Zenit {
 		outputs.clear();
 
 		name.clear();
+	}
+
+	void Node::Update(TimeStep ts)
+	{
+		for (auto id : nextNodesIds)
+		{
+			auto nextNode = NodeHelpers::FindNode(id, PanelNodes::GetNodes());
+			if (nextNode)
+				nextNode->ForceRegeneration();
+		}
 	}
 
 	void Node::BindCoreData() const

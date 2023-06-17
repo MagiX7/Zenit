@@ -26,6 +26,10 @@ namespace Zenit {
 		computeShader->SetUniform1i("iterations", iterations);
 		computeShader->SetUniform1f("lineThickness", lineThickness);
 		DispatchCompute(1,1);
+
+		Node::Update(ts);
+
+		regenerate = false;
 	}
 
 	void KifsFractalNode::OnImGuiNodeRender()

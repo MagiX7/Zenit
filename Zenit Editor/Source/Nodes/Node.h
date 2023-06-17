@@ -70,11 +70,9 @@ namespace Zenit {
 	struct Pin
 	{
 		ed::PinId id;
-		Node* node;
 		std::string name;
 		ed::PinKind kind;
-
-		//std::vector<LinkInfo> links;
+		Node* node;
 
 		Pin(int pinId, const char* pinName, ed::PinKind kind)
 			: id(pinId), node(nullptr), name(pinName), kind(kind)
@@ -90,16 +88,17 @@ namespace Zenit {
 
 		virtual ~Node();
 
-		virtual void Update(TimeStep ts) {};
+		virtual void Update(TimeStep ts);
 		virtual void ResetDefaultState() {};
 		virtual void OnImGuiNodeRender() {};
 		virtual void OnImGuiInspectorRender() {};
+
+		void ForceRegeneration() { regenerate = true; }
 
 		void BindCoreData() const;
 		void DispatchCompute(int xPixels, int yPixels) const;
 
 		static Texture2D* GetWhite();
-
 
 		virtual SerializerValue Save() { return SerializerValue(); };
 		virtual void Load(SerializerObject& obj) {};
@@ -116,6 +115,8 @@ namespace Zenit {
 		bool changeName = false;
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
+		std::vector<ed::NodeId> nextNodesIds;// = ed::NodeId(4294967295); // Max uint
+		
 
 		ImColor headerColor = { 255,255,255,255 };
 		NodeType type; // To be defined in each node

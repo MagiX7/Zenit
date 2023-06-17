@@ -28,6 +28,7 @@
 #include "Nodes/GroupNode.h"
 
 #include "EditorLayer.h"
+#include "../Helpers/NodeHelpers.h"
 
 #include <ImGui/imgui_internal.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
@@ -39,6 +40,8 @@
 #define OUTPUT_ROUGHNESS_PIN_ID 5
 
 namespace Zenit {
+
+	std::vector<Node*> PanelNodes::nodes = {};
 
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
 	{
@@ -378,10 +381,11 @@ namespace Zenit {
 					if (id.Get() == OUTPUT_NODE_ID)
 					{
 						ed::EndDelete();
+						ed::SetNodePosition(OUTPUT_NODE_ID, ed::GetNodePosition(OUTPUT_NODE_ID));
 						return;
 					}
 
-					Node* deletedNode = FindNode(id);
+					Node* deletedNode = NodeHelpers::FindNode(id, nodes);
 					std::vector<int> toErase;
 					toErase.resize(links.size());
 					toErase = { -1 };
@@ -390,21 +394,22 @@ namespace Zenit {
 					while (it != links.end())
 					{
 						LinkInfo& currentLink = *(it);
-
-						Pin* inputPin = FindPin(currentLink.inputId);
-						Pin* outputPin = FindPin(currentLink.outputId);
+						
+						Pin* inputPin = NodeHelpers::FindPin(currentLink.inputId, nodes);
+						Pin* outputPin = NodeHelpers::FindPin(currentLink.outputId, nodes);
 
 						// TODO: Removing here leads to problems!!!
 						if (outputPin->node == deletedNode)
 						{
-							UpdateNode(inputPin, outputPin, true);
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
+							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
-
 						}
 						else if (inputPin->node == deletedNode)
 						{
-							UpdateNode(inputPin, outputPin, true);
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
+							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
 						}
@@ -434,11 +439,11 @@ namespace Zenit {
 					ed::EndCreate();
 					return;
 				}
-
+				
 				if (inputPinId && outputPinId)
 				{
-					Pin* startPin = FindPin(inputPinId);
-					Pin* endPin = FindPin(outputPinId);
+					Pin* startPin = NodeHelpers::FindPin(inputPinId, nodes);
+					Pin* endPin = NodeHelpers::FindPin(outputPinId, nodes);
 
 					if (startPin->id.Get() < 0 && endPin->id.Get() < 0)
 						return;
@@ -462,7 +467,8 @@ namespace Zenit {
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
 						links.push_back(link);
 
-						UpdateNode(startPin, endPin, false);
+						startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+						UpdateNode(startPin, endPin, link, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
 					}
 					
@@ -478,18 +484,19 @@ namespace Zenit {
 			{
 				if (ed::AcceptDeletedItem())
 				{
-					LinkInfo* deletedLink = FindLink(deletedLinkId);
+					const LinkInfo& deletedLink = NodeHelpers::FindLink(deletedLinkId, links);
 
 					for (int i = 0; i < links.size(); ++i)
 					{
 						if (links[i].id == deletedLinkId)
 						{
 							LinkInfo link = links[i];
-							Pin* inputPin = FindPin(link.inputId);
-							Pin* outputPin = FindPin(link.outputId);
+							Pin* inputPin = NodeHelpers::FindPin(link.inputId, nodes);
+							Pin* outputPin = NodeHelpers::FindPin(link.outputId, nodes);
 
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
-							UpdateNode(inputPin, outputPin, true);
+							UpdateNode(inputPin, outputPin, deletedLink, true);
 
 							links.erase(links.begin() + i);
 
@@ -643,7 +650,7 @@ namespace Zenit {
 		ImGui::CloseCurrentPopup();
 	}
 
-	Node* PanelNodes::FindNode(ed::NodeId id) const
+	/*Node* PanelNodes::FindNode(ed::NodeId id) const
 	{
 		for (const auto& node : nodes)
 		{
@@ -683,7 +690,7 @@ namespace Zenit {
 		}
 
 		return &incorrectLink;
-	}
+	}*/
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
@@ -703,8 +710,8 @@ namespace Zenit {
 
 	void PanelNodes::DeleteLink(const ed::LinkId& id)
 	{
-		const LinkInfo* link = FindLink(id);
-		const Pin* output = FindPin(link->outputId);
+		const LinkInfo& link = NodeHelpers::FindLink(id, links);
+		const Pin* output = NodeHelpers::FindPin(link.outputId, nodes);
 
 		Node* other = (Node*)output->node;
 		other->BindCoreData();
@@ -825,85 +832,85 @@ namespace Zenit {
 		return node;
 	}
 
-	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
+	void PanelNodes::UpdateNode(Pin* inputPin, Pin* outputPin, const LinkInfo& link, bool resetData)
 	{
-		assert(startPin && endPin && "Pins are null");
-		assert(startPin->node && endPin->node && "Nodes are null");
+		assert(inputPin && outputPin && "Pins are null");
+		assert(inputPin->node && outputPin->node && "Nodes are null");
 
-		const auto inNode = (Node*)startPin->node;
+		const auto inNode = (Node*)inputPin->node;
 
-		switch (endPin->node->type)
+		switch (outputPin->node->type)
 		{
 			case NodeType::TRANSFORM:
 			{
-				UpdateNodeWithSingleInputTexture<TransformNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<TransformNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::NORMAL_MAP:
 			{
-				UpdateNodeWithSingleInputTexture<NormalMapNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<NormalMapNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::GRADIENT:
 			{
-				UpdateNodeWithSingleInputTexture<GradientNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<GradientNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::EDGE_DETECTOR:
 			{
-				UpdateNodeWithSingleInputTexture<EdgeDetectorNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<EdgeDetectorNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::TWIRL:
 			{
-				UpdateNodeWithSingleInputTexture<TwirlNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<TwirlNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::INVERT:
 			{
-				UpdateNodeWithSingleInputTexture<InvertNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<InvertNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::TILING:
 			{
-				UpdateNodeWithSingleInputTexture<TilingNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<TilingNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::BLEND:
 			{
-				const auto n = (BlendNode*)endPin->node;
+				const auto n = (BlendNode*)outputPin->node;
 
 				Texture2D* tex = nullptr;
 				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 				break;
 			}
 			case NodeType::CLAMP:
 			{
-				UpdateNodeWithSingleInputTexture<ClampNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<ClampNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::MAX:
 			{
-				const auto n = (MaxMinNode*)endPin->node;
+				const auto n = (MaxMinNode*)outputPin->node;
 
 				Texture2D* tex = nullptr;
 				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 				break;
 			}
 			case NodeType::MIN:
 			{
-				const auto n = (MaxMinNode*)endPin->node;
+				const auto n = (MaxMinNode*)outputPin->node;
 
 				Texture2D* tex = nullptr;
 				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-				n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
 				break;
 			}
@@ -911,10 +918,20 @@ namespace Zenit {
 			case NodeType::ADD:
 			case NodeType::SUBSTRACT:
 			{
-				UpdateNodeWithSingleInputTexture<SingleInstructionNode>(endPin->node, inNode->texture.get(), resetData);
+				UpdateNodeWithSingleInputTexture<SingleInstructionNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 		}
+		
+		//if (outputPin->node && outputPin->node->nextNodeId)
+		//{
+		//	// Never updates because UpdateNode() is called instantly after the link is created, so the last node never has a next node
+		//	// Create another function or system that calls this func? (i.e from node update?)
+		//	auto next = NodeHelpers::FindNode(outputPin->node->nextNodeId, nodes);
+		//	if (next)
+		//		UpdateNode(outputPin, &next->outputs[0], link, resetData);
+		//}
+
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
@@ -1281,7 +1298,7 @@ namespace Zenit {
 
 			LinkInfo link = LinkInfo(id, inputPinId, outputPinId);
 			links.push_back(link);
-			UpdateNode(FindPin(inputPinId), FindPin(outputPinId), false);
+			UpdateNode(NodeHelpers::FindPin(inputPinId, nodes), NodeHelpers::FindPin(outputPinId, nodes), link, false);
 		}
 
 		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
@@ -1292,7 +1309,7 @@ namespace Zenit {
 	{
 		ed::NodeId selectedId;
 		ed::GetSelectedNodes(&selectedId, 1);
-		return FindNode(selectedId);
+		return NodeHelpers::FindNode(selectedId, nodes);
 	}
 
 }

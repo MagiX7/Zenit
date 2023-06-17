@@ -18,8 +18,8 @@ namespace Zenit {
 
 	void EdgeDetectorNode::Update(TimeStep ts)
 	{
-		//if (!regenerate)
-			//return;
+		if (!regenerate)
+			return;
 
 		BindCoreData();
 
@@ -29,6 +29,8 @@ namespace Zenit {
 
 		DispatchCompute(1, 1);
 		
+		Node::Update(ts);
+
 		regenerate = false;
 	}
 

@@ -30,13 +30,14 @@ namespace Zenit {
 		void Update(TimeStep ts);
 		void OnImGuiRender();
 
-		Node* FindNode(ed::NodeId id) const;
-		Pin* FindPin(ed::PinId id);
-		LinkInfo* FindLink(const ed::LinkId& id);
+		//Node* FindNode(ed::NodeId id) const;
+		//Pin* FindPin(ed::PinId id);
+		//LinkInfo* FindLink(const ed::LinkId& id);
 
 		void SaveNodes(SerializerObject& appObject);
 		void LoadNodes(SerializerObject& appObject);
 
+		static const std::vector<Node*>& GetNodes() { return nodes; }
 		Node* GetSelectedNode();
 
 	private:
@@ -98,7 +99,7 @@ namespace Zenit {
 			return node;
 		}
 
-		void UpdateNode(Pin* startPin, Pin* endPin, bool resetData);
+		void UpdateNode(Pin* startPin, Pin* endPin, const LinkInfo& link, bool resetData);
 		void UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData);
 
 		template<typename T>
@@ -114,7 +115,7 @@ namespace Zenit {
 		EditorLayer* editorLayer;
 
 		std::shared_ptr<Texture2D> nodeBgTexture;
-		std::vector<Node*> nodes;
+		static std::vector<Node*> nodes;
 		std::vector<LinkInfo> links;
 		int creationId = 1;
 		int linkCreationId = 1000;

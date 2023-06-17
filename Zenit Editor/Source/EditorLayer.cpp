@@ -6,6 +6,8 @@
 #include "Nodes/Generators/VoronoiNode.h"
 #include "Helpers/Math.h"
 
+#include "Helpers/NodeHelpers.h"
+
 #include <ImGui/imgui.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
 #include <stb_image/stb_image_write.h>
@@ -693,7 +695,7 @@ namespace Zenit {
 		{			
 			nodeId = std::stoi(diffuseName.substr(start + 1));
 		}
-		SetDiffuseData(panelNodes->FindNode(nodeId));
+		SetDiffuseData(NodeHelpers::FindNode(nodeId, panelNodes->GetNodes()));
 
 		nodeId = -1;
 		start = normalsName.find_last_of("_");
@@ -701,7 +703,7 @@ namespace Zenit {
 		{
 			nodeId = std::stoi(normalsName.substr(start + 1));
 		}
-		SetNormalsData(panelNodes->FindNode(nodeId));
+		SetNormalsData(NodeHelpers::FindNode(nodeId, panelNodes->GetNodes()));
 
 		nodeId = -1;
 		start = metallicName.find_last_of("_");
@@ -709,7 +711,7 @@ namespace Zenit {
 		{
 			nodeId = std::stoi(metallicName.substr(start + 1));
 		}
-		SetMetallicData(panelNodes->FindNode(nodeId));
+		SetMetallicData(NodeHelpers::FindNode(nodeId, panelNodes->GetNodes()));
 
 		nodeId = -1;
 		start = roughnessName.find_last_of("_");
@@ -717,7 +719,7 @@ namespace Zenit {
 		{
 			nodeId = std::stoi(roughnessName.substr(start + 1));
 		}
-		SetRoughnessData(panelNodes->FindNode(nodeId));
+		SetRoughnessData(NodeHelpers::FindNode(nodeId, panelNodes->GetNodes()));
 
 		return true;
 	}

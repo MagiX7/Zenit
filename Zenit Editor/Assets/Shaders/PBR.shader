@@ -141,7 +141,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 
 void main()
 {
-	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz;
+	vec3 normal = texture2D(normalsTexture, vTexCoords).xyz * 2.0 - 1.0;
 
 	if (normal == vec3(1.0))
 	{

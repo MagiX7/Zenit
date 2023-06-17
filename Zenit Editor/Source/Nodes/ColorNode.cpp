@@ -9,7 +9,7 @@ namespace Zenit {
 		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 	}
 
-	void ColorNode::Update(TimeStep)
+	void ColorNode::Update(TimeStep ts)
 	{
 		if (!regenerate)
 			return;
@@ -17,6 +17,10 @@ namespace Zenit {
 		BindCoreData();
 		computeShader->SetUniformVec3f("color", color);
 		DispatchCompute(1, 1);
+		
+		Node::Update(ts);
+
+		regenerate = false;
 	}
 
 	void ColorNode::OnImGuiNodeRender()

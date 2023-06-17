@@ -31,6 +31,8 @@ namespace Zenit {
 		
 		DispatchCompute(1, 1);
 		
+		Node::Update(ts);
+
 		regenerate = false;
 	}
 
