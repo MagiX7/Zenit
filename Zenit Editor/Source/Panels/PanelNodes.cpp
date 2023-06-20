@@ -46,7 +46,7 @@ namespace Zenit {
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
 	{
 		config = ed::Config();
-		//config.SettingsFile = "Settings/NodeEditor.json";
+		config.SettingsFile = "";
 		config.UserPointer = this;
 
 		config.NavigateButtonIndex = 2;
@@ -694,8 +694,6 @@ namespace Zenit {
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
-		// TODO: Problem with locks. Maybe because of ImGui. Lock the update and imgui render or wait to end of frame?
-
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			if (id == nodes[i]->id)
@@ -721,7 +719,7 @@ namespace Zenit {
 		ed::DeleteLink(id);
 	}
 
-	Node* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
+	ColorNode* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
 		ColorNode* node = new ColorNode(creationId++, name, color);
 		node->size = { 5,5 };
@@ -732,7 +730,7 @@ namespace Zenit {
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
-		return nodes.back();
+		return node;
 	}
 
 	Node* PanelNodes::CreateBlendNode(const char* name)
@@ -799,7 +797,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType)
 	{
-		auto node = new SingleInstructionNode(creationId++, name, instructionType);
+		SingleInstructionNode* node = new SingleInstructionNode(creationId++, name, instructionType);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
@@ -817,7 +815,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
-		auto node = new GroupNode(creationId++ , name);
+		GroupNode* node = new GroupNode(creationId++ , name);
 		node->type = NodeType::GROUP;
 
 		ImVec2 padding = { 16, 35 };
@@ -1011,6 +1009,7 @@ namespace Zenit {
 	void PanelNodes::CreateFinalOutputNode()
 	{
 		Node* node = new Node(OUTPUT_NODE_ID, "PBR");
+		node->pos = { 1100, 100 };
 
 		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", ed::PinKind::Input);
 		albedo.node = node;
@@ -1033,6 +1032,7 @@ namespace Zenit {
 		nodes.emplace_back(node);
 
 		creationId += 5;
+		repositionNodes = true;
 	}
 
 	void PanelNodes::SaveNodes(SerializerObject& appObject)
@@ -1114,7 +1114,19 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
+		// Clear all previous nodes except the master
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			delete nodes[i];
+			nodes.erase(nodes.begin() + i);
+		}
+		nodes.clear();
+		
+		CreateFinalOutputNode();
+
+		// Load the new nodes
 		repositionNodes = true;
+	
 		glm::vec2 pos = JSONSerializer::GetVector2fFromObject(appObject, "pos");
 		nodes[0]->pos = ImVec2(pos.x, pos.y);
 
@@ -1134,7 +1146,14 @@ namespace Zenit {
 			{
 				case NodeType::COLOR:
 				{
-					node = (ColorNode*)CreateFlatColorNode(name, {});
+					node = CreateFlatColorNode(name, {});
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::GRADIENT:
+				{
+					node = CreateFilterNode<GradientNode>("Gradient");
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1186,6 +1205,13 @@ namespace Zenit {
 				case NodeType::VORONOI:
 				{
 					node = CreateGeneratorNode<VoronoiNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::KIFS_FRACTAL:
+				{
+					node = CreateGeneratorNode<KifsFractalNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1257,7 +1283,29 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
+				case NodeType::POW:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::POW);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::ADD:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::ADD);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::SUBSTRACT:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::SUBTRACT);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
 
+				// Transform
 				case NodeType::TRANSFORM:
 				{
 					node = CreateFilterNode<TransformNode>(name);
@@ -1266,6 +1314,7 @@ namespace Zenit {
 					break;
 				}
 
+				// Group
 				case NodeType::GROUP:
 				{
 					node = CreateGroupNode(name);

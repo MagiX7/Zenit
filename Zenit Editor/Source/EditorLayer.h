@@ -44,7 +44,7 @@ namespace Zenit {
 	private:
 		void SetModelShaderData();
 		void ExportTextures(int resolution, int channels);
-		void Save();
+		void Save(bool forceDialog);
 		bool Load();
 
 		void LoadSkyboxes();
@@ -94,6 +94,7 @@ namespace Zenit {
 		std::stack<Layer*> layers;
 
 		SerializerValue serializerRootValue;
+		std::string savedFilePath = "";
 
 
 		friend class PanelNodes;

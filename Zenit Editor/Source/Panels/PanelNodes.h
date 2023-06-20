@@ -17,6 +17,7 @@ namespace ed = ax::NodeEditor;
 namespace Zenit {
 
 	class EditorLayer;
+	class ColorNode;
 	enum class NoiseType;
 	enum class SingleInstructionType;
 
@@ -51,7 +52,7 @@ namespace Zenit {
 		void DeleteLink(const ed::LinkId& id);
 
 
-		Node* CreateFlatColorNode(const char* name, const glm::vec3& color);
+		ColorNode* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		
 		// Operators
 		Node* CreateBlendNode(const char* name);

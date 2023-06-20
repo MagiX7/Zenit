@@ -65,13 +65,25 @@ namespace Zenit {
 		JSONSerializer::SetString(object, "name", name.c_str());
 		JSONSerializer::SetNumber(object, "id", id.Get());
 		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetNumber(object, "angle", angle);
+		JSONSerializer::SetNumber(object, "reflection", reflectionAngle);
+		JSONSerializer::SetNumber(object, "lineThickness", lineThickness);
+		JSONSerializer::SetNumber(object, "iterations", iterations);
+
+		float angle = 0.66667f;
+		float reflectionAngle = 0.83333f;
+		float lineThickness = 1.0f;
+		int iterations = 3;
 
 		return value;
 	}
 
 	void KifsFractalNode::Load(SerializerObject& obj)
 	{
-
+		angle = JSONSerializer::GetNumberFromObject(obj, "angle");
+		reflectionAngle = JSONSerializer::GetNumberFromObject(obj, "reflection");
+		lineThickness = JSONSerializer::GetNumberFromObject(obj, "lineThickness");
+		iterations = JSONSerializer::GetNumberFromObject(obj, "iterations");
 	}
 
 }

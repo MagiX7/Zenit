@@ -18,7 +18,7 @@
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
 #define MODELS_PATH "\\Assets\\Models\\"
-#define SAVE_PATH   "Settings/SavedData.json"
+#define SAVE_PATH   "Settings/"
 
 namespace Zenit {
 
@@ -49,10 +49,9 @@ namespace Zenit {
 		currentMesh = nullptr;
 
 		panelNodes = new PanelNodes(this);
-		if (!Load())
+		
 		{
 			uint32_t data = 0xffffffff;
-			//diffuse = new Texture2D(&data, 1, 1);
 			diffuse = Node::GetWhite();
 			diffuse->SetName("white");
 			
@@ -94,6 +93,12 @@ namespace Zenit {
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
+		if (Input::GetInstance()->IsKeyPressed(Key::KEY_LEFT_CONTROL)
+			&& Input::GetInstance()->IsKeyPressed(Key::KEY_S))
+		{
+			Save(false);
+		}
+
 		panelViewport.OnUpdate(ts, currentModel, camera);
 		panelNodes->Update(ts);
 
@@ -121,14 +126,21 @@ namespace Zenit {
 		ImGui::BeginMainMenuBar();
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Export"))
+			if (ImGui::MenuItem("Open"))
 			{
-				showExportingPanel = true;
-				//ExportTextures();
+				Load();
 			}
 			else if (ImGui::MenuItem("Save"))
 			{
-				Save();
+				Save(false);
+			}
+			else if (ImGui::MenuItem("Save As..."))
+			{
+				Save(true);
+			}
+			else if (ImGui::MenuItem("Export"))
+			{
+				showExportingPanel = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -224,82 +236,13 @@ namespace Zenit {
 		}
 		ImGui::End();
 
-		ImGui::Begin("Hierarchy");
-		{
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				currentMesh = nullptr;
-
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx(currentModel->GetName().c_str(), flags | (currentMesh ? 0 : ImGuiTreeNodeFlags_Selected));
-			
-			if (ImGui::IsItemClicked())
-			{
-				// Set current mesh to 
-				currentMesh = nullptr;
-			}
-
-			if (opened)
-			{
-				std::queue<Mesh*> q;
-				for(auto mesh : currentModel->GetMeshes())
-					q.push(mesh);
-
-				while (!q.empty())
-				{
-					auto& curr = q.front();
-					q.pop();
-
-					bool opened = ImGui::TreeNodeEx(curr->GetName().c_str(), flags | (currentMesh == curr ? ImGuiTreeNodeFlags_Selected : 0));
-					
-					if (ImGui::IsItemClicked())
-					{
-						// Set current mesh to 
-						currentMesh = curr;
-					}
-					
-					if (opened)
-					{
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::TreePop();
-			}
-		}
-		ImGui::End();
-
 		ImGui::Begin("Inspector");
 		{
 			if (ImGui::CollapsingHeader("Camera"))
 			{
-				// TODO: Model Inspector UI + delete all orthographic stuff
 				if (camera.GetProjectionType() == PerspectiveCamera::ProjectionType::PERSPECTIVE)
 				{
 					ImGui::Dummy({ 0,5 });
-
-					/*auto pos = camera.GetPosition();
-					if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.1f))
-					{
-						camera.SetPosition(pos);
-					}
-					if (ImGui::Button("Reset"))
-					{
-						camera.SetPosition(glm::vec3(0, 0, 2));
-					}
-
-					ImGui::Dummy({ 0,2.5f });
-
-					auto rot = camera.GetRotation();
-					if (ImGui::DragFloat3("Rotation", glm::value_ptr(rot), 0.1f))
-					{
-						camera.SetRotation(rot);
-					}
-					if (ImGui::Button("Reset##2"))
-					{
-						camera.SetRotation(glm::vec3(0, 0, 0));
-					}
-
-					ImGui::Dummy({ 0,5 });*/
 
 					float verticalFov = camera.GetVerticalFov();
 					if (ImGui::DragFloat("Vertical FOV", &verticalFov, 0.1f))
@@ -358,33 +301,8 @@ namespace Zenit {
 			ImGui::Dummy({ 0, 3 });
 
 
-			//if (currentMesh)
-			//{
-			//	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-			//	{
-			//		//if (ImGui::Button("Apply textures"))
-			//		{
-			//			/*currentMesh->SetDiffuse(diffuse);
-			//			currentMesh->SetNormals(normals);
-			//			currentMesh->SetMetallic(metallic);
-			//			currentMesh->SetRoughness(roughness);*/
-			//		}
-			//	}
-			//}
-			//else
-			//{
-			//	ImGui::BulletText("There is no selected mesh.");
-			//	ImGui::Text("         Textures will be applied to every mesh inside the model.");
-
-			//	ImGui::Dummy({ 0, 3 });
-			//	ImGui::Separator();
-			//	ImGui::Dummy({ 0, 3 });
-			//}
-
-
 			if (Node* node = panelNodes->GetSelectedNode())
 				node->OnImGuiInspectorRender();
-
 		}
 		ImGui::End();
 
@@ -652,8 +570,20 @@ namespace Zenit {
 		delete[] data;
 	}
 
-	void EditorLayer::Save()
+	void EditorLayer::Save(bool saveAs)
 	{
+		std::string path = "";
+		if (saveAs || savedFilePath == "")
+		{
+			path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
+			if (path.empty())
+				return;
+			
+			if (!saveAs)
+				savedFilePath = path;
+		}
+
+
 		serializerRootValue = JSONSerializer::CreateValue();
 		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
 
@@ -667,13 +597,17 @@ namespace Zenit {
 		
 		panelNodes->SaveNodes(appObj);
 		
-		JSONSerializer::DumpFile(serializerRootValue, SAVE_PATH);
+		JSONSerializer::DumpFile(serializerRootValue, (path + ".zenit").c_str());
 		JSONSerializer::FreeValue(serializerRootValue);
 	}
 
 	bool EditorLayer::Load()
 	{
-		serializerRootValue = JSONSerializer::ReadFile(SAVE_PATH);
+		std::string path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
+		if (path.empty())
+			return false;
+
+		serializerRootValue = JSONSerializer::ReadFile(path.c_str());
 		if (!serializerRootValue.value)
 			return false;
 
