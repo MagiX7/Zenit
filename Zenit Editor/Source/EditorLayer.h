@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Zenit.h"
-#include "Panels/PanelInspector.h"
 #include "Panels/PanelViewport.h"
 #include "Panels/PanelLayerStack.h"
 #include "Panels/PanelNodes.h"
@@ -44,7 +43,9 @@ namespace Zenit {
 
 	private:
 		void SetModelShaderData();
-		void ExportTextures();
+		void ExportTextures(int resolution, int channels);
+		void Save();
+		bool Load();
 
 		void LoadSkyboxes();
 		void ReloadSkyboxes();
@@ -52,9 +53,10 @@ namespace Zenit {
 		void LoadModels();
 		void ReloadModels();
 
+		void FocusCameraOnModel();
+
 	private:
 		bool finished = false;
-		PanelInspector panelInspector;
 		PanelViewport panelViewport;
 		PanelLayerStack panelLayerStack;
 		PanelNodes* panelNodes;
@@ -67,18 +69,16 @@ namespace Zenit {
 		bool reloadSkyboxes = false;
 
 		PerspectiveCamera camera;
+		Frustum frustum;
 		std::vector<Model*> models;
 		Model* currentModel;
+		Mesh* currentMesh;
 
 		std::unique_ptr<Shader> pbrShader;
 		Texture2D* diffuse;
 		Texture2D* normals;
 		Texture2D* metallic;
-		std::shared_ptr<Texture2D> white;
-		float metallicValue = 1.0f;
 		Texture2D* roughness;
-		float roughnessValue = 1.0f;
-		Texture2D* ambientOcclusion;
 
 		DirectionalLight dirLight;
 		SkyboxProperties skyboxProps;
@@ -89,8 +89,11 @@ namespace Zenit {
 		Node* metallicOutput = nullptr;
 		Node* roughnessOutput = nullptr;
 		Node* aoOutput = nullptr;
+		bool showExportingPanel = false;
 
 		std::stack<Layer*> layers;
+
+		SerializerValue serializerRootValue;
 
 
 		friend class PanelNodes;

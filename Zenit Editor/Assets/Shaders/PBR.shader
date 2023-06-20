@@ -15,19 +15,19 @@ out vec3 vPosition;
 out vec2 vTexCoords;
 out vec3 vNormals;
 out mat3 TBN;
+out mat4 vModel;
 
 void main()
 {
 	gl_Position = projection * view * model * vec4(position, 1);
 	vTexCoords = texCoords;
 	vNormals = normalize((model * vec4(normals, 0.0)).xyz);
-	//vPosition = vec3(model * vec4(position, 1));
 	vPosition = position;
+	vModel = model;
 
 	vec3 N = normalize(normals);
 	vec3 T = tangents;
 	T = normalize(T - dot(T, N) * N);
-	//vec3 B = normalize(biTangents);
 	vec3 B = cross(T, N);
 	TBN = mat3(T, B, N);
 }
@@ -41,20 +41,13 @@ layout(location = 2) uniform sampler2D metallicTexture;
 layout(location = 3) uniform sampler2D roughnessTexture;
 layout(location = 4) uniform sampler2D ambientOcclussionTexture;
 layout(location = 5) uniform samplerCube irradianceMap;
-layout(location = 6) uniform samplerCube skyboxPrefilterMap;;
+layout(location = 6) uniform samplerCube skyboxPrefilterMap;
 layout(location = 7) uniform sampler2D skyboxBrdf;
-
-
-//uniform float metallic;
-//uniform float roughness;
 
 uniform vec3 camPos;
 uniform float reflectionLod;
 uniform int skyboxReflectionEnabled;
 uniform int drawSkybox;
-
-uniform float roughnessValue;
-
 
 out vec4 fragColor;
 
@@ -62,6 +55,7 @@ in vec3 vPosition;
 in vec2 vTexCoords;
 in vec3 vNormals;
 in mat3 TBN;
+in mat4 vModel;
 
 const float PI = 3.14159265359;
 
@@ -131,7 +125,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
 
 	vec3 numerator = NDF * F * G;
-	float denominator = max(4 * NdotV * NdotL, 0.0001);
+	float denominator = max((4 * NdotV * NdotL), 0.0001);
 	vec3 specular = numerator / denominator;
 
 	// Lambert Diffuse ========
@@ -142,7 +136,7 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 
 	vec3 radiance = dirLight.color * dirLight.intensity;
 
-	return (kd * albedo / PI + specular) * radiance * NdotL;
+	return (kd * (albedo / PI) + specular) * radiance * NdotL;
 }
 
 void main()
@@ -151,27 +145,18 @@ void main()
 
 	if (normal == vec3(1.0))
 	{
-		normal = vNormals;
+		normal = normalize(vNormals);
 	}
 	else
 	{
-		vec3 Q1 = dFdx(vPosition);
-		vec3 Q2 = dFdy(vPosition);
-		vec2 st1 = dFdx(vTexCoords);
-		vec2 st2 = dFdy(vTexCoords);
-
-		vec3 N = normalize(vNormals);
-		vec3 T = normalize(Q1 * st2.t - Q2 * st1.t);
-		vec3 B = -normalize(cross(N, T));
-		mat3 TBN = mat3(T, B, N);
-
 		normal = normalize(TBN * normal);
+		normal = normalize((vModel * vec4(normal, 0.0)).xyz);
 	}
 
 	vec3 albedo = texture2D(diffuseTexture, vTexCoords).rgb;
 	vec3 irradiance = texture(irradianceMap, normal).rgb;
 	float metallic = texture2D(metallicTexture, vTexCoords).r;
-	float roughness = texture2D(roughnessTexture, vTexCoords).r;
+	float roughness = max(texture2D(roughnessTexture, vTexCoords).r, 0.01f);
 	
 	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
 	

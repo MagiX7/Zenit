@@ -1,5 +1,5 @@
 project "Zenit Editor"
-    kind "ConsoleApp"
+    --kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
@@ -10,7 +10,7 @@ project "Zenit Editor"
     files
     {
         "Source/**.h",
-        "Source/**.cpp",        
+        "Source/**.cpp",
     }
 
     defines
@@ -33,6 +33,7 @@ project "Zenit Editor"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.node_editor}",
         "%{IncludeDir.ImGui}",
+        "%{IncludeDir.parson}",
     }
 
     links
@@ -52,14 +53,16 @@ project "Zenit Editor"
 
     filter "configurations:Debug"
         -- defines here
-        defines {"SPDLOG_COMPILED_LIB"}
+        kind "ConsoleApp"
+        defines {"SPDLOG_COMPILED_LIB", "ZN_DEBUG"}
         runtime "Debug"
         buildoptions "/MTd"
         symbols "On"
 
     filter "configurations:Release"
         -- defines here
-        defines {"SPDLOG_COMPILED_LIB"}
+        defines {"SPDLOG_COMPILED_LIB", "ZN_RELEASE"}
+        kind "WindowedApp"
         runtime "Release"
         buildoptions "/MT"
         optimize "On"

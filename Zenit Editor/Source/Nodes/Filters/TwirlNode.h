@@ -1,23 +1,26 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class TwirlNode : public ComputeShaderNode
+	class TwirlNode : public Node
 	{
 	public:
-		TwirlNode(int id, const char* name, NodeOutputType outputType);
+		TwirlNode(int id, const char* name);
 		virtual ~TwirlNode();
 
 		virtual void Update(TimeStep ts) override;
 		virtual void OnImGuiNodeRender() override;
 		virtual void OnImGuiInspectorRender() override;
 
-		void SetTexture(Texture2D* texture);
+		void SetInputTexture(Texture2D* texture);
+		
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
-		std::unique_ptr<Texture2D> inputTexture;
+		Texture2D* inputTexture;
 		glm::vec2 center;
 		float radius;
 		float angle;

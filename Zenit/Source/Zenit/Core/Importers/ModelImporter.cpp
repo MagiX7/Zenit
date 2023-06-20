@@ -10,7 +10,7 @@ namespace Zenit {
         importer.GetExtensionList(exts);
         std::vector<std::string> extensions;
         std::string currentExtension;
-        
+
         for (int i = 0; i < exts.size(); ++i)
         {
             char currentChar = exts[i];
@@ -57,7 +57,8 @@ namespace Zenit {
         for (unsigned int i = 0; i < node->mNumMeshes; i++)
         {
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            model.meshes.push_back(ProcessMesh(mesh, scene));
+            model.AddMesh(ProcessMesh(mesh, scene));
+            //model.meshes.push_back(ProcessMesh(mesh, scene));
         }
         
         for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -125,7 +126,7 @@ namespace Zenit {
             ComputeTangentsAndBiTangents(vertices, mesh->mNumFaces);
         }
 
-        return new Mesh(vertices, indices);
+        return new Mesh(mesh->mName.C_Str(), vertices, indices);
     }
 
     void ModelImporter::ComputeTangentsAndBiTangents(std::vector<Vertex>& vertices, unsigned int indicesCount)

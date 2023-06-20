@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class BlendNode : public ComputeShaderNode
+	class BlendNode : public Node
 	{
 	public:
-		BlendNode(int id, const char* name, NodeOutputType outputType);
+		BlendNode(int id, const char* name);
 		virtual ~BlendNode();
 
 		virtual void Update(TimeStep ts) override;
@@ -16,11 +16,14 @@ namespace Zenit {
 
 		void SetFirstTexture(Texture2D* texture);
 		void SetSecondTexture(Texture2D* texture);
+		
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
 
 	private:
 		float contribution;
-		std::unique_ptr<Texture2D> tex1;
-		std::unique_ptr<Texture2D> tex2;
+		Texture2D* tex1;
+		Texture2D* tex2;
 
 		enum class BlendMode
 		{

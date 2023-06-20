@@ -1,24 +1,34 @@
 #include "Zenit.h"
 
 #include "PanelNodes.h"
-#include "PanelInspector.h"
 
+#include "Nodes/Node.h"
 #include "Nodes/ColorNode.h"
-#include "Nodes/ComputeShaderNode.h"
-#include "Nodes/NoiseNode.h"
-#include "Nodes/VoronoiNode.h"
-#include "Nodes/CircleNode.h"
+#include "Nodes/GradientNode.h"
+
+#include "Nodes/Generators/CircleNode.h"
+#include "Nodes/Generators/CheckersNode.h"
+#include "Nodes/Generators/NoiseNode.h"
+#include "Nodes/Generators/VoronoiNode.h"
+#include "Nodes/Generators/VoronoiNode.h"
+#include "Nodes/Generators/KifsFractalNode.h"
 
 #include "Nodes/Filters/NormalMapNode.h"
+#include "Nodes/Filters/EdgeDetectorNode.h"
+#include "Nodes/Filters/TilingNode.h"
 #include "Nodes/Filters/TwirlNode.h"
-
-#include "Nodes/Constants/Vec1Node.h"
+#include "Nodes/Filters/InvertNode.h"
 
 #include "Nodes/Operators/BlendNode.h"
 #include "Nodes/Operators/ClampNode.h"
 #include "Nodes/Operators/MaxMinNode.h"
+#include "Nodes/Operators/SingleInstructionNode.h"
+
+#include "Nodes/TransformNode.h"
+#include "Nodes/GroupNode.h"
 
 #include "EditorLayer.h"
+#include "../Helpers/NodeHelpers.h"
 
 #include <ImGui/imgui_internal.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
@@ -31,36 +41,21 @@
 
 namespace Zenit {
 
+	std::vector<Node*> PanelNodes::nodes = {};
+
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
 	{
 		config = ed::Config();
-		config.SettingsFile = "Settings/NodeEditor.json";
+		//config.SettingsFile = "Settings/NodeEditor.json";
+		config.UserPointer = this;
+
 		config.NavigateButtonIndex = 2;
 		context = reinterpret_cast<ax::NodeEditor::Detail::EditorContext*>(ed::CreateEditor(&config));
 		ed::SetCurrentEditor(reinterpret_cast<ax::NodeEditor::EditorContext*>(context));
 
+		CreateFinalOutputNode();
 
-		Node* node = new Node(OUTPUT_NODE_ID, "PBR", NodeOutputType::NONE);
-
-		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", PinType::Object, ed::PinKind::Input);
-		albedo.node = node;
-		node->inputs.emplace_back(albedo);
-
-		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", PinType::Object, ed::PinKind::Input);
-		normals.node = node;
-		node->inputs.emplace_back(normals);
-
-		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", PinType::Object, ed::PinKind::Input);
-		metallic.node = node;
-		node->inputs.emplace_back(metallic);
-
-		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", PinType::Object, ed::PinKind::Input);
-		roughness.node = node;
-		node->inputs.emplace_back(roughness);
-
-		nodes.emplace_back(node);
-		
-		creationId += 5;
+		nodeBgTexture = std::make_shared<Texture2D>("Settings/NodeBackground.png");
 	}
 
 	PanelNodes::~PanelNodes()
@@ -86,38 +81,16 @@ namespace Zenit {
 		if (!hovered)
 			return;
 
-		//static bool startedDragging = false;
-		//if (!startedDragging && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-		//{
-		//	startedDragging = true;
-		//}
-		//if (startedDragging && ImGui::IsMouseReleased(ImGuiMouseButton_Left))
-		{
-			ImVec4 bounds = context->GetSelectionBounds().ToVec4();/* + context->GetViewRect().ToVec4()*/;
-			lastSelectionBounds = { bounds.x, bounds.y, bounds.z, bounds.w };
-			ZN_CORE_TRACE("{0}, {1}, {2}, {3}", lastSelectionBounds.Min.x, lastSelectionBounds.Min.y, lastSelectionBounds.Max.x, lastSelectionBounds.Max.y);
-			//startedDragging = false;
-		}
-		
-		
-
-		//editorLayer->SetDiffuseData(diffuseNode);
-		//editorLayer->SetNormalsData(normalsNode);
-		//editorLayer->SetMetallicData(metallicNode);
-		//editorLayer->SetRoughnessData(roughnessNode);
+		lastSelectionBounds = context->GetSelectionBounds();
 	}
 
-	void PanelNodes::OnImGuiRender(PanelInspector* panelInspector)
+	void PanelNodes::OnImGuiRender()
 	{
-		ed::NodeId selectedId;
-		ed::GetSelectedNodes(&selectedId, 1);
-		panelInspector->OnImGuiRender(editorLayer->currentModel, editorLayer->dirLight, FindNode(selectedId));
-
 		ImGui::Begin("Node editor");
 		
 		panelSize = ImGui::GetWindowSize();
 		hovered = ImGui::IsWindowHovered();
-
+		
 		if (ImGui::IsWindowHovered())
 		{
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
@@ -131,10 +104,6 @@ namespace Zenit {
 					rightClickedNodeId = ed::GetHoveredNode();
 					rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
 				}
-			}
-			else if (ed::GetSelectedObjectCount() > 0 && Input::GetInstance()->IsKeyPressed(KEY_SPACE))
-			{
-				showGroupPopup = true;
 			}
 			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
 			{
@@ -178,80 +147,121 @@ namespace Zenit {
 
 		for (auto n : nodes)
 		{
-			if (n->type == NodeType::COMMENT)
+			if (n->type == NodeType::GROUP)
 			{
 				DrawGroupNode(n);
+				continue;
 			}
-			else
+			
+			ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 6.0f);
+			ed::BeginNode(n->id);
+			
+			if (repositionNodes)
+				ed::SetNodePosition(n->id, n->pos);
+
+			ImGui::PushID(n->id.AsPointer());
+
+			int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
+			int height = ImGui::CalcTextSize(n->name.c_str()).y + 8;
+
+			ImGui::PushItemWidth(width);
+
+			ed::NodeId selectedNodeId;
+			ed::GetSelectedNodes(&selectedNodeId, 1);
+			if (selectedNodeId == n->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
-				ed::BeginNode(n->id);
-				ImGui::PushID(n->id.AsPointer());
-				ed::PushStyleColor(ed::StyleColor_NodeBg, n->nodeColor);
-				
-				int width = ImGui::CalcTextSize(n->name.c_str()).x + 8;
+				n->changeName = true;
+			}
+			else if (selectedNodeId != n->id)
+			{
+				n->changeName = false;
+			}
 
-				ImGui::PushItemWidth(width);
-
-				ed::NodeId selectedNodeId;
-				ed::GetSelectedNodes(&selectedNodeId, 1);
-				if (selectedNodeId == n->id && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				{
-					n->changeName = true;
-				}
-				else if (selectedNodeId != n->id)
+			if (n->changeName)
+			{
+				ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
+				if (ImGui::InputText("", &n->name, flags))
 				{
 					n->changeName = false;
 				}
-
-				if (n->changeName)
-				{
-					ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("", &n->name, flags))
-					{
-						n->changeName = false;
-					}
-				}
-				else
-				{
-					ImGui::TextUnformatted(n->name.c_str());
-				}
-				ImGui::PopItemWidth();
-
-				ImGui::NewLine();
-
-				ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
-				if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
-				{
-					ImGui::TableNextColumn();
-
-					for (const auto& input : n->inputs)
-					{
-						ed::BeginPin(input.id, input.kind);
-						ImGui::Text(input.name.c_str());
-						ed::EndPin();
-					}
-
-					ImGui::TableNextColumn();
-
-					n->OnImGuiNodeRender();
-
-					ImGui::TableNextColumn();
-					for (const auto& output : n->outputs)
-					{
-						ed::BeginPin(output.id, output.kind);
-						ImGui::Text(output.name.c_str());
-						ed::EndPin();
-						ImGui::Dummy({ 0,10 });
-					}
-
-					ImGui::EndTable();
-					ed::PopStyleColor();
-				}
-				ImGui::PopID();
-				ed::EndNode();
+			}
+			else
+			{
+				ImGui::TextUnformatted(n->name.c_str());
 			}
 
+			ImGui::PopItemWidth();
+
+			ImVec2 titleMin = ImGui::GetItemRectMin();
+			ImVec2 titleMax = ImGui::GetItemRectMax();
+			ImRect titleRect = { titleMin, titleMax };
+
+			ImGui::Dummy({ 0, 3 });
+
+			ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit;
+			if (ImGui::BeginTable(std::to_string(n->id.Get()).c_str(), 3, flags))
+			{
+				ImGui::TableNextColumn();
+				for (const auto& input : n->inputs)
+				{
+					ed::BeginPin(input.id, input.kind);
+					ImGui::Text(input.name.c_str());
+					ed::EndPin();
+
+					auto rect = ImRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+					ImVec2 leftCenter = rect.GetCenter();
+					leftCenter.x -= rect.GetWidth() / 2;
+				}
+					
+				ImGui::TableNextColumn();
+				
+				n->OnImGuiNodeRender();
+
+				ImGui::TableNextColumn();
+				for (const auto& output : n->outputs)
+				{
+					ed::BeginPin(output.id, output.kind);
+					ImGui::Text(output.name.c_str());
+					ed::EndPin();
+					ImGui::Dummy({ 0,10 });
+				}
+
+				ImGui::EndTable();
+			}
+			ImGui::PopID();
+
+			ed::EndNode();
+
+			// Draw Header
+			ImVec2 bgMax = ImGui::GetItemRectMax();
+			ImVec2 bgMin = ImGui::GetItemRectMin();
+
+			if ((bgMax.x > bgMin.x) && (bgMax.y > bgMin.y))
+			{
+				float alpha = (int)ImGui::GetStyle().Alpha * 255;
+				auto nodeDrawList = ed::GetNodeBackgroundDrawList(n->id);
+
+				auto headerColor = IM_COL32(0, 0, 0, alpha) | (n->headerColor & IM_COL32(255, 255, 255, 0));
+
+				ImVec2 headerMin = bgMin;
+				ImVec2 headerMax = bgMax;
+				headerMax.y = titleMax.y + 3;
+
+				auto uv = ImVec2(
+					(headerMax.x - headerMin.x) / (float)(4.0f * nodeBgTexture->GetWidth()),
+					(headerMax.y - headerMin.y) / (float)(4.0f * nodeBgTexture->GetHeight()));
+
+				nodeDrawList->AddImageRounded((void*)nodeBgTexture->GetId(), headerMin, headerMax,
+					ImVec2(0,0), uv + ImVec2(0.5,0.5),
+					headerColor, ed::GetStyle().NodeRounding, 1 | 2);
+					
+			}
+
+			// Pop border rounding
+			ed::PopStyleVar();
 		}
+
+		repositionNodes = false;
 
 		// Links creation
 		HandleLinks(links);
@@ -267,15 +277,26 @@ namespace Zenit {
 		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.75f);
 		ed::PushStyleColor(ed::StyleColor_NodeBg, ImColor(255, 255, 255, 64));
 		ed::PushStyleColor(ed::StyleColor_NodeBorder, ImColor(255, 255, 255, 64));
+		ed::PushStyleVar(ax::NodeEditor::StyleVar_NodeRounding, 6.0f);
 		
 		ed::BeginNode(node->id);
+
+		if (repositionNodes)
+			ed::SetNodePosition(node->id, node->pos);
+
 		ImGui::PushID(node->id.AsPointer());
 
 		ImGui::PushItemWidth(node->size.x);
-		//static bool changeName = false;
-		if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+
+		ed::NodeId selectedNodeId;
+		ed::GetSelectedNodes(&selectedNodeId, 1);
+		if (selectedNodeId == node->id && ImGui::IsWindowHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 		{
 			node->changeName = true;
+		}
+		else if (selectedNodeId != node->id)
+		{
+			node->changeName = false;
 		}
 
 		if (node->changeName)
@@ -298,6 +319,7 @@ namespace Zenit {
 		ed::EndNode();
 		ed::PopStyleColor(2);
 		ImGui::PopStyleVar();
+		ed::PopStyleVar();
 
 		if (ed::BeginGroupHint(node->id))
 		{
@@ -359,10 +381,11 @@ namespace Zenit {
 					if (id.Get() == OUTPUT_NODE_ID)
 					{
 						ed::EndDelete();
+						ed::SetNodePosition(OUTPUT_NODE_ID, ed::GetNodePosition(OUTPUT_NODE_ID));
 						return;
 					}
 
-					Node* deletedNode = FindNode(id);
+					Node* deletedNode = NodeHelpers::FindNode(id, nodes);
 					std::vector<int> toErase;
 					toErase.resize(links.size());
 					toErase = { -1 };
@@ -371,21 +394,22 @@ namespace Zenit {
 					while (it != links.end())
 					{
 						LinkInfo& currentLink = *(it);
-
-						Pin* inputPin = FindPin(currentLink.inputId);
-						Pin* outputPin = FindPin(currentLink.outputId);
+						
+						Pin* inputPin = NodeHelpers::FindPin(currentLink.inputId, nodes);
+						Pin* outputPin = NodeHelpers::FindPin(currentLink.outputId, nodes);
 
 						// TODO: Removing here leads to problems!!!
 						if (outputPin->node == deletedNode)
 						{
-							UpdateNode(inputPin, outputPin, true);
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
+							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
-
 						}
 						else if (inputPin->node == deletedNode)
 						{
-							UpdateNode(inputPin, outputPin, true);
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
+							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
 						}
@@ -415,11 +439,11 @@ namespace Zenit {
 					ed::EndCreate();
 					return;
 				}
-
+				
 				if (inputPinId && outputPinId)
 				{
-					Pin* startPin = FindPin(inputPinId);
-					Pin* endPin = FindPin(outputPinId);
+					Pin* startPin = NodeHelpers::FindPin(inputPinId, nodes);
+					Pin* endPin = NodeHelpers::FindPin(outputPinId, nodes);
 
 					if (startPin->id.Get() < 0 && endPin->id.Get() < 0)
 						return;
@@ -438,16 +462,13 @@ namespace Zenit {
 					{
 						ed::RejectNewItem(ImColor(255, 0, 0), 2.0f);
 					}
-					else if (endPin->type != startPin->type)
-					{
-						ed::RejectNewItem(ImColor(255, 128, 128), 1.0f);
-					}
 					else if (ed::AcceptNewItem(ImColor(128, 255,128)))
 					{
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
 						links.push_back(link);
 
-						UpdateNode(startPin, endPin, false);
+						startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+						UpdateNode(startPin, endPin, link, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
 					}
 					
@@ -463,20 +484,19 @@ namespace Zenit {
 			{
 				if (ed::AcceptDeletedItem())
 				{
-					LinkInfo* deletedLink = FindLink(deletedLinkId);
+					const LinkInfo& deletedLink = NodeHelpers::FindLink(deletedLinkId, links);
 
 					for (int i = 0; i < links.size(); ++i)
 					{
 						if (links[i].id == deletedLinkId)
 						{
 							LinkInfo link = links[i];
-							Pin* inputPin = FindPin(link.inputId);
-							Pin* outputPin = FindPin(link.outputId);
+							Pin* inputPin = NodeHelpers::FindPin(link.inputId, nodes);
+							Pin* outputPin = NodeHelpers::FindPin(link.outputId, nodes);
 
+							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
-
-							// TODO: Handle links deletion between normal/current nodes
-							UpdateNode(inputPin, outputPin, true);
+							UpdateNode(inputPin, outputPin, deletedLink, true);
 
 							links.erase(links.begin() + i);
 
@@ -501,27 +521,38 @@ namespace Zenit {
 					CreateFlatColorNode("Flat Color", { 1,0,0 });
 					showCreationPopup = false;
 				}
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Constants"))
-			{
-				if (ImGui::MenuItem("Vector1"))
+				else if (ImGui::MenuItem("Gradient"))
 				{
-					CreateVector1Node("Vector 1");
+					CreateFilterNode<GradientNode>("Gradient");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Filters"))
-			{
+			{ 
 				if (ImGui::MenuItem("Normal Map"))
 				{
-					CreateNormalMapNode("Normal Map");
+					CreateFilterNode<NormalMapNode>("Normal Map");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Tiling"))
+				{
+					CreateFilterNode<TilingNode>("Tiling");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Edge Detector"))
+				{
+					CreateFilterNode<EdgeDetectorNode>("Edge Detector");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Twirl"))
 				{
-					CreateTwirlNode("Twirl");
+					CreateFilterNode<TwirlNode>("Twirl");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Invert"))
+				{
+					CreateFilterNode<InvertNode>("Invert");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -530,22 +561,37 @@ namespace Zenit {
 			{
 				if (ImGui::MenuItem("Circle"))
 				{
-					CreateCircleNode("Circle");
+					CreateGeneratorNode<CircleNode>("Circle");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Checkers"))
+				{
+					CreateGeneratorNode<CheckersNode>("Checkers");
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Noise"))
 				{
-					CreateNoiseNode("Noise", NoiseType::NORMAL);
+					CreateGeneratorNode<NoiseNode>("Noise", NoiseType::WHITE);
 					showCreationPopup = false;
 				}
-				else if (ImGui::MenuItem("Perlin Noise"))
+				else if (ImGui::MenuItem("FBM"))
 				{
-					CreateNoiseNode("Noise", NoiseType::PERLIN);
+					CreateGeneratorNode<NoiseNode>("FBM", NoiseType::FBM);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Gradient Noise"))
+				{
+					CreateGeneratorNode<NoiseNode>("Gradient Noise", NoiseType::GRADIENT);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Voronoi"))
 				{
-					CreateVoronoiNode("Voronoi");
+					CreateGeneratorNode<VoronoiNode>("Voronoi");
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("KIFS Fractal"))
+				{
+					CreateGeneratorNode<KifsFractalNode>("KIFS Fractal");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -564,12 +610,37 @@ namespace Zenit {
 				}
 				else if (ImGui::MenuItem("Max"))
 				{
-					CreateMaxNode("Max");
+					CreateMaxMinNode("Max", true);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("Min"))
 				{
-					CreateMinNode("Min");
+					CreateMaxMinNode("Min", false);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Pow"))
+				{
+					CreateSingleInstructionNode("Pow", SingleInstructionType::POW);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Add"))
+				{
+					CreateSingleInstructionNode("Add", SingleInstructionType::ADD);
+					showCreationPopup = false;
+				}
+				else if (ImGui::MenuItem("Subtract"))
+				{
+					CreateSingleInstructionNode("Subtract", SingleInstructionType::SUBTRACT);
+					showCreationPopup = false;
+				}
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Transform"))
+			{
+				if (ImGui::MenuItem("Transform 2D"))
+				{
+					// Despite it is not a filter, it is created the same way
+					CreateFilterNode<TransformNode>("Transform 2D");
 					showCreationPopup = false;
 				}
 				ImGui::EndMenu();
@@ -579,7 +650,7 @@ namespace Zenit {
 		ImGui::CloseCurrentPopup();
 	}
 
-	Node* PanelNodes::FindNode(ed::NodeId id) const
+	/*Node* PanelNodes::FindNode(ed::NodeId id) const
 	{
 		for (const auto& node : nodes)
 		{
@@ -619,10 +690,12 @@ namespace Zenit {
 		}
 
 		return &incorrectLink;
-	}
+	}*/
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
+		// TODO: Problem with locks. Maybe because of ImGui. Lock the update and imgui render or wait to end of frame?
+
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			if (id == nodes[i]->id)
@@ -637,138 +710,47 @@ namespace Zenit {
 
 	void PanelNodes::DeleteLink(const ed::LinkId& id)
 	{
-		const LinkInfo* link = FindLink(id);
-		const Pin* output = FindPin(link->outputId);
+		const LinkInfo& link = NodeHelpers::FindLink(id, links);
+		const Pin* output = NodeHelpers::FindPin(link.outputId, nodes);
 
-		ComputeShaderNode* other = (ComputeShaderNode*)output->node;
-		//if (other->outputType == NodeOutputType::TEXTURE)
-		//{
-			other->BindCoreData();
-			other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
-			other->DispatchCompute(1, 1);
-		//}
+		Node* other = (Node*)output->node;
+		other->BindCoreData();
+		other->computeShader->SetUniformVec3f("inputColor", { 1,1,1 });
+		other->DispatchCompute(1, 1);
 
 		ed::DeleteLink(id);
 	}
 
 	Node* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
-		ColorNode* node = new ColorNode(creationId++, name, NodeOutputType::TEXTURE, color);
+		ColorNode* node = new ColorNode(creationId++, name, color);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
-		
-		Pin pin = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		node->headerColor = FLAT_COLOR_NODE_HEADER_COLOR;
+
+		Pin pin = Pin(creationId++, "Output", ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
 		return nodes.back();
 	}
 
-	Node* PanelNodes::CreateNoiseNode(const char* name, NoiseType noiseType)
-	{
-		NoiseNode* node = new NoiseNode(creationId++, name, NodeOutputType::TEXTURE, noiseType);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return nodes.back();
-	}
-
-	Node* PanelNodes::CreateVoronoiNode(const char* name)
-	{
-		VoronoiNode* node = new VoronoiNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateVector1Node(const char* name)
-	{
-		Vec1Node* node = new Vec1Node(creationId++, name, NodeOutputType::VEC1	);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Float, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateNormalMapNode(const char* name)
-	{
-		NormalMapNode* node = new NormalMapNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateTwirlNode(const char* name)
-	{
-		TwirlNode* node = new TwirlNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin input = Pin(creationId++, "Input", PinType::Object, ed::PinKind::Input);
-		input.node = node;
-		node->inputs.emplace_back(input);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return node;
-	}
-
-	Node* PanelNodes::CreateCircleNode(const char* name)
-	{
-		CircleNode* node = new CircleNode(creationId++, name, NodeOutputType::TEXTURE);
-		node->size = { 5,5 };
-		nodes.emplace_back(node);
-
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
-		output.node = node;
-		node->outputs.emplace_back(output);
-
-		return nullptr;
-	}
-
 	Node* PanelNodes::CreateBlendNode(const char* name)
 	{
-		BlendNode* node = new BlendNode(creationId++, name, NodeOutputType::TEXTURE);
+		BlendNode* node = new BlendNode(creationId++, name);
 		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "Output", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "Output",ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -777,71 +759,66 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateClampNode(const char* name)
 	{
-		ClampNode* node = new ClampNode(creationId++, name, NodeOutputType::TEXTURE);
+		ClampNode* node = new ClampNode(creationId++, name);
 		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
 		return node;
 	}
 
-	Node* PanelNodes::CreateMinNode(const char* name)
+	Node* PanelNodes::CreateMaxMinNode(const char* name, bool isMax)
 	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, false);
+		MaxMinNode* node = new MaxMinNode(creationId++, name, isMax);
 		node->size = { 5,5 };
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
-
 
 		return node;
 	}
 
-	Node* PanelNodes::CreateMaxNode(const char* name)
+	Node* PanelNodes::CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType)
 	{
-		MaxMinNode* node = new MaxMinNode(creationId++, name, NodeOutputType::TEXTURE, true);
+		auto node = new SingleInstructionNode(creationId++, name, instructionType);
 		node->size = { 5,5 };
-		//node->pos = ImGui::GetMousePos();
-		//ed::SetNodePosition(node->id, node->pos);
-		//ImGui::SetCursorPos();
+		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
+		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", PinType::Object, ed::PinKind::Input);
-		input2.node = node;
-		node->inputs.emplace_back(input2);
-
-		Pin output = Pin(creationId++, "O", PinType::Object, ed::PinKind::Output);
+		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
 		return node;
 	}
 
-	void PanelNodes::CreateGroupNode(const char* name)
+	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
-		Node* node = new Node(creationId++ , name, NodeOutputType::NONE);
-		node->type = NodeType::COMMENT;
+		auto node = new GroupNode(creationId++ , name);
+		node->type = NodeType::GROUP;
 
 		ImVec2 padding = { 16, 35 };
 		node->pos = lastSelectionBounds.GetTL() - padding;
@@ -852,75 +829,109 @@ namespace Zenit {
 
 		lastSelectionBounds = { 0,0,0,0 };
 		ed::ClearSelection();
+		return node;
 	}
 
-	void PanelNodes::UpdateNode(Pin* startPin, Pin* endPin, bool resetData)
+	void PanelNodes::UpdateNode(Pin* inputPin, Pin* outputPin, const LinkInfo& link, bool resetData)
 	{
-		//if (endPin->node->outputType == NodeOutputType::TEXTURE)
+		assert(inputPin && outputPin && "Pins are null");
+		assert(inputPin->node && outputPin->node && "Nodes are null");
+
+		const auto inNode = (Node*)inputPin->node;
+
+		switch (outputPin->node->type)
 		{
-			//if (startPin->node->outputType == NodeOutputType::TEXTURE)
+			case NodeType::TRANSFORM:
 			{
-				const auto inNode = (ComputeShaderNode*)startPin->node;
-				// TODO: Instead of check for the normal map, check for texture and all compute shaders have the uniform inputTexture?
-				// If you want an inputTexture, just use a multiply node
-				switch (endPin->node->type)
-				{
-					case NodeType::NORMAL_MAP:
-					{
-						const auto n = (NormalMapNode*)endPin->node;
-						resetData ? n->SetTexture(editorLayer->white) : n->SetTexture(inNode->texture);
-						break;
-					}
-					case NodeType::TWIRL:
-					{
-						const auto n = (TwirlNode*)endPin->node;
-						resetData ? n->SetTexture(editorLayer->white.get()) : n->SetTexture(inNode->texture.get());
-						break;
-					}
-					case NodeType::BLEND:
-					{
-						const auto n = (BlendNode*)endPin->node;
+				UpdateNodeWithSingleInputTexture<TransformNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::NORMAL_MAP:
+			{
+				UpdateNodeWithSingleInputTexture<NormalMapNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::GRADIENT:
+			{
+				UpdateNodeWithSingleInputTexture<GradientNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::EDGE_DETECTOR:
+			{
+				UpdateNodeWithSingleInputTexture<EdgeDetectorNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::TWIRL:
+			{
+				UpdateNodeWithSingleInputTexture<TwirlNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::INVERT:
+			{
+				UpdateNodeWithSingleInputTexture<InvertNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::TILING:
+			{
+				UpdateNodeWithSingleInputTexture<TilingNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::BLEND:
+			{
+				const auto n = (BlendNode*)outputPin->node;
 
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				Texture2D* tex = nullptr;
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
-						break;
-					}
-					case NodeType::CLAMP:
-					{
-						const auto n = (ClampNode*)endPin->node;
-						resetData ? n->SetInputTexture(editorLayer->white.get()) : n->SetInputTexture(inNode->texture.get());
-						break;
-					}
-					case NodeType::MAX:
-					{
-						const auto n = (MaxMinNode*)endPin->node;
+				break;
+			}
+			case NodeType::CLAMP:
+			{
+				UpdateNodeWithSingleInputTexture<ClampNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
+			}
+			case NodeType::MAX:
+			{
+				const auto n = (MaxMinNode*)outputPin->node;
 
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				Texture2D* tex = nullptr;
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
-						break;
-					}
-					case NodeType::MIN:
-					{
-						const auto n = (MaxMinNode*)endPin->node;
+				break;
+			}
+			case NodeType::MIN:
+			{
+				const auto n = (MaxMinNode*)outputPin->node;
 
-						Texture2D* tex = nullptr;
-						resetData ? tex = editorLayer->white.get() : tex = inNode->texture.get();
+				Texture2D* tex = nullptr;
+				resetData ? tex = Node::GetWhite() : tex = inNode->texture.get();
 
-						n->inputs[0].id.Get() < endPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
+				n->inputs[0].id.Get() < outputPin->id.Get() ? n->SetSecondTexture(tex) : n->SetFirstTexture(tex);
 
-						break;
-					}
-					
-
-				}
+				break;
+			}
+			case NodeType::POW:
+			case NodeType::ADD:
+			case NodeType::SUBSTRACT:
+			{
+				UpdateNodeWithSingleInputTexture<SingleInstructionNode>(outputPin->node, inNode->texture.get(), resetData);
+				break;
 			}
 		}
+		
+		//if (outputPin->node && outputPin->node->nextNodeId)
+		//{
+		//	// Never updates because UpdateNode() is called instantly after the link is created, so the last node never has a next node
+		//	// Create another function or system that calls this func? (i.e from node update?)
+		//	auto next = NodeHelpers::FindNode(outputPin->node->nextNodeId, nodes);
+		//	if (next)
+		//		UpdateNode(outputPin, &next->outputs[0], link, resetData);
+		//}
+
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
@@ -996,4 +1007,309 @@ namespace Zenit {
 
 		}
 	}
+
+	void PanelNodes::CreateFinalOutputNode()
+	{
+		Node* node = new Node(OUTPUT_NODE_ID, "PBR");
+
+		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", ed::PinKind::Input);
+		albedo.node = node;
+		node->inputs.emplace_back(albedo);
+
+		Pin normals = Pin(OUTPUT_NORMALS_PIN_ID, "Normals", ed::PinKind::Input);
+		normals.node = node;
+		node->inputs.emplace_back(normals);
+
+		Pin metallic = Pin(OUTPUT_METALLIC_PIN_ID, "Metallic", ed::PinKind::Input);
+		metallic.node = node;
+		node->inputs.emplace_back(metallic);
+
+		Pin roughness = Pin(OUTPUT_ROUGHNESS_PIN_ID, "Roughness", ed::PinKind::Input);
+		roughness.node = node;
+		node->inputs.emplace_back(roughness);
+
+		node->headerColor = ImColor(100, 100, 100, 255);
+
+		nodes.emplace_back(node);
+
+		creationId += 5;
+	}
+
+	void PanelNodes::SaveNodes(SerializerObject& appObject)
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
+
+		//SerializerValue masterNodeValue = JSONSerializer::CreateValue();
+		//SerializerObject masterNodeObject = JSONSerializer::CreateObjectFromValue(value);
+		ImVec2 pos = ed::GetNodePosition(nodes[0]->id);
+		JSONSerializer::SetVector2f(appObject, "pos", glm::vec2(pos.x, pos.y));
+
+		JSONSerializer::SetNumber(appObject, "creationId", creationId);
+
+		SerializerValue nodesArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray nodesArray = JSONSerializer::CreateArrayFromValue(nodesArrayValue);
+		JSONSerializer::SetObjectValue(appObject, "nodes", nodesArrayValue);
+
+		for (int i = 1; i < nodes.size(); ++i)
+		{
+			// TODO: Size save is good, position doesnt save
+			Node* node = nodes[i];
+			SerializerValue nodeValue = node->Save();
+			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
+			pos = ed::GetNodePosition(node->id);
+			JSONSerializer::SetVector2f(nodeObject, "pos", glm::vec2(pos.x, pos.y));
+			if (node->type == NodeType::GROUP)
+			{
+				JSONSerializer::SetVector2f(nodeObject, "size", glm::vec2(node->size.x, node->size.y));
+			}
+
+			JSONSerializer::AppendValueToArray(nodesArray, nodeValue);
+
+			SerializerValue inputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray inputPinsArray = JSONSerializer::CreateArrayFromValue(inputPinsArrayValue);
+			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
+			for (const auto& pin : node->inputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::AppendValueToArray(inputPinsArray, value);
+			}
+
+			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
+			SerializerArray outputPinsArray = JSONSerializer::CreateArrayFromValue(outputPinsArrayValue);
+			JSONSerializer::SetObjectValue(nodeObject, "outputPins", outputPinsArrayValue);
+			for (const auto& pin : node->outputs)
+			{
+				SerializerValue value = JSONSerializer::CreateValue();
+				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+				JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				JSONSerializer::SetString(object, "name", pin.name.c_str());
+				JSONSerializer::AppendValueToArray(outputPinsArray, value);
+			}
+
+		}
+
+		SerializerValue linksArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray linksArray = JSONSerializer::CreateArrayFromValue(linksArrayValue);
+		JSONSerializer::SetNumber(appObject, "linkCreationId", linkCreationId);
+		JSONSerializer::SetObjectValue(appObject, "links", linksArrayValue);
+
+		for (int i = 0; i < links.size(); ++i)
+		{
+			LinkInfo& link = links[i];
+			SerializerValue value = JSONSerializer::CreateValue();
+			SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+			
+			JSONSerializer::SetNumber(object, "id", link.id.Get());
+			JSONSerializer::SetNumber(object, "inputPinId", link.inputId.Get());
+			JSONSerializer::SetNumber(object, "outputPinId", link.outputId.Get());
+			JSONSerializer::AppendValueToArray(linksArray, value);
+		}
+	}
+
+	void PanelNodes::LoadNodes(SerializerObject& appObject)
+	{
+		repositionNodes = true;
+		glm::vec2 pos = JSONSerializer::GetVector2fFromObject(appObject, "pos");
+		nodes[0]->pos = ImVec2(pos.x, pos.y);
+
+		SerializerArray nodesArray = JSONSerializer::GetArrayFromObject(appObject, "nodes");
+		size_t size = JSONSerializer::GetArraySize(nodesArray);
+
+		for (size_t i = 0; i < size; ++i)
+		{
+			SerializerObject object = JSONSerializer::GetObjectFromArray(nodesArray, i);
+
+			const char* name = JSONSerializer::GetStringFromObject(object, "name");
+			int id = JSONSerializer::GetNumberFromObject(object, "id");
+			NodeType type = (NodeType)JSONSerializer::GetNumberFromObject(object, "type");
+
+			Node* node = nullptr;
+			switch (type)
+			{
+				case NodeType::COLOR:
+				{
+					node = (ColorNode*)CreateFlatColorNode(name, {});
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				// Generators
+				case NodeType::CIRCLE:
+				{
+					node = CreateGeneratorNode<CircleNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CHECKERS:
+				{
+					node = CreateGeneratorNode<CheckersNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::WHITE_NOISE:
+				{
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::WHITE);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::FBM_NOISE:
+				{
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::FBM);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::DERIVATIVE_NOISE:
+				{
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::DERIVATIVE);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::GRADIENT_NOISE:
+				{
+					node = CreateGeneratorNode<NoiseNode>(name, NoiseType::GRADIENT);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::VORONOI:
+				{
+					node = CreateGeneratorNode<VoronoiNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				// Filters
+				case NodeType::NORMAL_MAP:
+				{
+					node = CreateFilterNode<NormalMapNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::TILING:
+				{
+					node = CreateFilterNode<TilingNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::EDGE_DETECTOR:
+				{
+					node = CreateFilterNode<EdgeDetectorNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::TWIRL:
+				{
+					node = CreateFilterNode<TwirlNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::INVERT:
+				{
+					node = CreateFilterNode<InvertNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				// Operators
+				case NodeType::BLEND:
+				{
+					node = (BlendNode*)CreateBlendNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::CLAMP:
+				{
+					node = (ClampNode*)CreateClampNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MAX:
+				{
+					node = (MaxMinNode*)CreateMaxMinNode(name, true);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::MIN:
+				{
+					node = (MaxMinNode*)CreateMaxMinNode(name, false);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				case NodeType::TRANSFORM:
+				{
+					node = CreateFilterNode<TransformNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+				case NodeType::GROUP:
+				{
+					node = CreateGroupNode(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+
+			}		
+			glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
+			node->pos = ImVec2(position.x, position.y);
+			//ed::SetNodePosition(node->id, node->pos);
+			if (node->type == NodeType::GROUP)
+			{
+				glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
+				node->size = ImVec2(size.x, size.y);
+			}
+		}
+		creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
+
+		SerializerArray linksArray = JSONSerializer::GetArrayFromObject(appObject, "links");
+		size = JSONSerializer::GetArraySize(linksArray);
+		
+		for (size_t i = 0; i < size; ++i)
+		{
+			SerializerObject object = JSONSerializer::GetObjectFromArray(linksArray, i);
+			int id = JSONSerializer::GetNumberFromObject(object, "id");
+			int inputPinId = JSONSerializer::GetNumberFromObject(object, "inputPinId");
+			int outputPinId = JSONSerializer::GetNumberFromObject(object, "outputPinId");
+
+			LinkInfo link = LinkInfo(id, inputPinId, outputPinId);
+			links.push_back(link);
+			UpdateNode(NodeHelpers::FindPin(inputPinId, nodes), NodeHelpers::FindPin(outputPinId, nodes), link, false);
+		}
+
+		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
+
+	}
+
+	Node* PanelNodes::GetSelectedNode()
+	{
+		ed::NodeId selectedId;
+		ed::GetSelectedNodes(&selectedId, 1);
+		return NodeHelpers::FindNode(selectedId, nodes);
+	}
+
 }

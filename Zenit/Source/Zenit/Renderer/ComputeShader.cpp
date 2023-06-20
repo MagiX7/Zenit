@@ -33,6 +33,12 @@ namespace Zenit {
 		glUseProgram(0);
 	}
 
+	void ComputeShader::Dispatch(unsigned int x, unsigned int y, unsigned int z) const
+	{
+		glDispatchCompute(x, y, z);
+		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	}
+
 	unsigned int ComputeShader::CreateShader()
 	{
 		GLuint shader = glCreateShader(GL_COMPUTE_SHADER);

@@ -2,16 +2,16 @@
 
 namespace Zenit {
 
-	TwirlNode::TwirlNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType)
+	TwirlNode::TwirlNode(int id, const char* name)
+		: Node(id, name)
 	{
 		type = NodeType::TWIRL;
 
-		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/twirl.shader");
+		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Filters/twirl.shader");
 
-		texture = std::make_shared<Texture2D>(nullptr, 512, 512);
-		inputTexture = std::make_unique<Texture2D>("Settings/white.png");
-
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
+		inputTexture = GetWhite();
+		
 		center = { -0.5f,-0.5f };
 		radius = 1.0f;
 		angle = 3.0f;
@@ -35,12 +35,15 @@ namespace Zenit {
 		computeShader->SetUniform1f("angle", angle);
 
 		DispatchCompute(1, 1);
+
+		Node::Update(ts);
+
+		regenerate = false;
 	}
 
 	void TwirlNode::OnImGuiNodeRender()
 	{
 		ImGui::Image((ImTextureID*)texture->GetId(), { 50,50 }, { 0,1 }, { 1,0 });
-
 	}
 
 	void TwirlNode::OnImGuiInspectorRender()
@@ -56,10 +59,32 @@ namespace Zenit {
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
 	}
 
-	void TwirlNode::SetTexture(Texture2D* texture)
+	void TwirlNode::SetInputTexture(Texture2D* texture)
 	{
-		inputTexture.reset(texture);
+		inputTexture = texture;
 		regenerate = true;
+	}
+
+	SerializerValue TwirlNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetString(object, "name", name.c_str());
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetVector2f(object, "center", center);
+		JSONSerializer::SetNumber(object, "radius", radius);
+		JSONSerializer::SetNumber(object, "angle", angle);
+
+		return value;
+	}
+
+	void TwirlNode::Load(SerializerObject& obj)
+	{
+		center = JSONSerializer::GetVector2fFromObject(obj, "center");
+		radius = JSONSerializer::GetNumberFromObject(obj, "radius");
+		angle = JSONSerializer::GetNumberFromObject(obj, "angle");
 	}
 
 }

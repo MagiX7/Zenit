@@ -6,7 +6,7 @@
 
 namespace Zenit {
 
-	Mesh::Mesh(std::vector<Vertex> verts, std::vector<uint32_t> inds) : vertices(verts), indices(inds)
+	Mesh::Mesh(const char* meshName, std::vector<Vertex> verts, std::vector<uint32_t> inds) : name(meshName), vertices(verts), indices(inds)
 	{
 		SetBuffers();
 	}
@@ -28,7 +28,7 @@ namespace Zenit {
 	{
 		vao = std::make_shared<VertexArray>();
 
-		vbo = std::make_shared<VertexBuffer>(&vertices[0], vertices.size() * sizeof(Vertex));
+		vbo = std::make_shared<VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
 		vbo->SetLayout({
 			{ShaderDataType::VEC3F, "position"},
 			{ShaderDataType::VEC3F, "normals"},
@@ -40,5 +40,10 @@ namespace Zenit {
 
 		ibo = std::make_shared<IndexBuffer>(&indices[0], indices.size());
 		vao->SetIndexBuffer(&*ibo);
+
+
+		aabb = AABB();
+		for (int i = 0; i < vertices.size(); ++i)
+			aabb.Extend(vertices[i].position);
 	}
 }

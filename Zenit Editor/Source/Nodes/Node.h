@@ -8,56 +8,48 @@
 
 namespace ed = ax::NodeEditor;
 
+#define NODE_TEXTURE_SIZE 2048
+
 namespace Zenit {
 
-	enum class PinType
-	{
-		None = -1,
-		Flow,
-		Bool,
-		Int,
-		Float,
-		String,
-		Object,
-		Function,
-		Delegate,
-	};
-
-	enum class PinKind
-	{
-		Output,
-		Input
-	};
-
-	enum class NodeOutputType
-	{
-		NONE,
-		TEXTURE,
-		VEC1,
-		VEC2,
-		VEC3,
-	};
+	class PanelNodes;
 
 	enum class NodeType
 	{
 		COLOR = 0,
-		NOISE,
-		PERLIN_NOISE,
+		GRADIENT,
+
+		// Generators
+		CIRCLE,
+		CHECKERS,
+		WHITE_NOISE,
+		FBM_NOISE,
 		DERIVATIVE_NOISE,
+		GRADIENT_NOISE,
 		VORONOI,
+		KIFS_FRACTAL,
 
 		// Filters
 		NORMAL_MAP,
+		TILING,
+		EDGE_DETECTOR,
 		TWIRL,
+		INVERT,
 
 		// Operators
 		BLEND,
 		CLAMP,
 		MAX,
 		MIN,
+		POW = 19,
+		ADD = 20,
+		SUBSTRACT = 21,
+
+		// Transform
+		TRANSFORM,
 
 		// Helpers
-		COMMENT,
+		GROUP,
 	};
 
 	struct Pin;
@@ -78,15 +70,12 @@ namespace Zenit {
 	struct Pin
 	{
 		ed::PinId id;
-		Node* node;
 		std::string name;
-		PinType type;
 		ed::PinKind kind;
+		Node* node;
 
-		//std::vector<LinkInfo> links;
-
-		Pin(int pinId, const char* pinName, PinType type, ed::PinKind kind)
-			: id(pinId), node(nullptr), name(pinName), type(type), kind(kind)
+		Pin(int pinId, const char* pinName, ed::PinKind kind)
+			: id(pinId), node(nullptr), name(pinName), kind(kind)
 		{
 		}
 	};
@@ -95,20 +84,30 @@ namespace Zenit {
 	{
 	public:
 		Node() = delete;
-		Node(int id, const char* name, NodeOutputType outputType, ImColor color = ImColor(255, 255, 255));
+		Node(int id, const char* name, ImColor color = ImColor(255, 255, 255));
 
 		virtual ~Node();
 
-		virtual void Update(TimeStep ts) {};
+		virtual void Update(TimeStep ts);
 		virtual void ResetDefaultState() {};
 		virtual void OnImGuiNodeRender() {};
 		virtual void OnImGuiInspectorRender() {};
+
+		void ForceRegeneration() { regenerate = true; }
+
+		void BindCoreData() const;
+		void DispatchCompute(int xPixels, int yPixels) const;
+
+		static Texture2D* GetWhite();
+
+		virtual SerializerValue Save() { return SerializerValue(); };
+		virtual void Load(SerializerObject& obj) {};
 
 		bool operator==(const Node& other) const
 		{
 			return id == other.id;
 		}
-
+		
 
 	public:
 		ed::NodeId id;
@@ -116,17 +115,21 @@ namespace Zenit {
 		bool changeName = false;
 		std::vector<Pin> inputs;
 		std::vector<Pin> outputs;
+		std::vector<ed::NodeId> nextNodesIds;// = ed::NodeId(4294967295); // Max uint
+		
 
-		ImColor nodeColor = { 255,255,255,255 };
-		NodeOutputType outputType;
+		ImColor headerColor = { 255,255,255,255 };
 		NodeType type; // To be defined in each node
 		ImVec2 pos;
 		ImVec2 size;
 
-		std::string state;
-		std::string savedState;
+		// Compute Shader parameters
+		std::shared_ptr<Texture2D> texture;
+		std::unique_ptr<ComputeShader> computeShader;
+		static Texture2D* white;
 
-		bool isOutput; // Output written into the mesh
+	protected:
+		bool regenerate = true;
 
 	};
 

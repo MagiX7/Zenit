@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../ComputeShaderNode.h"
+#include "../Node.h"
 
 namespace Zenit {
 
-	class MaxMinNode : public ComputeShaderNode
+	class MaxMinNode : public Node
 	{
 	public:
-		MaxMinNode(int id, const char* name, NodeOutputType outputType, bool isMax);
+		MaxMinNode(int id, const char* name , bool isMax);
 		virtual ~MaxMinNode();
 
 		virtual void Update(TimeStep ts) override;
@@ -20,10 +20,13 @@ namespace Zenit {
 		void SetFirstTexture(Texture2D* texture);
 		void SetSecondTexture(Texture2D* texture);
 	
+		virtual SerializerValue Save() override;
+		virtual void Load(SerializerObject& obj) override;
+
 	private:
-		std::shared_ptr<Texture2D> inputTexture1;
-		std::shared_ptr<Texture2D> inputTexture2;
-		enum class Type { MIN, MAX };
-		Type maxMinType;
+		Texture2D* inputTexture1;
+		Texture2D* inputTexture2;
+		//enum class Type { MIN, MAX };
+		//Type maxMinType;
 	};
 }

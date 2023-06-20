@@ -2,20 +2,17 @@
 
 namespace Zenit {
 
-	BlendNode::BlendNode(int id, const char* name, NodeOutputType outputType)
-		: ComputeShaderNode(id, name, outputType), contribution(0)
+	BlendNode::BlendNode(int id, const char* name)
+		: Node(id, name), contribution(0.5)
 	{
 		type = NodeType::BLEND;
 
 		computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Operators/blend.shader");
-		texture = std::make_shared<Texture2D>(nullptr, 1024, 1024);
+		texture = std::make_shared<Texture2D>(nullptr, NODE_TEXTURE_SIZE, NODE_TEXTURE_SIZE);
 
-		BindCoreData();
-		computeShader->SetUniform1f("contribution", contribution);
-		DispatchCompute(1, 1);
+		tex1 = GetWhite();
+		tex2 = GetWhite();
 
-		tex1 = std::make_unique<Texture2D>("Settings/white.png");
-		tex2 = std::make_unique<Texture2D>("Settings/white.png");
 		blendMode = (BlendMode)0;
 	}
 
@@ -38,6 +35,10 @@ namespace Zenit {
 		computeShader->SetUniform1i("tex2", 2);
 
 		DispatchCompute(1, 1);
+
+		Node::Update(ts);
+
+		regenerate = false;
 	}
 
 	void BlendNode::OnImGuiNodeRender()
@@ -76,14 +77,36 @@ namespace Zenit {
 
 	void BlendNode::SetFirstTexture(Texture2D* texture)
 	{
-		tex1.reset(texture);
+		tex1 = texture;
 		regenerate = true;
 	}
 
 	void BlendNode::SetSecondTexture(Texture2D* texture)
 	{
-		tex2.reset(texture);
+		tex2 = texture;
 		regenerate = true;
+	}
+
+	SerializerValue BlendNode::Save()
+	{
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+
+		JSONSerializer::SetString(object, "name", name.c_str());
+		JSONSerializer::SetNumber(object, "id", id.Get());
+		JSONSerializer::SetNumber(object, "type", (int)type);
+		JSONSerializer::SetString(object, "firstTexture", tex1->GetName().c_str());
+		JSONSerializer::SetString(object, "secondTexture", tex2->GetName().c_str());
+		JSONSerializer::SetNumber(object, "blendMode", (int)blendMode);
+		JSONSerializer::SetNumber(object, "contribution", contribution);
+
+		return value;
+	}
+
+	void BlendNode::Load(SerializerObject& obj)
+	{
+		blendMode = (BlendMode)JSONSerializer::GetNumberFromObject(obj, "blendMode");
+		contribution = JSONSerializer::GetNumberFromObject(obj, "contribution");	
 	}
 
 }

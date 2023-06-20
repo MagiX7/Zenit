@@ -17,6 +17,7 @@ namespace Zenit {
 
 		void Bind() const;
 		void Unbind() const;
+		void Dispatch(unsigned int x, unsigned int y, unsigned int z) const;
 
 		void SetUniformBool(const std::string& name, bool b);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Zenit/Core/PerspectiveCamera.h"
+#include "Zenit/Renderer/PerspectiveCamera.h"
 
 #include <memory>
 #include <vector>

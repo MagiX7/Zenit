@@ -18,18 +18,21 @@ namespace Zenit {
 		return instance;
 	}
 
+	void Input::Shutdown()
+	{
+		delete instance;
+	}
+
 	bool Input::IsKeyPressed(int keycode)
 	{
 		GLFWwindow* window = Application::GetInstance().GetWindow().GetNativeWindow();
 		int state = glfwGetKey(window, keycode);
-
 		return state == GLFW_PRESS;
 	}
 
 	bool Input::IsMouseButtonPressed(int button)
 	{
 		GLFWwindow* window = Application::GetInstance().GetWindow().GetNativeWindow();
-
 		int state = glfwGetMouseButton(window, button);
 		return state == GLFW_PRESS;
 	}
