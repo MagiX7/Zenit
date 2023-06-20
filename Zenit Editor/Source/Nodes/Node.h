@@ -100,7 +100,7 @@ namespace Zenit {
 
 		static Texture2D* GetWhite();
 
-		virtual SerializerValue Save() { return SerializerValue(); };
+		virtual SerializerValue Save() { return SerializerValue(); }
 		virtual void Load(SerializerObject& obj) {};
 
 		bool operator==(const Node& other) const
@@ -108,6 +108,8 @@ namespace Zenit {
 			return id == other.id;
 		}
 		
+	protected:
+		void SaveCore(SerializerObject& obj);
 
 	public:
 		ed::NodeId id;

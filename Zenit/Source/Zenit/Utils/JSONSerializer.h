@@ -57,11 +57,13 @@ namespace Zenit {
 
 
 		static void AppendValueToArray(SerializerArray& array, SerializerValue& value);
+		static void AppendNumberToArray(SerializerArray& array, float number);
 
 		static SerializerObject GetObjectWithName(SerializerObject& object, const char* name);
 		static SerializerObject GetObjectWithValue(SerializerValue& value);
 		static SerializerObject GetObjectFromArray(SerializerArray& array, size_t index);
-
+		static float GetNumberFromArray(SerializerArray& array, size_t index);
+		
 		static SerializerValue GetValueFromObject(SerializerObject& object, const char* name);
 		static float GetNumberFromObject(SerializerObject& object, const char* name);
 		static glm::vec2 GetVector2fFromObject(SerializerObject& object, const char* name);

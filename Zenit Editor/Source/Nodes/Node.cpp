@@ -50,4 +50,23 @@ namespace Zenit {
 		return white;
 	}
 
+	void Node::SaveCore(SerializerObject& obj)
+	{
+		JSONSerializer::SetString(obj, "name", name.c_str());
+		JSONSerializer::SetNumber(obj, "id", id.Get());
+		JSONSerializer::SetNumber(obj, "type", (int)type);
+
+		SerializerValue idsArrayValue = JSONSerializer::CreateArrayValue();
+		SerializerArray idsArray = JSONSerializer::CreateArrayFromValue(idsArrayValue);
+		JSONSerializer::SetObjectValue(obj, "nextNodesIds", idsArrayValue);
+		for (int i = 0; i < nextNodesIds.size(); ++i)
+		{
+			JSONSerializer::AppendNumberToArray(idsArray, nextNodesIds[i].Get());
+			/*SerializerValue value = JSONSerializer::CreateValue();
+			SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+			JSONSerializer::SetNumber(object, ("id" + std::to_string(i)).c_str(), nextNodesIds[i].Get());
+			JSONSerializer::AppendValueToArray(idsArray, value);*/
+		}
+	}
+
 }

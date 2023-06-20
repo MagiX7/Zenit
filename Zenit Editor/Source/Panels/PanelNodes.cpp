@@ -485,6 +485,16 @@ namespace Zenit {
 				if (ed::AcceptDeletedItem())
 				{
 					const LinkInfo& deletedLink = NodeHelpers::FindLink(deletedLinkId, links);
+					
+					// Remove the next node id from the vector
+					Pin* inPin = NodeHelpers::FindPin(deletedLink.inputId, nodes);
+					Pin* outPin = NodeHelpers::FindPin(deletedLink.outputId, nodes);
+					auto it = std::find(inPin->node->nextNodesIds.begin(), inPin->node->nextNodesIds.end(), outPin->node->id);
+					if (it != inPin->node->nextNodesIds.end())
+					{
+						inPin->node->nextNodesIds.erase(it);
+					}
+
 
 					for (int i = 0; i < links.size(); ++i)
 					{
@@ -726,7 +736,7 @@ namespace Zenit {
 		nodes.emplace_back(node);
 		node->headerColor = FLAT_COLOR_NODE_HEADER_COLOR;
 
-		Pin pin = Pin(creationId++, "Output", ed::PinKind::Output);
+		Pin pin = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
@@ -740,15 +750,15 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "Output",ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ",ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -762,11 +772,11 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -780,15 +790,15 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -802,11 +812,11 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -1040,8 +1050,6 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
 
-		//SerializerValue masterNodeValue = JSONSerializer::CreateValue();
-		//SerializerObject masterNodeObject = JSONSerializer::CreateObjectFromValue(value);
 		ImVec2 pos = ed::GetNodePosition(nodes[0]->id);
 		JSONSerializer::SetVector2f(appObject, "pos", glm::vec2(pos.x, pos.y));
 
@@ -1071,12 +1079,13 @@ namespace Zenit {
 			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
 			for (const auto& pin : node->inputs)
 			{
-				SerializerValue value = JSONSerializer::CreateValue();
-				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				//SerializerValue value = JSONSerializer::CreateValue();
+				//SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 				
-				JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				JSONSerializer::SetString(object, "name", pin.name.c_str());
-				JSONSerializer::AppendValueToArray(inputPinsArray, value);
+				JSONSerializer::AppendNumberToArray(inputPinsArray, pin.id.Get());
+				//JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				//JSONSerializer::SetString(object, "name", pin.name.c_str());
+				//JSONSerializer::AppendValueToArray(inputPinsArray, value);
 			}
 
 			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
@@ -1084,12 +1093,15 @@ namespace Zenit {
 			JSONSerializer::SetObjectValue(nodeObject, "outputPins", outputPinsArrayValue);
 			for (const auto& pin : node->outputs)
 			{
-				SerializerValue value = JSONSerializer::CreateValue();
-				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				JSONSerializer::AppendNumberToArray(outputPinsArray, pin.id.Get());
 
-				JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				JSONSerializer::SetString(object, "name", pin.name.c_str());
-				JSONSerializer::AppendValueToArray(outputPinsArray, value);
+
+				//SerializerValue value = JSONSerializer::CreateValue();
+				//SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+				//
+				//JSONSerializer::SetNumber(object, "id", pin.id.Get());
+				//JSONSerializer::SetString(object, "name", pin.name.c_str());
+				//JSONSerializer::AppendValueToArray(outputPinsArray, value);
 			}
 
 		}
@@ -1241,6 +1253,7 @@ namespace Zenit {
 				}
 				case NodeType::TWIRL:
 				{
+					// TODO: La id de los pines no se conserva
 					node = CreateFilterNode<TwirlNode>(name);
 					node->id = id;
 					node->Load(object);
@@ -1323,18 +1336,53 @@ namespace Zenit {
 					break;
 				}
 
-			}		
-			glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
-			node->pos = ImVec2(position.x, position.y);
-			//ed::SetNodePosition(node->id, node->pos);
-			if (node->type == NodeType::GROUP)
+			}
+
+			if (node)
 			{
-				glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
-				node->size = ImVec2(size.x, size.y);
+				// Load Pins -----------------------------------------------------------------------------------
+				// Assign each pin its corresponding ID so later everything works
+				SerializerArray inputPinsArray = JSONSerializer::GetArrayFromObject(object, "inputPins");
+				size_t inputPinsSize = JSONSerializer::GetArraySize(inputPinsArray);
+				for (int i = 0; i < inputPinsSize; ++i)
+				{
+					node->inputs[i].id = JSONSerializer::GetNumberFromArray(inputPinsArray, i);
+				}
+
+				SerializerArray outputPinsArray = JSONSerializer::GetArrayFromObject(object, "outputPins");
+				size_t outputPinsSize = JSONSerializer::GetArraySize(outputPinsArray);
+				for (int i = 0; i < outputPinsSize; ++i)
+				{
+					node->outputs[i].id = JSONSerializer::GetNumberFromArray(outputPinsArray, i);;
+				}
+				// Load Pins -----------------------------------------------------------------------------------
+
+
+				// Store node position and size if it is a group node
+				glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
+				node->pos = ImVec2(position.x, position.y);
+
+				if (node->type == NodeType::GROUP)
+				{
+					glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
+					node->size = ImVec2(size.x, size.y);
+				}
+
+				SerializerArray nextNodesIdsArray = JSONSerializer::GetArrayFromObject(object, "nextNodesIds");
+				size_t nextNodesIdsSize = JSONSerializer::GetArraySize(outputPinsArray);
+				node->nextNodesIds.resize(nextNodesIdsSize);
+				for (int i = 0; i < nextNodesIdsSize; i++)
+				{
+					node->nextNodesIds[i] = JSONSerializer::GetNumberFromArray(nextNodesIdsArray, i);
+				}
+
+
 			}
 		}
 		creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
 
+
+		// Load Links --------------------------------------------------------------------------------
 		SerializerArray linksArray = JSONSerializer::GetArrayFromObject(appObject, "links");
 		size = JSONSerializer::GetArraySize(linksArray);
 		
@@ -1347,8 +1395,11 @@ namespace Zenit {
 
 			LinkInfo link = LinkInfo(id, inputPinId, outputPinId);
 			links.push_back(link);
-			UpdateNode(NodeHelpers::FindPin(inputPinId, nodes), NodeHelpers::FindPin(outputPinId, nodes), link, false);
+			auto inPin = NodeHelpers::FindPin(inputPinId, nodes);
+			auto outPin = NodeHelpers::FindPin(outputPinId, nodes);
+			UpdateNode(inPin, outPin, link, false);
 		}
+		// Load Links --------------------------------------------------------------------------------
 
 		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
 

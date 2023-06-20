@@ -51,7 +51,6 @@ namespace Zenit {
 		void DeleteNode(ed::NodeId id);
 		void DeleteLink(const ed::LinkId& id);
 
-
 		ColorNode* CreateFlatColorNode(const char* name, const glm::vec3& color);
 		
 		// Operators
@@ -74,7 +73,7 @@ namespace Zenit {
 			node->headerColor = GENERATOR_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);
 
-			Pin output = Pin(creationId++, "Output", ed::PinKind::Output);
+			Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 			output.node = node;
 			node->outputs.emplace_back(output);
 
@@ -82,18 +81,18 @@ namespace Zenit {
 		}
 
 		template<typename T, typename... Args>
-		T* CreateFilterNode(const char* name, Args&&... args)
+		T* CreateFilterNode(const char* name, int inputId = -1, int outputId = -1, Args&&... args)
 		{
 			T* node = new T(creationId++, name, std::forward<Args>(args)...);
 			node->size = { 5,5 };
 			node->headerColor = FILTER_NODE_HEADER_COLOR;
 			nodes.emplace_back(node);
 
-			Pin input = Pin(creationId++, "Input", ed::PinKind::Input);
+			Pin input = Pin(inputId > 0 ? inputId : creationId++, "  O  ", ed::PinKind::Input);
 			input.node = node;
 			node->inputs.emplace_back(input);
 
-			Pin output = Pin(creationId++, "Output", ed::PinKind::Output);
+			Pin output = Pin(outputId > 0 ? outputId : creationId++, "  O  ", ed::PinKind::Output);
 			output.node = node;
 			node->outputs.emplace_back(output);
 

@@ -130,10 +130,8 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 
-		JSONSerializer::SetString(object, "name", name.c_str());
-		JSONSerializer::SetNumber(object, "id", id.Get());
-		JSONSerializer::SetNumber(object, "type", (int)type);
-		
+		Node::SaveCore(object);
+
 		JSONSerializer::SetNumber(object, "factor", factor);
 		
 		switch (instrType)
