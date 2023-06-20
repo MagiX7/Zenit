@@ -25,6 +25,21 @@ The other one is to create a useful tool that can be used to generate textures a
 
 Besides that, another goal to achieve is to keep the tool as simple as possible, allowing the user to have a better experience when using it.
 
+
+## Controls
+### Nodes Panel
+- Right click to open the creation popup.
+- Left click to move nodes, multiple selection and create links.
+- To move the camera, press the mouse wheel button and move the mouse.
+- Mouse wheel to zoom in and out.
+- When changing the name of a node, left click outside of it to exit name editing mode.
+- Delete key to delete nodes or links.
+
+### 3D Preview
+- Left click to rotate the model.
+- Mouse wheel to zoom in or out.
+
+
 ## Dependencies
 
 The dependencies Zenit uses are:
