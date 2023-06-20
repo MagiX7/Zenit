@@ -17,6 +17,8 @@ namespace Zenit {
 		PerspectiveCamera(glm::vec3 pos, glm::vec3 target);
 		virtual ~PerspectiveCamera() {}
 
+		void Scroll(TimeStep ts);
+
 		void SetPerspective(float verticalFov, float nearClip, float farClip);
 		void SetOrthographic(float size, float nearClip, float farClip);
 
@@ -75,7 +77,7 @@ namespace Zenit {
 		glm::mat4 projection = glm::mat4(1.0);
 		glm::mat4 view = glm::mat4(1.0);
 		
-		glm::vec3 position = glm::vec3(0, 0, 3);
+		glm::vec3 position = glm::vec3(0);
 		glm::vec3 rotation = glm::vec3(0);
 		glm::vec3 direction = glm::vec3(0);
 		glm::vec3 up = glm::vec3(0);

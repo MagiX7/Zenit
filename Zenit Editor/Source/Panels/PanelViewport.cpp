@@ -24,7 +24,7 @@ namespace Zenit {
 		if (!allowModelRotation || !model)
 			return;
 
-		//camera.Scroll(ts);
+		camera.Scroll(ts);
 
 		float x = Input::GetInstance()->GetMouseX();
 		float y = Input::GetInstance()->GetMouseY();

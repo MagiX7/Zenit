@@ -1,6 +1,7 @@
 #include "Zenit/Core/Application.h"
 #include "Zenit/Core/Window.h"
 #include "Zenit/Core/Input.h"
+#include "Zenit/Core/Log.h"
 
 #include "Model.h"
 #include "Zenit/Renderer/PerspectiveCamera.h"

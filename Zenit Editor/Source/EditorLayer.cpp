@@ -32,7 +32,7 @@ namespace Zenit {
 	}
 
 
-	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2.5 }, { 0,0,0 })), frustum({ camera })
+	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 })), frustum({ camera })
 	{
 	}
 
@@ -277,7 +277,7 @@ namespace Zenit {
 				{
 					ImGui::Dummy({ 0,5 });
 
-					auto pos = camera.GetPosition();
+					/*auto pos = camera.GetPosition();
 					if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.1f))
 					{
 						camera.SetPosition(pos);
@@ -286,8 +286,6 @@ namespace Zenit {
 					{
 						camera.SetPosition(glm::vec3(0, 0, 2));
 					}
-
-					// TODO: Inverse Node (One minus)
 
 					ImGui::Dummy({ 0,2.5f });
 
@@ -301,7 +299,7 @@ namespace Zenit {
 						camera.SetRotation(glm::vec3(0, 0, 0));
 					}
 
-					ImGui::Dummy({ 0,5 });
+					ImGui::Dummy({ 0,5 });*/
 
 					float verticalFov = camera.GetVerticalFov();
 					if (ImGui::DragFloat("Vertical FOV", &verticalFov, 0.1f))
@@ -360,28 +358,28 @@ namespace Zenit {
 			ImGui::Dummy({ 0, 3 });
 
 
-			if (currentMesh)
-			{
-				if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					//if (ImGui::Button("Apply textures"))
-					{
-						/*currentMesh->SetDiffuse(diffuse);
-						currentMesh->SetNormals(normals);
-						currentMesh->SetMetallic(metallic);
-						currentMesh->SetRoughness(roughness);*/
-					}
-				}
-			}
-			else
-			{
-				ImGui::BulletText("There is no selected mesh.");
-				ImGui::Text("         Textures will be applied to every mesh inside the model.");
+			//if (currentMesh)
+			//{
+			//	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
+			//	{
+			//		//if (ImGui::Button("Apply textures"))
+			//		{
+			//			/*currentMesh->SetDiffuse(diffuse);
+			//			currentMesh->SetNormals(normals);
+			//			currentMesh->SetMetallic(metallic);
+			//			currentMesh->SetRoughness(roughness);*/
+			//		}
+			//	}
+			//}
+			//else
+			//{
+			//	ImGui::BulletText("There is no selected mesh.");
+			//	ImGui::Text("         Textures will be applied to every mesh inside the model.");
 
-				ImGui::Dummy({ 0, 3 });
-				ImGui::Separator();
-				ImGui::Dummy({ 0, 3 });
-			}
+			//	ImGui::Dummy({ 0, 3 });
+			//	ImGui::Separator();
+			//	ImGui::Dummy({ 0, 3 });
+			//}
 
 
 			if (Node* node = panelNodes->GetSelectedNode())

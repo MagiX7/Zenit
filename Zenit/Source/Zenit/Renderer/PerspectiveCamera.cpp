@@ -19,9 +19,21 @@
 namespace Zenit {
 
 	PerspectiveCamera::PerspectiveCamera(glm::vec3 pos, glm::vec3 target)
+		: position(pos)
 	{
 		this->target = target;
 		RecalculateMatrices();
+	}
+
+	void PerspectiveCamera::Scroll(TimeStep ts)
+	{
+
+		float scroll = Input::GetInstance()->GetMouseScrollDy();
+		if (scroll != 0)
+		{
+			position += forward * scroll * float(ts) * 5.0f;
+			RecalculateMatrices();
+		}
 	}
 
 	void PerspectiveCamera::SetPerspective(float verticalFov, float nearClip, float farClip)

@@ -24,8 +24,8 @@ namespace Zenit {
 		float GetMouseMotionX();
 		float GetMouseMotionY();
 		glm::vec2 GetMousePosition();
-		inline float GetMouseScrolDx() { return deltaXScroll; }
-		inline float GetMouseScrolDy() { return deltaYScroll; }
+		inline float GetMouseScrollDx() { return deltaXScroll; }
+		inline float GetMouseScrollDy() { return deltaYScroll; }
 
 		void OnEvent(Event& e);
 

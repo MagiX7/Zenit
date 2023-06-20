@@ -91,7 +91,7 @@ namespace Zenit {
 	{
 		deltaXScroll = e.GetOffsetX();
 		deltaYScroll = e.GetOffsetY();
-		
+
 		return true;
 	}
 }
