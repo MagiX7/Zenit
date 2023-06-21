@@ -398,17 +398,14 @@ namespace Zenit {
 						Pin* inputPin = NodeHelpers::FindPin(currentLink.inputId, nodes);
 						Pin* outputPin = NodeHelpers::FindPin(currentLink.outputId, nodes);
 
-						// TODO: Removing here leads to problems!!!
 						if (outputPin->node == deletedNode)
 						{
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
 						}
 						else if (inputPin->node == deletedNode)
 						{
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
@@ -467,7 +464,11 @@ namespace Zenit {
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
 						links.push_back(link);
 
-						startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+						// Check if the next node id is already present
+						auto it = std::find(startPin->node->nextNodesIds.begin(), startPin->node->nextNodesIds.end(), endPin->node->id);
+						if (it == startPin->node->nextNodesIds.end())
+							startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+
 						UpdateNode(startPin, endPin, link, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
 					}
@@ -486,16 +487,6 @@ namespace Zenit {
 				{
 					const LinkInfo& deletedLink = NodeHelpers::FindLink(deletedLinkId, links);
 					
-					// Remove the next node id from the vector
-					Pin* inPin = NodeHelpers::FindPin(deletedLink.inputId, nodes);
-					Pin* outPin = NodeHelpers::FindPin(deletedLink.outputId, nodes);
-					auto it = std::find(inPin->node->nextNodesIds.begin(), inPin->node->nextNodesIds.end(), outPin->node->id);
-					if (it != inPin->node->nextNodesIds.end())
-					{
-						inPin->node->nextNodesIds.erase(it);
-					}
-
-
 					for (int i = 0; i < links.size(); ++i)
 					{
 						if (links[i].id == deletedLinkId)
@@ -504,7 +495,6 @@ namespace Zenit {
 							Pin* inputPin = NodeHelpers::FindPin(link.inputId, nodes);
 							Pin* outputPin = NodeHelpers::FindPin(link.outputId, nodes);
 
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							UpdateNode(inputPin, outputPin, deletedLink, true);
 
@@ -659,48 +649,6 @@ namespace Zenit {
 		}
 		ImGui::CloseCurrentPopup();
 	}
-
-	/*Node* PanelNodes::FindNode(ed::NodeId id) const
-	{
-		for (const auto& node : nodes)
-		{
-			if (node->id == id)
-				return node;
-		}
-
-		return nullptr;
-	}
-
-	Pin* PanelNodes::FindPin(ed::PinId id)
-	{
-		for (int i = 0; i < nodes.size(); ++i)
-		{
-			for (auto& inputPin : nodes[i]->inputs)
-			{
-				if (inputPin.id == id)
-					return &inputPin;
-			}
-
-			for (auto& outputPin : nodes[i]->outputs)
-			{
-				if (outputPin.id == id)
-					return &outputPin;
-			}
-		}
-
-		return &incorrectPin;
-	}
-
-	LinkInfo* PanelNodes::FindLink(const ed::LinkId& id)
-	{
-		for (auto& link : links)
-		{
-			if (link.id == id)
-				return &link;
-		}
-
-		return &incorrectLink;
-	}*/
 
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
@@ -930,16 +878,6 @@ namespace Zenit {
 				break;
 			}
 		}
-		
-		//if (outputPin->node && outputPin->node->nextNodeId)
-		//{
-		//	// Never updates because UpdateNode() is called instantly after the link is created, so the last node never has a next node
-		//	// Create another function or system that calls this func? (i.e from node update?)
-		//	auto next = NodeHelpers::FindNode(outputPin->node->nextNodeId, nodes);
-		//	if (next)
-		//		UpdateNode(outputPin, &next->outputs[0], link, resetData);
-		//}
-
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
@@ -1079,13 +1017,7 @@ namespace Zenit {
 			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
 			for (const auto& pin : node->inputs)
 			{
-				//SerializerValue value = JSONSerializer::CreateValue();
-				//SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
-				
 				JSONSerializer::AppendNumberToArray(inputPinsArray, pin.id.Get());
-				//JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				//JSONSerializer::SetString(object, "name", pin.name.c_str());
-				//JSONSerializer::AppendValueToArray(inputPinsArray, value);
 			}
 
 			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
@@ -1094,14 +1026,6 @@ namespace Zenit {
 			for (const auto& pin : node->outputs)
 			{
 				JSONSerializer::AppendNumberToArray(outputPinsArray, pin.id.Get());
-
-
-				//SerializerValue value = JSONSerializer::CreateValue();
-				//SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
-				//
-				//JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				//JSONSerializer::SetString(object, "name", pin.name.c_str());
-				//JSONSerializer::AppendValueToArray(outputPinsArray, value);
 			}
 
 		}
@@ -1126,11 +1050,9 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
-		// Clear all previous nodes except the master
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			delete nodes[i];
-			nodes.erase(nodes.begin() + i);
 		}
 		nodes.clear();
 		
