@@ -999,7 +999,6 @@ namespace Zenit {
 
 		for (int i = 1; i < nodes.size(); ++i)
 		{
-			// TODO: Size save is good, position doesnt save
 			Node* node = nodes[i];
 			SerializerValue nodeValue = node->Save();
 			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
@@ -1175,7 +1174,6 @@ namespace Zenit {
 				}
 				case NodeType::TWIRL:
 				{
-					// TODO: La id de los pines no se conserva
 					node = CreateFilterNode<TwirlNode>(name);
 					node->id = id;
 					node->Load(object);

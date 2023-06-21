@@ -19,7 +19,6 @@ namespace Zenit {
 		ZN_CORE_ERROR(error);
 	}
 
-	// TODO: Add window flags
 	Window::Window(int width, int height, const std::string& title)
 	{
 		props = WindowProperties();
@@ -52,7 +51,6 @@ namespace Zenit {
 		glfwSetErrorCallback(GLFWErrorCallback);
 
 		window = glfwCreateWindow(props.width, props.height, props.title.c_str(), 0, 0);
-			
 		if (window) ZN_CORE_INFO("[INFO] Window Initialization...");
 
 		glfwMakeContextCurrent(window);

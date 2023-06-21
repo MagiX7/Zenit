@@ -2,7 +2,6 @@
 
 namespace Zenit {
 
-	// TODO: Handle different blend curves (easings maybe?)
 	ClampNode::ClampNode(int id, const char* name)
 		: Node(id, name), min(0.0f), max(1.0f)
 	{

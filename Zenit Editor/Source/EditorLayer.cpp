@@ -72,7 +72,6 @@ namespace Zenit {
 		FocusCameraOnModel();
 
 		Application::GetInstance().GetWindow().SetIcon("Settings/icon.png");
-		// TODO: Masking node (p.e only show stuff inside a circle)
 	}
 
 	void EditorLayer::OnDetach()

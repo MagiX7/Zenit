@@ -23,7 +23,6 @@ namespace Zenit {
 
 		BindCoreData();
 
-		//TODO: Revise rotation
 		inputTexture->Bind(1);
 		computeShader->SetUniform1i("inputTexture", 1);
 		computeShader->SetUniformVec2f("offset", offset);
