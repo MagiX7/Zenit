@@ -31,15 +31,13 @@ namespace Zenit {
 		void Update(TimeStep ts);
 		void OnImGuiRender();
 
-		//Node* FindNode(ed::NodeId id) const;
-		//Pin* FindPin(ed::PinId id);
-		//LinkInfo* FindLink(const ed::LinkId& id);
-
 		void SaveNodes(SerializerObject& appObject);
 		void LoadNodes(SerializerObject& appObject);
+		void ClearNodes();
 
 		static const std::vector<Node*>& GetNodes() { return nodes; }
 		Node* GetSelectedNode();
+
 
 	private:
 		void DrawNodes(std::vector<Node*>& nodes, std::vector<LinkInfo>& links);

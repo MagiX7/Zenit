@@ -69,8 +69,6 @@ namespace Zenit {
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
 
-		FocusCameraOnModel();
-
 		Application::GetInstance().GetWindow().SetIcon("Settings/icon.png");
 	}
 
@@ -125,7 +123,11 @@ namespace Zenit {
 		ImGui::BeginMainMenuBar();
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Open"))
+			if (ImGui::MenuItem("New"))
+			{
+				NewScene();
+			}
+			else if (ImGui::MenuItem("Open..."))
 			{
 				Load();
 			}
@@ -157,7 +159,6 @@ namespace Zenit {
 				if (ImGui::MenuItem(model->GetName().c_str()))
 				{
 					currentModel = model;
-					FocusCameraOnModel();
 				}
 			}
 
@@ -316,8 +317,8 @@ namespace Zenit {
 
 		ImGui::Begin("Performance");
 		{
-			ImGui::Text(std::to_string(Application::GetInstance().GetTimeStep()).c_str());
-			ImGui::Text(std::to_string(Application::GetInstance().GetTotalExecutionTime()).c_str());
+			ImGui::Text(("FPS: " + std::to_string(1.0f / Application::GetInstance().GetTimeStep())).c_str());
+			ImGui::Text(("Delta Time: " + std::to_string(Application::GetInstance().GetTimeStep())).c_str());
 		}
 		ImGui::End();
 		
@@ -654,6 +655,17 @@ namespace Zenit {
 
 		return true;
 	}
+
+	void EditorLayer::NewScene()
+	{
+		panelNodes->ClearNodes();
+		savedFilePath = "";
+		SetDiffuseData(nullptr);
+		SetNormalsData(nullptr);
+		SetMetallicData(nullptr);
+		SetRoughnessData(nullptr);
+		
+	}
 		
 	void EditorLayer::LoadSkyboxes()
 	{
@@ -730,80 +742,6 @@ namespace Zenit {
 		models.clear();
 
 		LoadModels();
-	}
-
-	void EditorLayer::FocusCameraOnModel()
-	{
-		/*glm::vec3 maxPoint = currentModel->GetAABB().GetMax();
-		glm::vec3 minPoint = currentModel->GetAABB().GetMin();
-
-		glm::vec3 h = (maxPoint - minPoint) / 2.0f;
-
-		float angle = glm::radians(camera.GetVerticalFov() / 2);
-
-		glm::vec3 distance = h / glm::tan(angle);
-
-		distance.x = (distance.x + 2.5f) * camera.GetForward().x;
-		distance.y = distance.y * camera.GetForward().y;
-		distance.z = (distance.z + 2.5f) * camera.GetForward().z;
-		glm::vec3 newPos = currentModel->GetAABB().GetCenter() - distance;
-		camera.SetPosition(newPos);
-		frustum.UpdateFrustum(camera);*/
-
-		/*newUp = newFront.Cross(float3(0.0f, 1.0f, 0.0f).Cross(newFront).Normalized());
-		const float meshRadius = mesh->GetLocalAABB().HalfDiagonal().Length();
-		const float currentDistance = meshCenter.Distance(cameraFrustum.Pos());
-		newPos = meshCenter + ((cameraFrustum.Pos() - meshCenter).Normalized() * meshRadius * 2);*/
-
-
-
-
-
-
-
-		/*AABB modelAabb = currentModel->GetAABB();
-
-		float verticalSize = modelAabb.GetMax().y - modelAabb.GetMin().y;
-
-		float dist = glm::abs(verticalSize / glm::tan(camera.GetVerticalFov() / 2));
-
-		float longest = modelAabb.GetLongestEdge();
-
-		do
-		{
-			glm::vec3 camPosition = camera.GetPosition();
-			glm::vec3 dir = glm::normalize(modelAabb.GetCenter() - camPosition);
-			
-			float totalDistance = glm::distance(modelAabb.GetCenter(), camPosition);
-			if (totalDistance > dist + longest)
-			{
-				camPosition += dir * dist;
-				camera.SetPosition(camPosition);
-				frustum.UpdateFrustum(camera);
-				ZN_CORE_TRACE(" >>> {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
-			}
-			else if (totalDistance < dist - longest)
-			{
-				camPosition -= dir * dist;
-				camera.SetPosition(camPosition);
-				frustum.UpdateFrustum(camera);
-				ZN_CORE_TRACE(" <<< {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
-			}
-			else
-			{
-				break;
-			}
-		} while (!modelAabb.IsInsideFrustum(frustum));*/
-
-		
-		//reference = modelAabb->CenterPoint();
-		//editorCam->SetPosition(position);
-		//editorCam->Look(reference);
-
-
-		
-
-
 	}
 
 }

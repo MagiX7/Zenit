@@ -27,9 +27,7 @@ namespace Zenit {
 
 	void PerspectiveCamera::Scroll(TimeStep ts)
 	{
-
-		float scroll = Input::GetInstance()->GetMouseScrollDy();
-		if (scroll != 0)
+		if (float scroll = Input::GetInstance()->GetMouseScrollDy())
 		{
 			position += forward * scroll * float(ts) * 5.0f;
 			RecalculateMatrices();

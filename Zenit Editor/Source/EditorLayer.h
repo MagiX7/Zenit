@@ -46,14 +46,13 @@ namespace Zenit {
 		void ExportTextures(int resolution, int channels);
 		void Save(bool forceDialog);
 		bool Load();
+		void NewScene();
 
 		void LoadSkyboxes();
 		void ReloadSkyboxes();
 
 		void LoadModels();
 		void ReloadModels();
-
-		void FocusCameraOnModel();
 
 	private:
 		bool finished = false;

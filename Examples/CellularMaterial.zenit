@@ -1,0 +1,199 @@
+{
+    "App": {
+        "diffuse": "Blend_25",
+        "normals": "Normal Map_13",
+        "metallic": "white",
+        "roughness": "white",
+        "pos x": 1100,
+        "pos y": 100,
+        "creationId": 30,
+        "nodes": [
+            {
+                "name": "Voronoi",
+                "id": 8,
+                "type": 8,
+                "nextNodesIds": [
+                    10
+                ],
+                "seed": 4835.61767578125,
+                "scale": 23,
+                "pos x": 71,
+                "pos y": 35,
+                "inputPins": [],
+                "outputPins": [
+                    9
+                ]
+            },
+            {
+                "name": "Edge Detector",
+                "id": 10,
+                "type": 12,
+                "nextNodesIds": [
+                    13,
+                    18
+                ],
+                "threshold": 6,
+                "pos x": 221,
+                "pos y": 35,
+                "inputPins": [
+                    11
+                ],
+                "outputPins": [
+                    12
+                ]
+            },
+            {
+                "name": "Normal Map",
+                "id": 13,
+                "type": 10,
+                "nextNodesIds": [
+                    1
+                ],
+                "zoom": 1,
+                "bumpness": -0.029999999329447746,
+                "pos x": 757,
+                "pos y": 35,
+                "inputPins": [
+                    14
+                ],
+                "outputPins": [
+                    15
+                ]
+            },
+            {
+                "name": "Flat Color",
+                "id": 16,
+                "type": 0,
+                "nextNodesIds": [
+                    18
+                ],
+                "color x": 1,
+                "color y": 0,
+                "color z": 0,
+                "pos x": 231,
+                "pos y": 163,
+                "inputPins": [],
+                "outputPins": [
+                    17
+                ]
+            },
+            {
+                "name": "Blend",
+                "id": 18,
+                "type": 15,
+                "nextNodesIds": [
+                    1,
+                    25
+                ],
+                "firstTexture": "",
+                "secondTexture": "",
+                "blendMode": 5,
+                "contribution": 1,
+                "pos x": 373,
+                "pos y": 147,
+                "inputPins": [
+                    19,
+                    20
+                ],
+                "outputPins": [
+                    21
+                ]
+            },
+            {
+                "name": "Gradient",
+                "id": 22,
+                "type": 1,
+                "nextNodesIds": [
+                    25
+                ],
+                "vertical": 1,
+                "horizontal": 0,
+                "distance": 1,
+                "pos x": 285,
+                "pos y": 291,
+                "inputPins": [
+                    23
+                ],
+                "outputPins": [
+                    24
+                ]
+            },
+            {
+                "name": "Blend",
+                "id": 25,
+                "type": 15,
+                "nextNodesIds": [
+                    1
+                ],
+                "firstTexture": "Blend_18",
+                "secondTexture": "",
+                "blendMode": 0,
+                "contribution": 0.86000001430511475,
+                "pos x": 525,
+                "pos y": 271,
+                "inputPins": [
+                    26,
+                    27
+                ],
+                "outputPins": [
+                    28
+                ]
+            },
+            {
+                "name": "Albedo",
+                "id": 29,
+                "type": 23,
+                "nextNodesIds": [],
+                "pos x": 55,
+                "pos y": 0,
+                "size x": 596,
+                "size y": 388,
+                "inputPins": [],
+                "outputPins": []
+            }
+        ],
+        "linkCreationId": 1011,
+        "links": [
+            {
+                "id": 1000,
+                "inputPinId": 9,
+                "outputPinId": 11
+            },
+            {
+                "id": 1001,
+                "inputPinId": 12,
+                "outputPinId": 14
+            },
+            {
+                "id": 1002,
+                "inputPinId": 15,
+                "outputPinId": 3
+            },
+            {
+                "id": 1003,
+                "inputPinId": 12,
+                "outputPinId": 19
+            },
+            {
+                "id": 1004,
+                "inputPinId": 17,
+                "outputPinId": 20
+            },
+            {
+                "id": 1008,
+                "inputPinId": 21,
+                "outputPinId": 26
+            },
+            {
+                "id": 1009,
+                "inputPinId": 24,
+                "outputPinId": 27
+            },
+            {
+                "id": 1010,
+                "inputPinId": 28,
+                "outputPinId": 2
+            }
+        ]
+    }
+}

@@ -1049,14 +1049,8 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
-		for (int i = 0; i < nodes.size(); ++i)
-		{
-			delete nodes[i];
-		}
-		nodes.clear();
+		ClearNodes();
 		
-		CreateFinalOutputNode();
-
 		// Load the new nodes
 		repositionNodes = true;
 	
@@ -1323,6 +1317,19 @@ namespace Zenit {
 
 		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
 
+	}
+
+	void PanelNodes::ClearNodes()
+	{
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			delete nodes[i];
+		}
+		nodes.clear();
+
+		links.clear();
+
+		CreateFinalOutputNode();
 	}
 
 	Node* PanelNodes::GetSelectedNode()
