@@ -18,6 +18,8 @@ namespace Zenit {
 		void Unbind();
 		void UnbindImage();
 
+		void WriteToDisk(const std::string& path, int channels);
+
 		inline const void* GetData() const { return data; }
 
 		inline unsigned int GetWidth() { return width; }

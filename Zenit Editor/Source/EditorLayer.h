@@ -43,7 +43,7 @@ namespace Zenit {
 
 	private:
 		void SetModelShaderData();
-		bool ExportTextures(int resolution, int channels);
+		bool ExportTextures(int channels);
 		void Save(bool forceDialog);
 		bool Load();
 		void NewScene();
@@ -64,7 +64,6 @@ namespace Zenit {
 
 		Skybox* currentSkybox;
 		std::vector<Skybox*> skyboxes;
-		std::vector<std::future<void>> futures;
 		bool reloadSkyboxes = false;
 
 		PerspectiveCamera camera;

@@ -31,6 +31,7 @@ namespace Zenit {
 		PushOverlay(imguiLayer);
 
 		isRunning = true;
+		exitRequested = false;
 		minimized = false;
 	}
 
@@ -59,7 +60,7 @@ namespace Zenit {
 			imguiLayer->End();
 			
 			Input::GetInstance()->ResetScrollStats();
-			if (shouldClose) shouldClose = false;
+			if (exitRequested) exitRequested = false;
 
 			window->SwapBuffers();
 		}
@@ -109,7 +110,7 @@ namespace Zenit {
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		//isRunning = false;
-		shouldClose = true;
+		exitRequested = true;
 		return true;
 	}
 

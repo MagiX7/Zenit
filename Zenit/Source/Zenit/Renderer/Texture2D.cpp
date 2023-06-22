@@ -3,6 +3,8 @@
 #include "Zenit/Core/Log.h"
 
 #include <stb_image.h>
+#include <stb_image_write.h>
+
 #include <glad/glad.h>
 
 #include <iostream>
@@ -115,6 +117,37 @@ namespace Zenit {
 	void Texture2D::UnbindImage()
 	{
 		glBindImageTexture(0, 0, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
+	}
+
+	void Texture2D::WriteToDisk(const std::string& path, int channels)
+	{
+		if (width == 1 || height == 1)
+			return;
+
+		GLuint size = width * height;
+		unsigned int* data = new unsigned int[size];
+
+		GLenum format;
+		switch (channels)
+		{
+			case 1: format = GL_RED; break;
+			case 2: format = GL_RG; break;
+			case 3: format = GL_RGB; break;
+			case 4: format = GL_RGBA; break;
+			default: format = GL_RGBA; break;
+		}
+
+		glBindTexture(GL_TEXTURE_2D, id);
+		glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, data);
+
+		if (stbi_write_png((path + ".png").c_str(), width, height, channels, data, width * channels))
+		{
+			auto error = stbi_failure_reason();
+			ZN_CORE_ERROR("Unable to write image {0}", error);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		delete[] data;
 	}
 
 }
