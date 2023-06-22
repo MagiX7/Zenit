@@ -15,7 +15,7 @@
                 "nextNodesIds": [
                     10
                 ],
-                "seed": 4835.61767578125,
+                "seed": 4841.919921875,
                 "scale": 23,
                 "pos x": 71,
                 "pos y": 35,
@@ -29,10 +29,9 @@
                 "id": 10,
                 "type": 12,
                 "nextNodesIds": [
-                    13,
-                    18
+                    13
                 ],
-                "threshold": 6,
+                "threshold": 7,
                 "pos x": 221,
                 "pos y": 35,
                 "inputPins": [
@@ -50,7 +49,7 @@
                     1
                 ],
                 "zoom": 1,
-                "bumpness": -0.029999999329447746,
+                "bumpness": -0.090000003576278687,
                 "pos x": 757,
                 "pos y": 35,
                 "inputPins": [
@@ -67,9 +66,9 @@
                 "nextNodesIds": [
                     18
                 ],
-                "color x": 1,
-                "color y": 0,
-                "color z": 0,
+                "color x": 0.41794312000274658,
+                "color y": 0.83569949865341187,
+                "color z": 1,
                 "pos x": 231,
                 "pos y": 163,
                 "inputPins": [],
@@ -125,10 +124,10 @@
                 "nextNodesIds": [
                     1
                 ],
-                "firstTexture": "Blend_18",
+                "firstTexture": "",
                 "secondTexture": "",
                 "blendMode": 0,
-                "contribution": 0.86000001430511475,
+                "contribution": 0.40000000596046448,
                 "pos x": 525,
                 "pos y": 271,
                 "inputPins": [
@@ -152,7 +151,7 @@
                 "outputPins": []
             }
         ],
-        "linkCreationId": 1011,
+        "linkCreationId": 1012,
         "links": [
             {
                 "id": 1000,
@@ -180,11 +179,6 @@
                 "outputPinId": 20
             },
             {
-                "id": 1008,
-                "inputPinId": 21,
-                "outputPinId": 26
-            },
-            {
                 "id": 1009,
                 "inputPinId": 24,
                 "outputPinId": 27
@@ -193,6 +187,11 @@
                 "id": 1010,
                 "inputPinId": 28,
                 "outputPinId": 2
+            },
+            {
+                "id": 1011,
+                "inputPinId": 21,
+                "outputPinId": 26
             }
         ]
     }

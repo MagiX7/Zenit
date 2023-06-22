@@ -43,7 +43,7 @@ namespace Zenit {
 
 	private:
 		void SetModelShaderData();
-		void ExportTextures(int resolution, int channels);
+		bool ExportTextures(int resolution, int channels);
 		void Save(bool forceDialog);
 		bool Load();
 		void NewScene();
@@ -95,6 +95,7 @@ namespace Zenit {
 		SerializerValue serializerRootValue;
 		std::string savedFilePath = "";
 
+		bool showExitPopup = false;
 
 		friend class PanelNodes;
 	};
