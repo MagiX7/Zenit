@@ -26,9 +26,6 @@ namespace Zenit {
 
 		camera.Scroll(ts);
 
-		float x = Input::GetInstance()->GetMouseX();
-		float y = Input::GetInstance()->GetMouseY();
-
 		const float dx = Input::GetInstance()->GetMouseMotionX();
 		const float dy = Input::GetInstance()->GetMouseMotionY();
 		

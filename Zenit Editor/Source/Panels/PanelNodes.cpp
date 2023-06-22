@@ -46,7 +46,7 @@ namespace Zenit {
 	PanelNodes::PanelNodes(EditorLayer* edLayer) : editorLayer(edLayer)
 	{
 		config = ed::Config();
-		//config.SettingsFile = "Settings/NodeEditor.json";
+		config.SettingsFile = "";
 		config.UserPointer = this;
 
 		config.NavigateButtonIndex = 2;
@@ -398,17 +398,14 @@ namespace Zenit {
 						Pin* inputPin = NodeHelpers::FindPin(currentLink.inputId, nodes);
 						Pin* outputPin = NodeHelpers::FindPin(currentLink.outputId, nodes);
 
-						// TODO: Removing here leads to problems!!!
 						if (outputPin->node == deletedNode)
 						{
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
 						}
 						else if (inputPin->node == deletedNode)
 						{
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateNode(inputPin, outputPin, currentLink, true);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							it = links.erase(it);
@@ -467,7 +464,11 @@ namespace Zenit {
 						LinkInfo link = LinkInfo(ed::LinkId(linkCreationId++), inputPinId, outputPinId);
 						links.push_back(link);
 
-						startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+						// Check if the next node id is already present
+						auto it = std::find(startPin->node->nextNodesIds.begin(), startPin->node->nextNodesIds.end(), endPin->node->id);
+						if (it == startPin->node->nextNodesIds.end())
+							startPin->node->nextNodesIds.emplace_back(endPin->node->id);
+
 						UpdateNode(startPin, endPin, link, false);
 						UpdateOutputNodeData(*startPin, *endPin, false);
 					}
@@ -485,7 +486,7 @@ namespace Zenit {
 				if (ed::AcceptDeletedItem())
 				{
 					const LinkInfo& deletedLink = NodeHelpers::FindLink(deletedLinkId, links);
-
+					
 					for (int i = 0; i < links.size(); ++i)
 					{
 						if (links[i].id == deletedLinkId)
@@ -494,7 +495,6 @@ namespace Zenit {
 							Pin* inputPin = NodeHelpers::FindPin(link.inputId, nodes);
 							Pin* outputPin = NodeHelpers::FindPin(link.outputId, nodes);
 
-							inputPin->node->nextNodesIds.emplace_back(outputPin->node->id);
 							UpdateOutputNodeData(*inputPin, *outputPin, true);
 							UpdateNode(inputPin, outputPin, deletedLink, true);
 
@@ -650,52 +650,8 @@ namespace Zenit {
 		ImGui::CloseCurrentPopup();
 	}
 
-	/*Node* PanelNodes::FindNode(ed::NodeId id) const
-	{
-		for (const auto& node : nodes)
-		{
-			if (node->id == id)
-				return node;
-		}
-
-		return nullptr;
-	}
-
-	Pin* PanelNodes::FindPin(ed::PinId id)
-	{
-		for (int i = 0; i < nodes.size(); ++i)
-		{
-			for (auto& inputPin : nodes[i]->inputs)
-			{
-				if (inputPin.id == id)
-					return &inputPin;
-			}
-
-			for (auto& outputPin : nodes[i]->outputs)
-			{
-				if (outputPin.id == id)
-					return &outputPin;
-			}
-		}
-
-		return &incorrectPin;
-	}
-
-	LinkInfo* PanelNodes::FindLink(const ed::LinkId& id)
-	{
-		for (auto& link : links)
-		{
-			if (link.id == id)
-				return &link;
-		}
-
-		return &incorrectLink;
-	}*/
-
 	void PanelNodes::DeleteNode(ed::NodeId id)
 	{
-		// TODO: Problem with locks. Maybe because of ImGui. Lock the update and imgui render or wait to end of frame?
-
 		for (int i = 0; i < nodes.size(); ++i)
 		{
 			if (id == nodes[i]->id)
@@ -721,18 +677,18 @@ namespace Zenit {
 		ed::DeleteLink(id);
 	}
 
-	Node* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
+	ColorNode* PanelNodes::CreateFlatColorNode(const char* name, const glm::vec3& color)
 	{
 		ColorNode* node = new ColorNode(creationId++, name, color);
 		node->size = { 5,5 };
 		nodes.emplace_back(node);
 		node->headerColor = FLAT_COLOR_NODE_HEADER_COLOR;
 
-		Pin pin = Pin(creationId++, "Output", ed::PinKind::Output);
+		Pin pin = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		pin.node = node;
 		node->outputs.emplace_back(pin);
 
-		return nodes.back();
+		return node;
 	}
 
 	Node* PanelNodes::CreateBlendNode(const char* name)
@@ -742,15 +698,15 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "Output",ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ",ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -764,11 +720,11 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -782,15 +738,15 @@ namespace Zenit {
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin input2 = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input2 = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input2.node = node;
 		node->inputs.emplace_back(input2);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -799,16 +755,16 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateSingleInstructionNode(const char* name, SingleInstructionType instructionType)
 	{
-		auto node = new SingleInstructionNode(creationId++, name, instructionType);
+		SingleInstructionNode* node = new SingleInstructionNode(creationId++, name, instructionType);
 		node->size = { 5,5 };
 		node->headerColor = OPERATOR_NODE_HEADER_COLOR;
 		nodes.emplace_back(node);
 
-		Pin input = Pin(creationId++, "O", ed::PinKind::Input);
+		Pin input = Pin(creationId++, "  O  ", ed::PinKind::Input);
 		input.node = node;
 		node->inputs.emplace_back(input);
 
-		Pin output = Pin(creationId++, "O", ed::PinKind::Output);
+		Pin output = Pin(creationId++, "  O  ", ed::PinKind::Output);
 		output.node = node;
 		node->outputs.emplace_back(output);
 
@@ -817,7 +773,7 @@ namespace Zenit {
 
 	Node* PanelNodes::CreateGroupNode(const char* name)
 	{
-		auto node = new GroupNode(creationId++ , name);
+		GroupNode* node = new GroupNode(creationId++ , name);
 		node->type = NodeType::GROUP;
 
 		ImVec2 padding = { 16, 35 };
@@ -922,16 +878,6 @@ namespace Zenit {
 				break;
 			}
 		}
-		
-		//if (outputPin->node && outputPin->node->nextNodeId)
-		//{
-		//	// Never updates because UpdateNode() is called instantly after the link is created, so the last node never has a next node
-		//	// Create another function or system that calls this func? (i.e from node update?)
-		//	auto next = NodeHelpers::FindNode(outputPin->node->nextNodeId, nodes);
-		//	if (next)
-		//		UpdateNode(outputPin, &next->outputs[0], link, resetData);
-		//}
-
 	}
 
 	void PanelNodes::UpdateOutputNodeData(Pin& startPin, Pin& endPin, bool resetData)
@@ -1011,6 +957,7 @@ namespace Zenit {
 	void PanelNodes::CreateFinalOutputNode()
 	{
 		Node* node = new Node(OUTPUT_NODE_ID, "PBR");
+		node->pos = { 1100, 100 };
 
 		Pin albedo = Pin(OUTPUT_ALBEDO_PIN_ID, "Albedo", ed::PinKind::Input);
 		albedo.node = node;
@@ -1033,6 +980,7 @@ namespace Zenit {
 		nodes.emplace_back(node);
 
 		creationId += 5;
+		repositionNodes = true;
 	}
 
 	void PanelNodes::SaveNodes(SerializerObject& appObject)
@@ -1040,8 +988,6 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject panelNodesObject = JSONSerializer::GetObjectWithValue(value);
 
-		//SerializerValue masterNodeValue = JSONSerializer::CreateValue();
-		//SerializerObject masterNodeObject = JSONSerializer::CreateObjectFromValue(value);
 		ImVec2 pos = ed::GetNodePosition(nodes[0]->id);
 		JSONSerializer::SetVector2f(appObject, "pos", glm::vec2(pos.x, pos.y));
 
@@ -1053,7 +999,6 @@ namespace Zenit {
 
 		for (int i = 1; i < nodes.size(); ++i)
 		{
-			// TODO: Size save is good, position doesnt save
 			Node* node = nodes[i];
 			SerializerValue nodeValue = node->Save();
 			SerializerObject nodeObject = JSONSerializer::GetObjectWithValue(nodeValue);
@@ -1071,12 +1016,7 @@ namespace Zenit {
 			JSONSerializer::SetObjectValue(nodeObject, "inputPins", inputPinsArrayValue);
 			for (const auto& pin : node->inputs)
 			{
-				SerializerValue value = JSONSerializer::CreateValue();
-				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
-				
-				JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				JSONSerializer::SetString(object, "name", pin.name.c_str());
-				JSONSerializer::AppendValueToArray(inputPinsArray, value);
+				JSONSerializer::AppendNumberToArray(inputPinsArray, pin.id.Get());
 			}
 
 			SerializerValue outputPinsArrayValue = JSONSerializer::CreateArrayValue();
@@ -1084,12 +1024,7 @@ namespace Zenit {
 			JSONSerializer::SetObjectValue(nodeObject, "outputPins", outputPinsArrayValue);
 			for (const auto& pin : node->outputs)
 			{
-				SerializerValue value = JSONSerializer::CreateValue();
-				SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
-
-				JSONSerializer::SetNumber(object, "id", pin.id.Get());
-				JSONSerializer::SetString(object, "name", pin.name.c_str());
-				JSONSerializer::AppendValueToArray(outputPinsArray, value);
+				JSONSerializer::AppendNumberToArray(outputPinsArray, pin.id.Get());
 			}
 
 		}
@@ -1114,7 +1049,11 @@ namespace Zenit {
 
 	void PanelNodes::LoadNodes(SerializerObject& appObject)
 	{
+		ClearNodes();
+		
+		// Load the new nodes
 		repositionNodes = true;
+	
 		glm::vec2 pos = JSONSerializer::GetVector2fFromObject(appObject, "pos");
 		nodes[0]->pos = ImVec2(pos.x, pos.y);
 
@@ -1134,7 +1073,14 @@ namespace Zenit {
 			{
 				case NodeType::COLOR:
 				{
-					node = (ColorNode*)CreateFlatColorNode(name, {});
+					node = CreateFlatColorNode(name, {});
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::GRADIENT:
+				{
+					node = CreateFilterNode<GradientNode>("Gradient");
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1186,6 +1132,13 @@ namespace Zenit {
 				case NodeType::VORONOI:
 				{
 					node = CreateGeneratorNode<VoronoiNode>(name);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::KIFS_FRACTAL:
+				{
+					node = CreateGeneratorNode<KifsFractalNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
@@ -1257,7 +1210,29 @@ namespace Zenit {
 					node->Load(object);
 					break;
 				}
+				case NodeType::POW:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::POW);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::ADD:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::ADD);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
+				case NodeType::SUBSTRACT:
+				{
+					node = (SingleInstructionNode*)CreateSingleInstructionNode(name, SingleInstructionType::SUBTRACT);
+					node->id = id;
+					node->Load(object);
+					break;
+				}
 
+				// Transform
 				case NodeType::TRANSFORM:
 				{
 					node = CreateFilterNode<TransformNode>(name);
@@ -1266,6 +1241,7 @@ namespace Zenit {
 					break;
 				}
 
+				// Group
 				case NodeType::GROUP:
 				{
 					node = CreateGroupNode(name);
@@ -1274,18 +1250,53 @@ namespace Zenit {
 					break;
 				}
 
-			}		
-			glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
-			node->pos = ImVec2(position.x, position.y);
-			//ed::SetNodePosition(node->id, node->pos);
-			if (node->type == NodeType::GROUP)
+			}
+
+			if (node)
 			{
-				glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
-				node->size = ImVec2(size.x, size.y);
+				// Load Pins -----------------------------------------------------------------------------------
+				// Assign each pin its corresponding ID so later everything works
+				SerializerArray inputPinsArray = JSONSerializer::GetArrayFromObject(object, "inputPins");
+				size_t inputPinsSize = JSONSerializer::GetArraySize(inputPinsArray);
+				for (int i = 0; i < inputPinsSize; ++i)
+				{
+					node->inputs[i].id = JSONSerializer::GetNumberFromArray(inputPinsArray, i);
+				}
+
+				SerializerArray outputPinsArray = JSONSerializer::GetArrayFromObject(object, "outputPins");
+				size_t outputPinsSize = JSONSerializer::GetArraySize(outputPinsArray);
+				for (int i = 0; i < outputPinsSize; ++i)
+				{
+					node->outputs[i].id = JSONSerializer::GetNumberFromArray(outputPinsArray, i);;
+				}
+				// Load Pins -----------------------------------------------------------------------------------
+
+
+				// Store node position and size if it is a group node
+				glm::vec2 position = JSONSerializer::GetVector2fFromObject(object, "pos");
+				node->pos = ImVec2(position.x, position.y);
+
+				if (node->type == NodeType::GROUP)
+				{
+					glm::vec2 size = JSONSerializer::GetVector2fFromObject(object, "size");
+					node->size = ImVec2(size.x, size.y);
+				}
+
+				SerializerArray nextNodesIdsArray = JSONSerializer::GetArrayFromObject(object, "nextNodesIds");
+				size_t nextNodesIdsSize = JSONSerializer::GetArraySize(outputPinsArray);
+				node->nextNodesIds.resize(nextNodesIdsSize);
+				for (int i = 0; i < nextNodesIdsSize; i++)
+				{
+					node->nextNodesIds[i] = JSONSerializer::GetNumberFromArray(nextNodesIdsArray, i);
+				}
+
+
 			}
 		}
 		creationId = JSONSerializer::GetNumberFromObject(appObject, "creationId");
 
+
+		// Load Links --------------------------------------------------------------------------------
 		SerializerArray linksArray = JSONSerializer::GetArrayFromObject(appObject, "links");
 		size = JSONSerializer::GetArraySize(linksArray);
 		
@@ -1298,11 +1309,27 @@ namespace Zenit {
 
 			LinkInfo link = LinkInfo(id, inputPinId, outputPinId);
 			links.push_back(link);
-			UpdateNode(NodeHelpers::FindPin(inputPinId, nodes), NodeHelpers::FindPin(outputPinId, nodes), link, false);
+			auto inPin = NodeHelpers::FindPin(inputPinId, nodes);
+			auto outPin = NodeHelpers::FindPin(outputPinId, nodes);
+			UpdateNode(inPin, outPin, link, false);
 		}
+		// Load Links --------------------------------------------------------------------------------
 
 		linkCreationId = JSONSerializer::GetNumberFromObject(appObject, "linkCreationId");
 
+	}
+
+	void PanelNodes::ClearNodes()
+	{
+		for (int i = 0; i < nodes.size(); ++i)
+		{
+			delete nodes[i];
+		}
+		nodes.clear();
+
+		links.clear();
+
+		CreateFinalOutputNode();
 	}
 
 	Node* PanelNodes::GetSelectedNode()

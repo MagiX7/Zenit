@@ -49,7 +49,8 @@ namespace Zenit {
 	void BlendNode::OnImGuiInspectorRender()
 	{
 		ImGui::Separator();
-		ImGui::DragFloat("Distribution", &contribution, 0.01f, 0.0f, 1.0f);
+		if (ImGui::DragFloat("Distribution", &contribution, 0.01f, 0.0f, 1.0f))
+			regenerate = true;
 
 		const char* labels[] = { "Burn", "Darken", "Difference", "Dodge", "Divide", "Multiply", "Negation", "Subtract"};
 		const char* previewValue = labels[comboCurrentIndex];
@@ -92,9 +93,7 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 
-		JSONSerializer::SetString(object, "name", name.c_str());
-		JSONSerializer::SetNumber(object, "id", id.Get());
-		JSONSerializer::SetNumber(object, "type", (int)type);
+		Node::SaveCore(object);
 		JSONSerializer::SetString(object, "firstTexture", tex1->GetName().c_str());
 		JSONSerializer::SetString(object, "secondTexture", tex2->GetName().c_str());
 		JSONSerializer::SetNumber(object, "blendMode", (int)blendMode);

@@ -49,7 +49,10 @@ namespace Zenit {
 
 	SerializerValue InvertNode::Save()
 	{
-		return SerializerValue();
+		SerializerValue value = JSONSerializer::CreateValue();
+		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
+		Node::SaveCore(object);		
+		return value;
 	}
 
 	void InvertNode::Load(SerializerObject& obj)

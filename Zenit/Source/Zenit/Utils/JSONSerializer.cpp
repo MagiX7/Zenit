@@ -118,7 +118,16 @@ namespace Zenit {
 		JSON_Status status = json_array_append_value(array, value);
 		if (status != JSONSuccess)
 		{
-			ZN_CORE_ERROR("Appending to Array failed");
+			ZN_CORE_ERROR("Appending Value to Array failed");
+		}
+	}
+
+	void JSONSerializer::AppendNumberToArray(SerializerArray& array, float number)
+	{
+		JSON_Status status = json_array_append_number(array, number);
+		if (status != JSONSuccess)
+		{
+			ZN_CORE_ERROR("Appending Number to Array failed");
 		}
 	}
 
@@ -134,6 +143,11 @@ namespace Zenit {
 		SerializerValue value = SerializerValue();
 		value.value = json_object_get_value(object, name);
 		return value;
+	}
+
+	float JSONSerializer::GetNumberFromArray(SerializerArray& array, size_t index)
+	{
+		return json_array_get_number(array, index);
 	}
 	
 	SerializerObject JSONSerializer::GetObjectWithValue(SerializerValue& value)

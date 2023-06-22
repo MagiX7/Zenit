@@ -18,7 +18,7 @@
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
 #define MODELS_PATH "\\Assets\\Models\\"
-#define SAVE_PATH   "Settings/SavedData.json"
+#define SAVE_PATH   "Settings/"
 
 namespace Zenit {
 
@@ -49,10 +49,9 @@ namespace Zenit {
 		currentMesh = nullptr;
 
 		panelNodes = new PanelNodes(this);
-		if (!Load())
+		
 		{
 			uint32_t data = 0xffffffff;
-			//diffuse = new Texture2D(&data, 1, 1);
 			diffuse = Node::GetWhite();
 			diffuse->SetName("white");
 			
@@ -70,10 +69,7 @@ namespace Zenit {
 		dirLight = DirectionalLight();
 		skyboxProps = SkyboxProperties();
 
-		FocusCameraOnModel();
-
 		Application::GetInstance().GetWindow().SetIcon("Settings/icon.png");
-		// TODO: Masking node (p.e only show stuff inside a circle)
 	}
 
 	void EditorLayer::OnDetach()
@@ -94,6 +90,17 @@ namespace Zenit {
 
 	void EditorLayer::OnUpdate(const TimeStep ts)
 	{
+		if (Application::GetInstance().ExitRequested())
+		{
+			showExitPopup = true;
+		}
+
+		if (Input::GetInstance()->IsKeyPressed(Key::KEY_LEFT_CONTROL)
+			&& Input::GetInstance()->IsKeyPressed(Key::KEY_S))
+		{
+			Save(false);
+		}
+
 		panelViewport.OnUpdate(ts, currentModel, camera);
 		panelNodes->Update(ts);
 
@@ -121,14 +128,25 @@ namespace Zenit {
 		ImGui::BeginMainMenuBar();
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Export"))
+			if (ImGui::MenuItem("New"))
 			{
-				showExportingPanel = true;
-				//ExportTextures();
+				NewScene();
+			}
+			else if (ImGui::MenuItem("Open..."))
+			{
+				Load();
 			}
 			else if (ImGui::MenuItem("Save"))
 			{
-				Save();
+				Save(false);
+			}
+			else if (ImGui::MenuItem("Save As..."))
+			{
+				Save(true);
+			}
+			else if (ImGui::MenuItem("Export"))
+			{
+				showExportingPanel = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -146,7 +164,6 @@ namespace Zenit {
 				if (ImGui::MenuItem(model->GetName().c_str()))
 				{
 					currentModel = model;
-					FocusCameraOnModel();
 				}
 			}
 
@@ -192,7 +209,7 @@ namespace Zenit {
 
 		ImGui::EndMainMenuBar();
 
-		ImGui::Begin("Lightning Settings");
+		ImGui::Begin("Lighting Settings");
 		{
 			ImGui::Text("Directional Light");
 			ImGui::Text("Direction");
@@ -224,82 +241,13 @@ namespace Zenit {
 		}
 		ImGui::End();
 
-		ImGui::Begin("Hierarchy");
-		{
-			if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
-				currentMesh = nullptr;
-
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_OpenOnArrow;
-			bool opened = ImGui::TreeNodeEx(currentModel->GetName().c_str(), flags | (currentMesh ? 0 : ImGuiTreeNodeFlags_Selected));
-			
-			if (ImGui::IsItemClicked())
-			{
-				// Set current mesh to 
-				currentMesh = nullptr;
-			}
-
-			if (opened)
-			{
-				std::queue<Mesh*> q;
-				for(auto mesh : currentModel->GetMeshes())
-					q.push(mesh);
-
-				while (!q.empty())
-				{
-					auto& curr = q.front();
-					q.pop();
-
-					bool opened = ImGui::TreeNodeEx(curr->GetName().c_str(), flags | (currentMesh == curr ? ImGuiTreeNodeFlags_Selected : 0));
-					
-					if (ImGui::IsItemClicked())
-					{
-						// Set current mesh to 
-						currentMesh = curr;
-					}
-					
-					if (opened)
-					{
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::TreePop();
-			}
-		}
-		ImGui::End();
-
 		ImGui::Begin("Inspector");
 		{
 			if (ImGui::CollapsingHeader("Camera"))
 			{
-				// TODO: Model Inspector UI + delete all orthographic stuff
 				if (camera.GetProjectionType() == PerspectiveCamera::ProjectionType::PERSPECTIVE)
 				{
 					ImGui::Dummy({ 0,5 });
-
-					/*auto pos = camera.GetPosition();
-					if (ImGui::DragFloat3("Position", glm::value_ptr(pos), 0.1f))
-					{
-						camera.SetPosition(pos);
-					}
-					if (ImGui::Button("Reset"))
-					{
-						camera.SetPosition(glm::vec3(0, 0, 2));
-					}
-
-					ImGui::Dummy({ 0,2.5f });
-
-					auto rot = camera.GetRotation();
-					if (ImGui::DragFloat3("Rotation", glm::value_ptr(rot), 0.1f))
-					{
-						camera.SetRotation(rot);
-					}
-					if (ImGui::Button("Reset##2"))
-					{
-						camera.SetRotation(glm::vec3(0, 0, 0));
-					}
-
-					ImGui::Dummy({ 0,5 });*/
 
 					float verticalFov = camera.GetVerticalFov();
 					if (ImGui::DragFloat("Vertical FOV", &verticalFov, 0.1f))
@@ -358,33 +306,8 @@ namespace Zenit {
 			ImGui::Dummy({ 0, 3 });
 
 
-			//if (currentMesh)
-			//{
-			//	if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
-			//	{
-			//		//if (ImGui::Button("Apply textures"))
-			//		{
-			//			/*currentMesh->SetDiffuse(diffuse);
-			//			currentMesh->SetNormals(normals);
-			//			currentMesh->SetMetallic(metallic);
-			//			currentMesh->SetRoughness(roughness);*/
-			//		}
-			//	}
-			//}
-			//else
-			//{
-			//	ImGui::BulletText("There is no selected mesh.");
-			//	ImGui::Text("         Textures will be applied to every mesh inside the model.");
-
-			//	ImGui::Dummy({ 0, 3 });
-			//	ImGui::Separator();
-			//	ImGui::Dummy({ 0, 3 });
-			//}
-
-
 			if (Node* node = panelNodes->GetSelectedNode())
 				node->OnImGuiInspectorRender();
-
 		}
 		ImGui::End();
 
@@ -399,25 +322,65 @@ namespace Zenit {
 
 		ImGui::Begin("Performance");
 		{
-			ImGui::Text(std::to_string(Application::GetInstance().GetTimeStep()).c_str());
-			ImGui::Text(std::to_string(Application::GetInstance().GetTotalExecutionTime()).c_str());
+			ImGui::Text(("FPS: " + std::to_string(1.0f / Application::GetInstance().GetTimeStep())).c_str());
+			ImGui::Text(("Delta Time: " + std::to_string(Application::GetInstance().GetTimeStep())).c_str());
 		}
 		ImGui::End();
 		
 
-
 		panelViewport.OnImGuiRender(fbo.get(), camera);
-		//panelLayerStack.OnImGuiRender(layers);
 		panelNodes->OnImGuiRender();
 
+		if (showExitPopup)
+		{
+			if (showExportingPanel) showExportingPanel = false;
+
+			ImGui::OpenPopup("##Exit Popup");
+			ImGui::SetNextWindowSize({ 370 , 120 });
+			if (ImGui::BeginPopupModal("##Exit Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration))
+			{
+				ImGui::Dummy({ 0,10 });
+				
+				ImGui::Dummy({ 19,0 });
+				ImGui::SameLine();
+				ImGui::Text("Are you sure you want to exit? Remember to save.");
+				
+				ImGui::Dummy({ 0,20 });
+
+				ImGui::SetNextItemWidth(256);
+
+				ImGuiStyle& style = ImGui::GetStyle();
+				float size = 100 + 100 + 25 + style.FramePadding.x * 2.0f;
+				float avail = ImGui::GetContentRegionAvail().x;
+
+				float off = (avail - size) * 0.5f;
+				if (off > 0.0f)
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + off);
+
+				
+				if (ImGui::Button("Yes", { 100,0 }))
+				{
+					Application::GetInstance().Terminate();
+				}
+
+				ImGui::SameLine(0, 25);
+				
+				if (ImGui::Button("No", { 100, 0 }))
+				{
+					showExitPopup = false;
+				}
+
+				ImGui::EndPopup();
+			}
+		}
 
 		if (showExportingPanel)
 		{
 			ImGui::OpenPopup("Export Settings");
-			ImGui::Dummy({ 0,10 });
-			ImGui::SetNextWindowSize({ 340 , 175});
+			ImGui::SetNextWindowSize({ 340 , 150});
 			if (ImGui::BeginPopupModal("Export Settings", NULL, ImGuiWindowFlags_AlwaysAutoResize))
 			{
+				ImGui::Dummy({ 0,2 });
 				ImGui::SetNextItemWidth(256);
 
 				const char* items[] = { "512", "1024", "2048", "4096", "8192" };
@@ -447,7 +410,6 @@ namespace Zenit {
 
 				
 				ImGuiStyle& style = ImGui::GetStyle();
-				//float size = ImGui::CalcTextSize("Export").x + style.FramePadding.x * 2.0f;
 				float size = 100 + 100 + 25 + style.FramePadding.x * 2.0f;
 				float avail = ImGui::GetContentRegionAvail().x;
 
@@ -466,8 +428,8 @@ namespace Zenit {
 						case 4: res = 4096; break;
 						case 5: res = 8192; break;
 					}
-					ExportTextures(res, channels);
-					showExportingPanel = false;
+					if (ExportTextures(res, channels))
+						showExportingPanel = false;
 				}
 
 				ImGui::SameLine(0, 25);
@@ -495,8 +457,6 @@ namespace Zenit {
 	{
 		if (!node)
 		{
-			//if (diffuse != white.get())
-
 			diffuse = Node::GetWhite();
 			return false;
 		}
@@ -593,11 +553,11 @@ namespace Zenit {
 		}
 	}
 
-	void EditorLayer::ExportTextures(int resolution, int channels)
+	bool EditorLayer::ExportTextures(int resolution, int channels)
 	{
 		std::string path = FileDialog::SaveFile("png (*.png)\0*.png\0");
 		if (path.empty())
-			return;
+			return false;
 
 		int w = resolution;
 		int h = resolution;
@@ -650,10 +610,24 @@ namespace Zenit {
 		stbi_flip_vertically_on_write(1);
 		stbi_write_png((path + "_roughness.png").c_str(), w, h, channels, data, w * channels);
 		delete[] data;
+
+		return true;
 	}
 
-	void EditorLayer::Save()
+	void EditorLayer::Save(bool saveAs)
 	{
+		std::string path = savedFilePath;
+		if (saveAs || savedFilePath == "")
+		{
+			path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
+			if (path.empty())
+				return;
+			
+			if (!saveAs)
+				savedFilePath = path;
+		}
+
+
 		serializerRootValue = JSONSerializer::CreateValue();
 		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
 
@@ -667,13 +641,17 @@ namespace Zenit {
 		
 		panelNodes->SaveNodes(appObj);
 		
-		JSONSerializer::DumpFile(serializerRootValue, SAVE_PATH);
+		JSONSerializer::DumpFile(serializerRootValue, (path + ".zenit").c_str());
 		JSONSerializer::FreeValue(serializerRootValue);
 	}
 
 	bool EditorLayer::Load()
 	{
-		serializerRootValue = JSONSerializer::ReadFile(SAVE_PATH);
+		std::string path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
+		if (path.empty())
+			return false;
+
+		serializerRootValue = JSONSerializer::ReadFile(path.c_str());
 		if (!serializerRootValue.value)
 			return false;
 
@@ -720,6 +698,17 @@ namespace Zenit {
 		SetRoughnessData(NodeHelpers::FindNode(nodeId, panelNodes->GetNodes()));
 
 		return true;
+	}
+
+	void EditorLayer::NewScene()
+	{
+		panelNodes->ClearNodes();
+		savedFilePath = "";
+		SetDiffuseData(nullptr);
+		SetNormalsData(nullptr);
+		SetMetallicData(nullptr);
+		SetRoughnessData(nullptr);
+		
 	}
 		
 	void EditorLayer::LoadSkyboxes()
@@ -797,80 +786,6 @@ namespace Zenit {
 		models.clear();
 
 		LoadModels();
-	}
-
-	void EditorLayer::FocusCameraOnModel()
-	{
-		/*glm::vec3 maxPoint = currentModel->GetAABB().GetMax();
-		glm::vec3 minPoint = currentModel->GetAABB().GetMin();
-
-		glm::vec3 h = (maxPoint - minPoint) / 2.0f;
-
-		float angle = glm::radians(camera.GetVerticalFov() / 2);
-
-		glm::vec3 distance = h / glm::tan(angle);
-
-		distance.x = (distance.x + 2.5f) * camera.GetForward().x;
-		distance.y = distance.y * camera.GetForward().y;
-		distance.z = (distance.z + 2.5f) * camera.GetForward().z;
-		glm::vec3 newPos = currentModel->GetAABB().GetCenter() - distance;
-		camera.SetPosition(newPos);
-		frustum.UpdateFrustum(camera);*/
-
-		/*newUp = newFront.Cross(float3(0.0f, 1.0f, 0.0f).Cross(newFront).Normalized());
-		const float meshRadius = mesh->GetLocalAABB().HalfDiagonal().Length();
-		const float currentDistance = meshCenter.Distance(cameraFrustum.Pos());
-		newPos = meshCenter + ((cameraFrustum.Pos() - meshCenter).Normalized() * meshRadius * 2);*/
-
-
-
-
-
-
-
-		/*AABB modelAabb = currentModel->GetAABB();
-
-		float verticalSize = modelAabb.GetMax().y - modelAabb.GetMin().y;
-
-		float dist = glm::abs(verticalSize / glm::tan(camera.GetVerticalFov() / 2));
-
-		float longest = modelAabb.GetLongestEdge();
-
-		do
-		{
-			glm::vec3 camPosition = camera.GetPosition();
-			glm::vec3 dir = glm::normalize(modelAabb.GetCenter() - camPosition);
-			
-			float totalDistance = glm::distance(modelAabb.GetCenter(), camPosition);
-			if (totalDistance > dist + longest)
-			{
-				camPosition += dir * dist;
-				camera.SetPosition(camPosition);
-				frustum.UpdateFrustum(camera);
-				ZN_CORE_TRACE(" >>> {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
-			}
-			else if (totalDistance < dist - longest)
-			{
-				camPosition -= dir * dist;
-				camera.SetPosition(camPosition);
-				frustum.UpdateFrustum(camera);
-				ZN_CORE_TRACE(" <<< {0} {1} {2}", camPosition.x, camPosition.y, camPosition.z);
-			}
-			else
-			{
-				break;
-			}
-		} while (!modelAabb.IsInsideFrustum(frustum));*/
-
-		
-		//reference = modelAabb->CenterPoint();
-		//editorCam->SetPosition(position);
-		//editorCam->Look(reference);
-
-
-		
-
-
 	}
 
 }

@@ -23,7 +23,6 @@ namespace Zenit {
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data = stbi_load(path.c_str(), &w, &h, &channels, 0);
 
-		// TODO: Data from stbi gets deleted later. May affect when an image is loaded
 		this->data = data;
 
 		name = path.substr(path.find_last_of("/") + 1, path.length());

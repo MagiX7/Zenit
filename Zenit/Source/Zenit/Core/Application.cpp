@@ -59,6 +59,7 @@ namespace Zenit {
 			imguiLayer->End();
 			
 			Input::GetInstance()->ResetScrollStats();
+			if (shouldClose) shouldClose = false;
 
 			window->SwapBuffers();
 		}
@@ -107,7 +108,8 @@ namespace Zenit {
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
-		isRunning = false;
+		//isRunning = false;
+		shouldClose = true;
 		return true;
 	}
 

@@ -2,7 +2,6 @@
 
 namespace Zenit {
 
-	// TODO: Handle different blend curves (easings maybe?)
 	ClampNode::ClampNode(int id, const char* name)
 		: Node(id, name), min(0.0f), max(1.0f)
 	{
@@ -63,10 +62,7 @@ namespace Zenit {
 		SerializerValue value = JSONSerializer::CreateValue();
 		SerializerObject object = JSONSerializer::CreateObjectFromValue(value);
 
-		JSONSerializer::SetString(object, "name", name.c_str());
-		JSONSerializer::SetNumber(object, "id", id.Get());
-		JSONSerializer::SetNumber(object, "type", (int)type);
-		//JSONSerializer::SetString(object, "inputTexture", inputTexture->GetName().c_str());
+		Node::SaveCore(object);
 		JSONSerializer::SetNumber(object, "max", max);
 		JSONSerializer::SetNumber(object, "min", min);
 
