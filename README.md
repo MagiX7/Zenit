@@ -44,6 +44,11 @@ Besides that, another goal to achieve is to keep the tool as simple as possible,
 - Left click to rotate the model.
 - Mouse wheel to zoom in or out.
 
+## Custom 3D Model and HDRI loading
+In order to texture your own models, all that is required is to drag and drop them in the file explorer, under the folder "Models" or "Skybox", both located in "Assets".
+Once this is done, go back to the application and in the Main Menu Bar, under 3D Model, or Skybox, click "Refresh", and you are ready to go!
+
+Note: the 3D model format MUST be FBX.
 
 ## Dependencies
 
@@ -53,9 +58,11 @@ The dependencies Zenit uses are:
   - [Glad](https://glad.dav1d.de/)
   - [glm](https://github.com/g-truc/glm)
   - [ImGui](https://github.com/ocornut/imgui)
+  - [imgui-node-editor](https://github.com/thedmd/imgui-node-editor)
   - [Assimp](https://github.com/assimp/assimp)
   - [spdlog](https://github.com/gabime/spdlog)
   - [stb_image](https://github.com/nothings/stb)
+  - [parson](https://github.com/kgabis/parson)
 
 
 ## Reminder
