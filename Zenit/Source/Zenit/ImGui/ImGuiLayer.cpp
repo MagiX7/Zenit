@@ -93,8 +93,8 @@ namespace Zenit {
 		colors[ImGuiCol_ScrollbarGrabHovered] = { 0.5,0.5,0.5,1 };
 
 		colors[ImGuiCol_FrameBg] = { 0.2f,0.2f,0.2f,1 };
-		colors[ImGuiCol_FrameBgActive] = { 0.3f,0.3f,0.3f,1 };
-		colors[ImGuiCol_FrameBgHovered] = { 0.35f,0.35f,0.35f,1 };
+		colors[ImGuiCol_FrameBgActive] = { 0.28f,0.28f,0.28f,1 };
+		colors[ImGuiCol_FrameBgHovered] = { 0.3f,0.3f,0.3f,1 };
 
 		colors[ImGuiCol_Header] = { 0.2f,0.2f,0.2f,1 };
 		colors[ImGuiCol_HeaderActive] = { 0.33f,0.33f,0.33f,1 };
@@ -117,5 +117,8 @@ namespace Zenit {
 		colors[ImGuiCol_TabHovered] = { 0.3f,0.3f,0.3f,1 };
 		colors[ImGuiCol_TabUnfocused] = { 0.15f,0.15f,0.15f,1 };
 		colors[ImGuiCol_TabUnfocusedActive] = { 0.2f,0.2f,0.2f,1 };
+
+		colors[ImGuiCol_SliderGrab] = { 0.45f, 0.45f, 0.45f, 1 };
+		colors[ImGuiCol_SliderGrabActive] = { 0.42f, 0.42f, 0.42f, 1 };
 	}
 }

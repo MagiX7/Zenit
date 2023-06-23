@@ -10,10 +10,8 @@
 
 #include <ImGui/imgui.h>
 #include <ImGui/misc/cpp/imgui_stdlib.h>
-#include <stb_image/stb_image_write.h>
 
 #include <filesystem>
-#include <queue>
 
 
 #define SKYBOX_PATH "\\Assets\\Skybox\\"
@@ -21,16 +19,6 @@
 #define SAVE_PATH   "Settings/"
 
 namespace Zenit {
-
-	static std::mutex skyboxesMutex;
-
-	static void LoadMeshes(std::vector<Model*>* models, std::string path)
-	{
-		std::lock_guard<std::mutex> lock(skyboxesMutex);
-		models->push_back(ModelImporter::ImportModel(path));
-		ZN_INFO("Model loaded");
-	}
-
 
 	EditorLayer::EditorLayer() : camera(PerspectiveCamera({ 0,0,2 }, { 0,0,0 })), frustum({ camera })
 	{
@@ -383,27 +371,9 @@ namespace Zenit {
 				ImGui::Dummy({ 0,2 });
 				ImGui::SetNextItemWidth(256);
 
-				const char* items[] = { "512", "1024", "2048", "4096", "8192" };
-				static int currentResIndex = 1;
-				const char* previewValues = items[currentResIndex];
-				if (ImGui::BeginCombo("Resolution", previewValues))
-				{
-					for (int n = 0; n < IM_ARRAYSIZE(items); n++)
-					{
-						const bool isSelected = (currentResIndex == n);
-						if (ImGui::Selectable(items[n], isSelected))
-							currentResIndex = n;
-
-						if (isSelected)
-							ImGui::SetItemDefaultFocus();
-					}
-					ImGui::EndCombo();
-				}
-
-				ImGui::SetNextItemWidth(256);
 				static int channels = 4;
-				ImGui::SliderInt("Channels", &channels, 1, 4);
-				
+				ImGui::SliderInt("Channels", &channels, 3, 4);
+
 				ImGui::Dummy({ 0, 5 });
 				ImGui::Separator();
 				ImGui::Dummy({ 0, 5 });
@@ -419,16 +389,7 @@ namespace Zenit {
 
 				if (ImGui::Button("Export", { 100,0 }))
 				{
-					int res = -1;
-					switch (currentResIndex)
-					{
-						case 1: res = 512; break;
-						case 2: res = 1024; break;
-						case 3: res = 2048; break;
-						case 4: res = 4096; break;
-						case 5: res = 8192; break;
-					}
-					if (ExportTextures(res, channels))
+					if (ExportTextures(channels))
 						showExportingPanel = false;
 				}
 
@@ -436,7 +397,6 @@ namespace Zenit {
 
 				if (ImGui::Button("Cancel", { 100, 0 }))
 				{
-					currentResIndex = 1;
 					channels = 4;
 					showExportingPanel = false;
 				}
@@ -553,63 +513,16 @@ namespace Zenit {
 		}
 	}
 
-	bool EditorLayer::ExportTextures(int resolution, int channels)
+	bool EditorLayer::ExportTextures(int channels)
 	{
 		std::string path = FileDialog::SaveFile("png (*.png)\0*.png\0");
 		if (path.empty())
 			return false;
 
-		int w = resolution;
-		int h = resolution;
-		GLubyte* data = new GLubyte[channels * w * h];
-		memset(data, 0, channels * w * h);
-
-		diffuse->Bind(0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		stbi_flip_vertically_on_write(1);
-		stbi_write_png((path + "_diffuse.png").c_str(), w, h, channels, data, w * channels);
-		delete[] data;
-
-
-		w = resolution;
-		h = resolution;
-		data = new GLubyte[channels * w * h];
-		memset(data, 0, channels * w * h);
-		normals->Bind(0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		stbi_flip_vertically_on_write(1);
-		stbi_write_png((path + "_normals.png").c_str(), w, h, channels, data, w * channels);
-		delete[] data;
-
-
-		w = resolution;
-		h = resolution;
-		data = new GLubyte[channels * w * h];
-		memset(data, 0, channels * w * h);
-		metallic->Bind(2);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		stbi_flip_vertically_on_write(1);
-		stbi_write_png((path + "_metallic.png").c_str(), w, h, channels, data, w * channels);
-		delete[] data;
-
-
-		w = resolution;
-		h = resolution;
-		data = new GLubyte[channels * w * h];
-		memset(data, 0, channels * w * h);
-		roughness->Bind(0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		stbi_flip_vertically_on_write(1);
-		stbi_write_png((path + "_roughness.png").c_str(), w, h, channels, data, w * channels);
-		delete[] data;
+		diffuse->WriteToDisk(path + "_diffuse", channels);
+		normals->WriteToDisk(path + "_normals", channels);
+		metallic->WriteToDisk(path + "_metallic", channels);
+		roughness->WriteToDisk(path + "_roughness", channels);
 
 		return true;
 	}
@@ -727,7 +640,6 @@ namespace Zenit {
 			if (!std::filesystem::is_directory(it->path()))
 			{
 				std::string path = it->path().string();
-				//futures.push_back(std::async(std::launch::async, LoadMeshes, &skyboxes, path));
 				skyboxes.push_back(new Skybox(path));
 			}
 		}
@@ -761,7 +673,6 @@ namespace Zenit {
 			if (!std::filesystem::is_directory(it->path()))
 			{
 				std::string path = it->path().string();
-				//futures.push_back(std::async(std::launch::async, LoadMeshes, &skyboxes, path));
 				if (Model* model = ModelImporter::ImportModel(path))
 				{
 					models.push_back(model);

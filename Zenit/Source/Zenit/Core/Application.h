@@ -23,7 +23,7 @@ namespace Zenit {
 		void OnEvent(Event& e);
 
 		void Terminate() { isRunning = false; }
-		bool ExitRequested() { return shouldClose; }
+		bool ExitRequested() { return exitRequested; }
 
 		void PushLayer(EngineLayer* layer);
 		void PopLayer(EngineLayer* layer);
@@ -44,7 +44,7 @@ namespace Zenit {
 	private:
 		static Application* instance;
 		bool isRunning;
-		bool shouldClose;
+		bool exitRequested;
 		bool minimized;
 
 		TimeStep timestep = 0;
