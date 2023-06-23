@@ -569,9 +569,9 @@ namespace Zenit {
 					CreateGeneratorNode<CheckersNode>("Checkers");
 					showCreationPopup = false;
 				}
-				else if (ImGui::MenuItem("Noise"))
+				else if (ImGui::MenuItem("White Noise"))
 				{
-					CreateGeneratorNode<NoiseNode>("Noise", NoiseType::WHITE);
+					CreateGeneratorNode<NoiseNode>("White Noise", NoiseType::WHITE);
 					showCreationPopup = false;
 				}
 				else if (ImGui::MenuItem("FBM"))
