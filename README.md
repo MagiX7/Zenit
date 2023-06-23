@@ -27,12 +27,17 @@ Besides that, another goal to achieve is to keep the tool as simple as possible,
 
 
 ## Controls
+
+### General
+- Left Control + S to save.
+
 ### Nodes Panel
 - Right click to open the creation popup.
 - Left click to move nodes, multiple selection and create links.
-- To move the camera, press the mouse wheel button and move the mouse.
+- For moving, press the mouse wheel button and move the mouse.
 - Mouse wheel to zoom in and out.
-- When changing the name of a node, left click outside of it to exit name editing mode.
+- Double left click a node name to change its name.
+- Left click outside of it to exit name editing mode.
 - Delete key to delete nodes or links.
 
 ### 3D Preview
