@@ -1,0 +1,120 @@
+{
+    "App": {
+        "diffuse": "Blend_11",
+        "normals": "Normal Map_8",
+        "metallic": "white",
+        "roughness": "FBM_6",
+        "pos x": 1100,
+        "pos y": 100,
+        "creationId": 17,
+        "nodes": [
+            {
+                "name": "FBM",
+                "id": 6,
+                "type": 5,
+                "nextNodesIds": [
+                    8,
+                    11,
+                    1
+                ],
+                "noiseType": 2,
+                "scale": 20,
+                "pos x": 135,
+                "pos y": 99,
+                "inputPins": [],
+                "outputPins": [
+                    7
+                ]
+            },
+            {
+                "name": "Normal Map",
+                "id": 8,
+                "type": 10,
+                "nextNodesIds": [
+                    1
+                ],
+                "zoom": 1,
+                "bumpness": 0.18999999761581421,
+                "pos x": 309,
+                "pos y": 195,
+                "inputPins": [
+                    9
+                ],
+                "outputPins": [
+                    10
+                ]
+            },
+            {
+                "name": "Blend",
+                "id": 11,
+                "type": 15,
+                "nextNodesIds": [
+                    1
+                ],
+                "firstTexture": "",
+                "secondTexture": "FBM_6",
+                "blendMode": 5,
+                "contribution": 1,
+                "pos x": 437,
+                "pos y": 3,
+                "inputPins": [
+                    12,
+                    13
+                ],
+                "outputPins": [
+                    14
+                ]
+            },
+            {
+                "name": "Flat Color",
+                "id": 15,
+                "type": 0,
+                "nextNodesIds": [
+                    11
+                ],
+                "color x": 1,
+                "color y": 0,
+                "color z": 0,
+                "pos x": 247,
+                "pos y": -46,
+                "inputPins": [],
+                "outputPins": [
+                    16
+                ]
+            }
+        ],
+        "linkCreationId": 1006,
+        "links": [
+            {
+                "id": 1000,
+                "inputPinId": 7,
+                "outputPinId": 9
+            },
+            {
+                "id": 1001,
+                "inputPinId": 10,
+                "outputPinId": 3
+            },
+            {
+                "id": 1002,
+                "inputPinId": 16,
+                "outputPinId": 12
+            },
+            {
+                "id": 1003,
+                "inputPinId": 7,
+                "outputPinId": 13
+            },
+            {
+                "id": 1004,
+                "inputPinId": 14,
+                "outputPinId": 2
+            },
+            {
+                "id": 1005,
+                "inputPinId": 7,
+                "outputPinId": 5
+            }
+        ]
+    }
+}

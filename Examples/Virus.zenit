@@ -1,0 +1,142 @@
+{
+    "App": {
+        "diffuse": "Blend_11",
+        "normals": "Normal Map_17",
+        "metallic": "white",
+        "roughness": "FBM_6",
+        "pos x": 1100,
+        "pos y": 100,
+        "creationId": 20,
+        "nodes": [
+            {
+                "name": "FBM",
+                "id": 6,
+                "type": 5,
+                "nextNodesIds": [
+                    8,
+                    1
+                ],
+                "noiseType": 2,
+                "scale": 10,
+                "pos x": 7,
+                "pos y": 35,
+                "inputPins": [],
+                "outputPins": [
+                    7
+                ]
+            },
+            {
+                "name": "Edge Detector",
+                "id": 8,
+                "type": 12,
+                "nextNodesIds": [
+                    11,
+                    17
+                ],
+                "threshold": 8,
+                "pos x": 253,
+                "pos y": 67,
+                "inputPins": [
+                    9
+                ],
+                "outputPins": [
+                    10
+                ]
+            },
+            {
+                "name": "Blend",
+                "id": 11,
+                "type": 15,
+                "nextNodesIds": [
+                    1
+                ],
+                "firstTexture": "",
+                "secondTexture": "",
+                "blendMode": 0,
+                "contribution": 1,
+                "pos x": 421,
+                "pos y": -1,
+                "inputPins": [
+                    12,
+                    13
+                ],
+                "outputPins": [
+                    14
+                ]
+            },
+            {
+                "name": "Flat Color",
+                "id": 15,
+                "type": 0,
+                "nextNodesIds": [
+                    11
+                ],
+                "color x": 1,
+                "color y": 0,
+                "color z": 0,
+                "pos x": 263,
+                "pos y": -78,
+                "inputPins": [],
+                "outputPins": [
+                    16
+                ]
+            },
+            {
+                "name": "Normal Map",
+                "id": 17,
+                "type": 10,
+                "nextNodesIds": [
+                    1
+                ],
+                "zoom": 1,
+                "bumpness": 0.079999998211860657,
+                "pos x": 421,
+                "pos y": 131,
+                "inputPins": [
+                    18
+                ],
+                "outputPins": [
+                    19
+                ]
+            }
+        ],
+        "linkCreationId": 1007,
+        "links": [
+            {
+                "id": 1000,
+                "inputPinId": 7,
+                "outputPinId": 9
+            },
+            {
+                "id": 1001,
+                "inputPinId": 16,
+                "outputPinId": 12
+            },
+            {
+                "id": 1002,
+                "inputPinId": 10,
+                "outputPinId": 13
+            },
+            {
+                "id": 1003,
+                "inputPinId": 14,
+                "outputPinId": 2
+            },
+            {
+                "id": 1004,
+                "inputPinId": 10,
+                "outputPinId": 18
+            },
+            {
+                "id": 1005,
+                "inputPinId": 19,
+                "outputPinId": 3
+            },
+            {
+                "id": 1006,
+                "inputPinId": 7,
+                "outputPinId": 5
+            }
+        ]
+    }
+}

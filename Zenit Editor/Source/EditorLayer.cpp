@@ -563,7 +563,9 @@ namespace Zenit {
 		std::string path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
 		if (path.empty())
 			return false;
-
+		
+		savedFilePath = path.substr(0, path.find_last_of("."));
+		
 		serializerRootValue = JSONSerializer::ReadFile(path.c_str());
 		if (!serializerRootValue.value)
 			return false;
