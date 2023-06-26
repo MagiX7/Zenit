@@ -66,7 +66,7 @@ namespace Zenit {
 
 	void EdgeDetectorNode::Load(SerializerObject& obj)
 	{
-		JSONSerializer::GetNumberFromObject(obj, "threshold");
+		threshold = JSONSerializer::GetNumberFromObject(obj, "threshold");
 	}
 
 }

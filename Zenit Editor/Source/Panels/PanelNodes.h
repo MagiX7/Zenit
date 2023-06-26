@@ -136,7 +136,6 @@ namespace Zenit {
 
 		ImRect lastSelectionBounds = { 0,0,0,0 };
 		bool hovered = false;
-		ImVec2 panelSize;
 
 	};
 

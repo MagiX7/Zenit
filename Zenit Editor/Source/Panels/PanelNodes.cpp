@@ -87,11 +87,12 @@ namespace Zenit {
 	void PanelNodes::OnImGuiRender()
 	{
 		ImGui::Begin("Node editor");
-		
-		panelSize = ImGui::GetWindowSize();
-		hovered = ImGui::IsWindowHovered();
-		
-		if (ImGui::IsWindowHovered())
+
+		auto pos = ImGui::GetWindowPos();
+		auto size = ImGui::GetWindowSize();
+		hovered = ImGui::IsMouseHoveringRect(pos, pos + size);
+
+		if (hovered)
 		{
 			if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_RIGHT))
 			{
@@ -105,11 +106,16 @@ namespace Zenit {
 					rightClickedNodeId.Get() != 0 ? showCreationPopup = false : showCreationPopup = true;
 				}
 			}
-			else if (Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
-			{
-				showCreationPopup = false;
-				showGroupPopup = false;
-			}
+		}
+		else 
+		{
+			showCreationPopup = showGroupPopup = false;
+		}
+
+		// IsWindowHovered() returns false if an element is on top of the window and the mouse is hovering that element on top
+		if (ImGui::IsWindowHovered() && Input::GetInstance()->IsMouseButtonPressed(MOUSE_LEFT))
+		{
+			showCreationPopup = showGroupPopup = false;
 		}
 
 		if (showCreationPopup)

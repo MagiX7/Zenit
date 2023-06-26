@@ -58,12 +58,12 @@ namespace Zenit {
 
 		BindCoreData();
 		computeShader->SetUniform1f("seed", latestSeed);
-		computeShader->SetUniform1i("scale", scale);
 		switch (noiseType)
 		{
 			case NoiseType::FBM:
 			{
 				computeShader->SetUniform1i("numOctaves", numOctaves);
+				computeShader->SetUniform1i("scale", scale);
 				break;
 			}
 			case NoiseType::WHITE:
@@ -72,6 +72,7 @@ namespace Zenit {
 			}
 			case NoiseType::GRADIENT:
 			{
+				computeShader->SetUniform1i("scale", scale);
 				break;
 			}
 		}
@@ -96,8 +97,11 @@ namespace Zenit {
 		if (ImGui::Button("Regenerate"))
 			regenerate = true;
 
-		if (ImGui::DragInt("Scale", &scale, 0.1f))
-			regenerate = true;
+		if (noiseType != NoiseType::WHITE)
+		{
+			if (ImGui::DragInt("Scale", &scale, 0.1f))
+				regenerate = true;
+		}
 
 		if (noiseType == NoiseType::FBM)
 		{
