@@ -140,7 +140,7 @@ namespace Zenit {
 		}
 		if (ImGui::BeginMenu("View"))
 		{
-			if (ImGui::MenuItem("Show Demo Window"))
+			if (ImGui::MenuItem("Show ImGui Demo Window"))
 				showDemoWindow = !showDemoWindow;
 
 			ImGui::EndMenu();

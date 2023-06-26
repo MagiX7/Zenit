@@ -31,7 +31,6 @@ namespace Zenit {
 
 		// Filters
 		NORMAL_MAP,
-		TILING,
 		EDGE_DETECTOR,
 		TWIRL,
 		INVERT,

@@ -1,5 +1,5 @@
 project "Zenit Editor"
-    --kind "ConsoleApp"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
     staticruntime "on"
@@ -53,7 +53,6 @@ project "Zenit Editor"
 
     filter "configurations:Debug"
         -- defines here
-        kind "ConsoleApp"
         defines {"SPDLOG_COMPILED_LIB", "ZN_DEBUG"}
         runtime "Debug"
         buildoptions "/MTd"
@@ -62,7 +61,6 @@ project "Zenit Editor"
     filter "configurations:Release"
         -- defines here
         defines {"SPDLOG_COMPILED_LIB", "ZN_RELEASE"}
-        kind "WindowedApp"
         runtime "Release"
         buildoptions "/MT"
         optimize "On"

@@ -15,7 +15,6 @@
 
 #include "Nodes/Filters/NormalMapNode.h"
 #include "Nodes/Filters/EdgeDetectorNode.h"
-#include "Nodes/Filters/TilingNode.h"
 #include "Nodes/Filters/TwirlNode.h"
 #include "Nodes/Filters/InvertNode.h"
 
@@ -541,11 +540,6 @@ namespace Zenit {
 					CreateFilterNode<NormalMapNode>("Normal Map");
 					showCreationPopup = false;
 				}
-				else if (ImGui::MenuItem("Tiling"))
-				{
-					CreateFilterNode<TilingNode>("Tiling");
-					showCreationPopup = false;
-				}
 				else if (ImGui::MenuItem("Edge Detector"))
 				{
 					CreateFilterNode<EdgeDetectorNode>("Edge Detector");
@@ -831,11 +825,6 @@ namespace Zenit {
 			case NodeType::INVERT:
 			{
 				UpdateNodeWithSingleInputTexture<InvertNode>(outputPin->node, inNode->texture.get(), resetData);
-				break;
-			}
-			case NodeType::TILING:
-			{
-				UpdateNodeWithSingleInputTexture<TilingNode>(outputPin->node, inNode->texture.get(), resetData);
 				break;
 			}
 			case NodeType::BLEND:
@@ -1154,13 +1143,6 @@ namespace Zenit {
 				case NodeType::NORMAL_MAP:
 				{
 					node = CreateFilterNode<NormalMapNode>(name);
-					node->id = id;
-					node->Load(object);
-					break;
-				}
-				case NodeType::TILING:
-				{
-					node = CreateFilterNode<TilingNode>(name);
 					node->id = id;
 					node->Load(object);
 					break;
