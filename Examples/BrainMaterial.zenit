@@ -30,9 +30,7 @@
                 "id": 8,
                 "type": 7,
                 "nextNodesIds": [
-                    10,
-                    13,
-                    17
+                    10
                 ],
                 "noiseType": 4,
                 "pos x": -169,
@@ -63,10 +61,8 @@
             {
                 "name": "Blend",
                 "id": 13,
-                "type": 15,
+                "type": 14,
                 "nextNodesIds": [
-                    1,
-                    10,
                     23
                 ],
                 "firstTexture": "",
@@ -86,10 +82,9 @@
             {
                 "name": "Edge Detector",
                 "id": 17,
-                "type": 12,
+                "type": 11,
                 "nextNodesIds": [
-                    13,
-                    20
+                    13
                 ],
                 "threshold": 20,
                 "pos x": -19,
@@ -106,12 +101,12 @@
                 "id": 23,
                 "type": 22,
                 "nextNodesIds": [
-                    10,
-                    1
+                    10
                 ],
                 "offset x": 0,
                 "offset y": 0,
                 "rotationAngle": 0,
+                "scale": 2,
                 "pos x": 381,
                 "pos y": 51,
                 "inputPins": [

@@ -47,7 +47,7 @@
             {
                 "name": "Blend",
                 "id": 11,
-                "type": 15,
+                "type": 14,
                 "nextNodesIds": [
                     1
                 ],

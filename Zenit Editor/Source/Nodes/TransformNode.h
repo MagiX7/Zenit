@@ -24,7 +24,7 @@ namespace Zenit {
 		
 		glm::vec2 offset = { 0,0 };
 		float rotationAngle = 0.0f;
-		glm::vec2 scale = { 1,1 };
+		int scale = 1;
 
 		glm::mat3 transform = glm::mat3(1.0);
 	};

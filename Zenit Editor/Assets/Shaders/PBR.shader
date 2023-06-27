@@ -1,5 +1,5 @@
 #type vertex
-#version 460 core
+#version 430 core
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normals;
@@ -11,7 +11,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat4 model;
 
-out vec3 vPosition;
+out vec3 vWorldPosition;
 out vec2 vTexCoords;
 out vec3 vNormals;
 out mat3 TBN;
@@ -22,7 +22,7 @@ void main()
 	gl_Position = projection * view * model * vec4(position, 1);
 	vTexCoords = texCoords;
 	vNormals = normalize((model * vec4(normals, 0.0)).xyz);
-	vPosition = position;
+	vWorldPosition = (model * vec4(position, 1)).xyz;
 	vModel = model;
 
 	vec3 N = normalize(normals);
@@ -33,7 +33,7 @@ void main()
 }
 
 #type fragment
-#version 460 core
+#version 430 core
 
 layout(location = 0) uniform sampler2D diffuseTexture;
 layout(location = 1) uniform sampler2D normalsTexture;
@@ -51,7 +51,7 @@ uniform int drawSkybox;
 
 out vec4 fragColor;
 
-in vec3 vPosition;
+in vec3 vWorldPosition;
 in vec2 vTexCoords;
 in vec3 vNormals;
 in mat3 TBN;
@@ -125,13 +125,13 @@ vec3 CalculateDirLight(DirLight dirLight, vec3 normal, vec3 viewDir, vec3 albedo
 	vec3 F = FresnelSchlick(max(dot(halfway, viewDir), 0.0), F0);
 
 	vec3 numerator = NDF * F * G;
-	float denominator = max((4 * NdotV * NdotL), 0.0001);
+	float denominator = 4 * max((NdotV * NdotL), 0.0001);
 	vec3 specular = numerator / denominator;
 
 	// Lambert Diffuse ========
 	vec3 ks = F;
 	vec3 kd = vec3(1.0) - ks;
-	kd *= 1.0f - metallic;
+	kd *= (1.0f - metallic);
 	// Lambert Diffuse ========
 
 	vec3 radiance = dirLight.color * dirLight.intensity;
@@ -160,7 +160,7 @@ void main()
 	
 	float ao = texture2D(ambientOcclussionTexture, vTexCoords).r;
 	
-	vec3 viewDir = normalize(camPos - vPosition);
+	vec3 viewDir = normalize(camPos - vWorldPosition);
 	
 	vec3 color = vec3(0);
 	vec3 F0 = vec3(0);

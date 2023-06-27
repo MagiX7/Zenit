@@ -27,7 +27,7 @@ namespace Zenit {
 		computeShader->SetUniform1i("inputTexture", 1);
 		computeShader->SetUniformVec2f("offset", offset);
 		computeShader->SetUniform1f("angle", rotationAngle);
-		computeShader->SetUniformVec2f("scale", scale);
+		computeShader->SetUniform1i("scale", scale);
 
 		DispatchCompute(1, 1);
 
@@ -49,7 +49,7 @@ namespace Zenit {
 		if (ImGui::DragFloat("Rotation Angle", &rotationAngle, 0.1f))
 			regenerate = true;
 
-		if (ImGui::DragFloat2("Scale", glm::value_ptr(scale), 0.01f))
+		if (ImGui::DragInt("Scale", &scale, 0.01f))
 			regenerate = true;
 
 		ImGui::Image((void*)texture->GetId(), { 256,256 }, { 0,1 }, { 1,0 });
@@ -69,6 +69,8 @@ namespace Zenit {
 		Node::SaveCore(object);
 		JSONSerializer::SetVector2f(object, "offset", offset);
 		JSONSerializer::SetNumber(object, "rotationAngle", rotationAngle);
+		JSONSerializer::SetNumber(object, "scale", scale);
+		
 
 		return value;
 	}
@@ -77,6 +79,7 @@ namespace Zenit {
 	{
 		offset = JSONSerializer::GetVector2fFromObject(obj, "offset");
 		rotationAngle = JSONSerializer::GetNumberFromObject(obj, "rotationAngle");
+		scale = JSONSerializer::GetNumberFromObject(obj, "scale");
 	}
 
 }

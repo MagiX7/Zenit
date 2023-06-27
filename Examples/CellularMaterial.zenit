@@ -27,7 +27,7 @@
             {
                 "name": "Edge Detector",
                 "id": 10,
-                "type": 12,
+                "type": 11,
                 "nextNodesIds": [
                     13
                 ],
@@ -79,7 +79,7 @@
             {
                 "name": "Blend",
                 "id": 18,
-                "type": 15,
+                "type": 14,
                 "nextNodesIds": [
                     1,
                     25
@@ -120,7 +120,7 @@
             {
                 "name": "Blend",
                 "id": 25,
-                "type": 15,
+                "type": 14,
                 "nextNodesIds": [
                     1
                 ],
