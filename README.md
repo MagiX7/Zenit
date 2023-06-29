@@ -4,7 +4,7 @@
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=XyL9dlqSCmY"
 target="_blank"><img src="http://img.youtube.com/vi/XyL9dlqSCmY/0.jpg" 
-alt="Zenit Trailer" width="1040" height="660" border="10"/></a>
+alt="Zenit Trailer" width="1040" height="600" border="10"/></a>
 
 
 ## Introduction
