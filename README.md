@@ -1,8 +1,11 @@
 # Zenit
 
-[![Click to see the trailer](https://github.com/MagiX7/Zenit/blob/main/Logo/Zenit%20Logo.png)](https://youtu.be/XyL9dlqSCmY)
+## Trailer
 
-You can see the trailer by clicking on the image above or using this link: https://youtu.be/XyL9dlqSCmY
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=XyL9dlqSCmY"
+target="_blank"><img src="http://img.youtube.com/vi/XyL9dlqSCmY/0.jpg" 
+alt="Zenit Trailer" width="1040" height="760" border="10"/></a>
+
 
 ## Introduction
 
