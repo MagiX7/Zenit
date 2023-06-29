@@ -6,6 +6,7 @@
 target="_blank"><img src="http://img.youtube.com/vi/XyL9dlqSCmY/0.jpg" 
 alt="Zenit Trailer" width="1040" height="610" border="10"/></a>
 
+Click the image above or use this link: https://www.youtube.com/watch?v=XyL9dlqSCmY
 
 ## Introduction
 
