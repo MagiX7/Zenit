@@ -17,9 +17,7 @@ void main()
 	vec2 uv = pixelCoords / resolution;
 
 	vec3 tex = texture2D(inputTexture, uv).rgb;
-	vec3 col = vec3(0);
-
-	col = uv.x * tex * float(horizontal) * distance + uv.y * tex * float(vertical) * distance;
+	vec3 col = uv.x * tex * float(horizontal) * distance + uv.y * tex * float(vertical) * distance;
 
 	imageStore(imgOutput, pixelCoords, vec4(col, 1));
 }

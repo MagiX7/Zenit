@@ -5,9 +5,6 @@ namespace Zenit {
 	NoiseNode::NoiseNode(int id, const char* name, NoiseType nType)
 		: Node(id, name), noiseType(nType)
 	{
-		//type = NodeType::PERLIN_NOISE;
-		//noiseType = NodeType(noiseType);
-
 		switch (noiseType)
 		{
 			case NoiseType::WHITE:
@@ -18,7 +15,7 @@ namespace Zenit {
 			}
 			case NoiseType::FBM:
 			{
-				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/perlin_noise.shader");
+				computeShader = std::make_unique<ComputeShader>("Assets/Shaders/Compute/Generators/fbm.shader");
 				type = NodeType::FBM_NOISE;
 				break;
 			}

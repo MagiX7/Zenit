@@ -20,9 +20,11 @@ vec2 hash(in vec2 x)
 float gradient(in vec2 p)
 {
     p *= scale;
+
     vec2 i = floor(p);
     vec2 f = fract(p);
 
+    // Cubic interpolation
     vec2 u = f * f * (3.0 - 2.0 * f);
     vec2 du = 6.0 * f * (1.0 - f);
 
@@ -44,7 +46,7 @@ void main()
     ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
     vec2 res = imageSize(imgOutput);
 
-    vec2 uv = pixelCoords / res;
+    vec2 uv = (pixelCoords - 0.5 * res.xy) / res.y;
 
     float n = gradient(uv) * 0.5 + 0.5;
 

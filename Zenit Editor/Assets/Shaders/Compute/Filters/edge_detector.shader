@@ -29,16 +29,6 @@ vec3 sobel(float stepx, float stepy, vec2 center)
 	float right = intensity(texture2D(inputTexture, center + vec2(stepx, 0)));
 	float bright = intensity(texture2D(inputTexture, center + vec2(stepx, -stepy)));
 
-	// Sobel masks (see http://en.wikipedia.org/wiki/Sobel_operator)
-	//        1 0 -1     -1 -2 -1
-	//    X = 2 0 -2  Y = 0  0  0
-	//        1 0 -1      1  2  1
-
-	// You could also use Scharr operator:
-	//        3 0 -3        3 10   3
-	//    X = 10 0 -10  Y = 0  0   0
-	//        3 0 -3        -3 -10 -3
-
 	float x = tleft + 2.0 * left + bleft - tright - 2.0 * right - bright;
 	float y = -tleft - 2.0 * top - tright + bleft + 2.0 * bottom + bright;
 	float color = sqrt((x * x) + (y * y));
@@ -61,7 +51,7 @@ void main()
 		GetHeight(uv + vec2(0., stepp.y))
 	);
 
-	vec3 col = sobel(threshold/resolution.x, threshold / resolution.y, uv);
+	vec3 col = sobel(threshold / resolution.x, threshold / resolution.y, uv);
 
 	imageStore(imgOutput, pixelCoords, vec4(col, 1));
 }

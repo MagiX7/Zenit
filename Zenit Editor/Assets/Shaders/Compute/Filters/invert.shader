@@ -11,7 +11,7 @@ void main()
 	
 	vec2 uv = (pixelCoords - resolution.xy) / resolution.y;
 
-	vec3 color =texture2D(inputTexture, uv).rgb;	
+	vec3 color = texture2D(inputTexture, uv).rgb;	
 	color = 1.0 - color;
 
 	imageStore(imgOutput, pixelCoords, vec4(color, 1));

@@ -13,7 +13,7 @@ void main()
 {
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 	vec2 resolution = imageSize(imgOutput);
-	vec2 uv = (pixelCoords - /*0.5 * */resolution.xy) / resolution.y;
+	vec2 uv = (pixelCoords - resolution.xy) / resolution.y;
 	
 	vec3 base = texture2D(tex1, uv).rgb;
 	vec3 blend = texture2D(tex2, uv).rgb;
@@ -25,7 +25,6 @@ void main()
 		case 0:
 		{
 			color = 1.0 - (1.0 - blend) / base;
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -33,7 +32,6 @@ void main()
 		case 1:
 		{
 			color = min(blend, base);
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -41,7 +39,6 @@ void main()
 		case 2:
 		{
 			color = abs(blend - base);
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -49,7 +46,6 @@ void main()
 		case 3:
 		{
 			color = base / (1.0 - blend);
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -57,7 +53,6 @@ void main()
 		case 4:
 		{
 			color = base / (max(blend, 0.0000001));
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -65,7 +60,6 @@ void main()
 		case 5:
 		{
 			color = base * blend;
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -73,7 +67,6 @@ void main()
 		case 6:
 		{
 			color = 1.0 - abs(1.0 - blend - base);
-			color = mix(base, color, contribution);
 			break;
 		}
 
@@ -81,11 +74,11 @@ void main()
 		case 7:
 		{
 			color = base - blend;
-			color = mix(base, color, contribution);
 			break;
 		}
 
 	}
 
+	color = mix(base, color, contribution);
 	imageStore(imgOutput, pixelCoords, vec4(color, 1));
 }

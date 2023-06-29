@@ -14,12 +14,8 @@ void main()
 	vec2 uv = (pixelCoords - 0.5 * resolution.xy) / resolution.y;
 	
 	uv -= offset;
-
-	vec3 color = vec3(0);
-
 	float m = smoothstep(radius, radius - blur, length(uv));
-
-	color = vec3(m);
+	vec3 color = vec3(m);
 
 	imageStore(imgOutput, pixelCoords, vec4(color, 1));
 }

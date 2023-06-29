@@ -540,7 +540,6 @@ namespace Zenit {
 				savedFilePath = path;
 		}
 
-
 		serializerRootValue = JSONSerializer::CreateValue();
 		SerializerObject rootObj = JSONSerializer::GetObjectWithValue(serializerRootValue);
 
@@ -560,7 +559,7 @@ namespace Zenit {
 
 	bool EditorLayer::Load()
 	{
-		std::string path = FileDialog::SaveFile("zenit (*.zenit)\0*.zenit\0");
+		std::string path = FileDialog::OpenFile("zenit (*.zenit)\0*.zenit\0");
 		if (path.empty())
 			return false;
 		

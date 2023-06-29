@@ -31,7 +31,6 @@ void main()
 	vec2 id = floor(uv); // Id of each quad of the grid
 
 	float minDist = 100;
-	vec2 cell = vec2(-1);
 	for (int y = -1; y <= 1; ++y)
 	{
 		for (int x = -1; x <= 1; ++x)
@@ -44,7 +43,6 @@ void main()
 			if (d < minDist)
 			{
 				minDist = d;
-				cell = id + offset;
 			}
 		}
 	}

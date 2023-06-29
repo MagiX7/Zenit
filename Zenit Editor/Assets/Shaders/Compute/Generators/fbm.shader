@@ -63,18 +63,9 @@ void main()
 	ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
 	vec2 res = imageSize(imgOutput);
     
-	//vec2 uv = (pixelCoords - 0.5 * res.xy) / res.y;
 	vec2 uv = pixelCoords / res;
 
 	float value = fBm(uv);
-	
-
-
-
-
-	//float value = cnoise(uv);
-
-    //vec4 color = vec4(vec3(value), 1.0);
 
 	vec4 color = vec4(vec3(value), 1) * vec4(inputColor, 1);
 	imageStore(imgOutput, pixelCoords, color);

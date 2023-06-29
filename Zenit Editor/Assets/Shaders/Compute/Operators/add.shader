@@ -17,7 +17,6 @@ void main()
 	
 	vec3 color = vec3(0);
 	vec3 data = texture2D(inputTexture, uv).rgb;
-	
 	color = data + factor * (useColor ? inColor : vec3(1));
 
 	imageStore(imgOutput, pixelCoords, vec4(color, 1));

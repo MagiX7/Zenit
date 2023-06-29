@@ -32,8 +32,8 @@ void main()
 	for (int i = 0; i < iterations; i++)
 	{
 		uv *= 3.0f;
-		scale *= 3;
 		uv.x -= 1.5f;
+		scale *= 3;
 
 		uv.x = abs(uv.x);
 		uv.x -= 0.5;
