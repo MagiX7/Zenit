@@ -1,12 +1,5 @@
 # Zenit
-
-## Trailer
-
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=XyL9dlqSCmY"
-target="_blank"><img src="http://img.youtube.com/vi/XyL9dlqSCmY/0.jpg" 
-alt="Zenit Trailer" width="1040" height="610" border="10"/></a>
-
-Click the image above or use this link: https://www.youtube.com/watch?v=XyL9dlqSCmY
+![](https://github.com/MagiX7/Zenit/blob/main/Logo/Zenit%20Logo.png)
 
 ## Introduction
 
@@ -17,6 +10,8 @@ Zenit also supports custom FBX model loading.
 
 The very core engine was made following [TheCherno Game Engine Series](https://www.youtube.com/playlist?list=PLlrATfBNZ98dC-V-N3m0Go4deliWHPFwT)
 to explore new and different workarounds from what I learnt during the course.
+
+To see it in action, check the trailer right here: https://www.youtube.com/watch?v=XyL9dlqSCmY
 
 ## Files generation
 
