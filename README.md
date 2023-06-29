@@ -1,6 +1,8 @@
 # Zenit
 
-![](https://github.com/MagiX7/Zenit/blob/main/Logo/Zenit%20Logo.png)
+[![Click to see the trailer](https://github.com/MagiX7/Zenit/blob/main/Logo/Zenit%20Logo.png)](https://youtu.be/XyL9dlqSCmY)
+
+You can see the trailer by clicking on the image above or using this link: https://youtu.be/XyL9dlqSCmY
 
 ## Introduction
 
