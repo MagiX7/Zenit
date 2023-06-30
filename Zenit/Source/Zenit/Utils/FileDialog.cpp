@@ -29,7 +29,7 @@ namespace Zenit {
 	std::string FileDialog::SaveFile(const char* filter)
 	{
 		OPENFILENAME file;
-		char size[512] = {};
+		char size[512] = { 0 };
 		ZeroMemory(&file, sizeof(OPENFILENAME));
 		file.lStructSize = sizeof(OPENFILENAME);
 
