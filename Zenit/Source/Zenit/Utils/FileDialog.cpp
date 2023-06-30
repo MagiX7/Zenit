@@ -7,15 +7,15 @@ namespace Zenit {
 	std::string FileDialog::OpenFile(const char* filter)
 	{
 		OPENFILENAME file;
-		char size[260] = {};
+		char size[512] = { 0 };
 		ZeroMemory(&file, sizeof(OPENFILENAME));
 		file.lStructSize = sizeof(OPENFILENAME);
 
 		file.hwndOwner = GetActiveWindow();
 		file.lpstrFile = size;
-		file.nMaxFile = sizeof(file);
+		file.nMaxFile = sizeof(size);
 		file.lpstrFilter = filter;
-		file.nFileExtension = (WORD)".png";
+		file.nFileExtension = (WORD)".zenit";
 		file.nFilterIndex = 1;
 		file.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetOpenFileName(&file))
@@ -29,15 +29,15 @@ namespace Zenit {
 	std::string FileDialog::SaveFile(const char* filter)
 	{
 		OPENFILENAME file;
-		char size[260] = {};
+		char size[512] = {};
 		ZeroMemory(&file, sizeof(OPENFILENAME));
 		file.lStructSize = sizeof(OPENFILENAME);
 
 		file.hwndOwner = GetActiveWindow();
 		file.lpstrFile = size;
-		file.nMaxFile = sizeof(file);
+		file.nMaxFile = sizeof(size);
 		file.lpstrFilter = filter;
-		file.nFileExtension = (WORD)".png";
+		file.nFileExtension = (WORD)".zenit";
 		file.nFilterIndex = 1;
 		file.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 		if (GetSaveFileName(&file))
